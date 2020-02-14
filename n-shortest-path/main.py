@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import collections
-import math
 from itertools import combinations
 
 from dag import DAG
@@ -12,7 +11,7 @@ def get_substrings(s):
 
 def normalize_word_prob(part_count):
     total = sum(part_count.values())
-    return {k: math.pow(v / total, 1 / (len(k))) for k, v in part_count.items()}
+    return {k: (v / total) ** (len(k) ** -1) for k, v in part_count.items()}
 
 
 def load_vocab(filename):
