@@ -6,4 +6,6 @@
 
 - pg16457.txt
 
-    free novel “All Around the Moon” by Jules Verne. Used in https://leimao.github.io/blog/Byte-Pair-Encoding/
+    Free novel “All Around the Moon” by Jules Verne. 
+    
+    See https://leimao.github.io/blog/Byte-Pair-Encoding/
