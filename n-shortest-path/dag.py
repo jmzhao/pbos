@@ -43,5 +43,5 @@ class DAG:
         for word in words:
             print(word)
             for parts, prob in self.predict(word):
-                print(f"{prob:.5g}: {'-'.join(parts)}")
+                print(f"{prob:.5E}: {'-'.join(parts)}")
             print()
