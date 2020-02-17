@@ -23,12 +23,15 @@ def count_subwords(vocab: List[str]) -> Dict[str, int]:
     return subword_count
 
 
-def normalize_prob(subword_count: Dict[str, int]) -> Dict[str, float]:
+def normalize_prob(subword_count: Dict[str, int], take_root=False) -> Dict[str, float]:
     """
     :param subword_count: dictionary {word: count}
     :return: normalized probability {word: probability}, the length of word is also normalized
     """
     total = sum(subword_count.values())
 
-    # TODO: is this formula right? Long words will get a much higher score since we are taking the n-th root
-    return {k: (v / total) ** (len(k) ** -1) for k, v in subword_count.items()}
+    if take_root:
+        # TODO: is this formula right? Long words will get a much higher score since we are taking the n-th root
+        return {k: (v / total) ** (len(k) ** -1) for k, v in subword_count.items()}
+    else:
+        return {k: (v / total) for k, v in subword_count.items()}

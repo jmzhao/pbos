@@ -4,7 +4,7 @@ from random import choice
 import numpy as np
 from tqdm import tqdm
 
-from bos import BoS
+from bos import PBoS
 
 import argparse, datetime, json, logging, os
 parser = argparse.ArgumentParser(description='Bag of substrings: prediction')
@@ -20,7 +20,7 @@ if not isinstance(numeric_level, int):
 logging.basicConfig(level=numeric_level)
 
 logging.info('loading...')
-model = BoS.load(args.model)
+model = PBoS.load(args.model)
 logging.debug(type(model.semb))
 logging.info('generating...')
 queries = [l.strip() for l in open(args.queries, 'r', encoding='utf-8')]
