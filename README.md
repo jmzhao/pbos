@@ -1,11 +1,13 @@
-# Datasets
+# Usage 
 
-- 20k.txt
+- Download datasets
 
-    See https://github.com/first20hours/google-10000-english
+```shell script
+cd datasets && make
+```
 
-- pg16457.txt
+- Run n-shortest-path segmentation
 
-    Free novel “All Around the Moon” by Jules Verne. 
-    
-    See https://leimao.github.io/blog/Byte-Pair-Encoding/
+```shell script
+python n_shortest_path.py
+```

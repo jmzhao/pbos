@@ -1,5 +1,6 @@
 /datasets/*
-!/datasets/Makefile
+!/datasets/converter
+!/datasets/*.py
 .DS_Store
 /.idea
 __pycache__
