@@ -30,6 +30,8 @@ training_group.add_argument('--lr_decay', action='store_true',
 model_group = parser.add_argument_group('PBoS model arguments')
 parser.add_argument('--word_list', '-f', default="./datasets/unigram_freq.csv",
     help="list of words to create subword vocab")
+parser.add_argument('--boundary', '-b', action='store_true',
+    help="annotate word boundary")
 args = parser.parse_args()
 
 numeric_level = getattr(logging, args.loglevel.upper(), None)
@@ -64,7 +66,7 @@ else :
 emb = np.array(emb)
 
 logging.info(f"building subword vocab from `{args.word_list}`...")
-subword_count = load_vocab(args.word_list)
+subword_count = load_vocab(args.word_list, boundary=args.boundary)
 subword_prob = normalize_prob(subword_count, take_root=True)
 logging.info(f"subword vocab size: {len(subword_prob)}")
 
@@ -75,6 +77,7 @@ def MSE_backward(pred, target) :
 
 model = PBoS(embedding_dim=len(emb[0]),
     subword_prob=subword_prob,
+    boundary=args.boundary,
 )
 h = []
 start_time = time()

@@ -102,7 +102,9 @@ def calc_prefix_prob(w, subword_prob, backward=False):
 #         p.append(sum(p[j] * dag.get((j, i), 0) / e_total[j] for j in range(i)))
 #     return p[::-1] if backward else p
 
-def calc_subword_weights(w, subword_prob):
+def calc_subword_weights(w, subword_prob, boundary=False):
+    if boundary:
+        w = '<' + w + '>'
     p_prefix = calc_prefix_prob(w, subword_prob)
     p_suffix = calc_prefix_prob(w, subword_prob, backward=True)
     subword_weights = {}
@@ -121,15 +123,13 @@ def calc_subword_weights(w, subword_prob):
 
 
 class PBoS (BoS):
-    def __init__(self, embedding_dim, * , subword_prob):
+    def __init__(self, embedding_dim, * , subword_prob, boundary=False):
         self.semb = defaultdict(float)
         self.subword_prob = subword_prob
-        self._calc_subword_weights = lru_cache(maxsize=32)(partial(calc_subword_weights, subword_prob=subword_prob))
-        self.config = dict(embedding_dim=embedding_dim, subword_prob=subword_prob)
+        self._calc_subword_weights = lru_cache(maxsize=32)(
+            partial(calc_subword_weights, subword_prob=subword_prob, boundary=boundary))
+        self.config = dict(embedding_dim=embedding_dim, subword_prob=subword_prob, boundary=boundary)
         self._zero_emb = np.zeros(self.config['embedding_dim'])
-
-    def _calc_subword_weights(self, w):
-        return calc_subword_weights(w, self.subword_prob)
 
     def embed(self, w):
         subword_weights = self._calc_subword_weights(w)
@@ -153,21 +153,27 @@ if __name__ == '__main__':
                         help="list of words to create subword vocab")
     parser.add_argument('--n_largest', '-n', type=int, default=20,
                         help="the number of segmentations to show")
+    parser.add_argument('--boundary', '-b', action='store_true',
+                        help="annotate word boundary")
     parser.add_argument('--interactive', '-i', action='store_true',
                         help="interactive mode")
     args = parser.parse_args()
 
     logging.info(f"building subword vocab from `{args.word_list}`...")
-    subword_count = load_vocab(args.word_list)
-    subword_prob = normalize_prob(subword_count, take_root=True)
+    subword_count = load_vocab(args.word_list, boundary=args.boundary)
+    subword_prob = normalize_prob(subword_count, take_root=False)
     logging.info(f"subword vocab size: {len(subword_prob)}")
 
     test_words = [
         "lowest",
         "somnambulists", ## aka "sleep-walkers"
+        "technically",
+        "electronics",
     ]
 
     def test_word(w):
+        if args.boundary:
+            w = '<' + w + '>'
         p_prefix = calc_prefix_prob(w, subword_prob)
         print("p_prefix:", '\t'.join(f"{x:.5E}" for x in p_prefix))
         p_suffix = calc_prefix_prob(w[::-1], subword_prob)[::-1]

@@ -4,7 +4,7 @@ from typing import Dict, List
 import numpy as np
 
 
-def load_vocab(filename: str) -> Dict[str, int]:
+def load_vocab(filename: str, cutoff=5, min_len=1, boundary=False) -> Dict[str, int]:
     """
     :param filename: a .txt file
     :return: dictionary {word: count}
@@ -17,11 +17,14 @@ def load_vocab(filename: str) -> Dict[str, int]:
         for line in f:
             rows = line.strip().split(",")
             part = rows[0]
+            if boundary:
+                part = '<' + part + '>'
             count = int(rows[1]) if len(rows) == 2 else 1
             for part in get_substrings(part):
-                part_count[part] += count
+                if len(part) >= min_len:
+                    part_count[part] += count
 
-    return part_count
+    return {k:v for k, v in part_count.items() if v >= cutoff}
 
 
 def load_embedding(filename: str) -> (List[str], np.ndarray):

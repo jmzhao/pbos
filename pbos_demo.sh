@@ -34,7 +34,7 @@ python pbos_train.py \
   --target "${DATADIR}/${PRETRAINED}/processed.txt" \
   --word_list "${DATADIR}/${PRETRAINED}/word_list.txt" \
   --save "${RESULTSDIR}/model.pbos" \
-  --epochs 10 --lr_decay
+  --epochs 10 --lr_decay #--boundary
 python pbos_pred.py \
   --queries "${DATADIR}/rw/queries.txt" \
   --save "${RESULTSDIR}/rw_vectors.txt" \
