@@ -1,6 +1,7 @@
+/.idea
 /datasets/*
 !/datasets/converter
 !/datasets/*.py
+/results/
 .DS_Store
-/.idea
 __pycache__
