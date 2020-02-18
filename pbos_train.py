@@ -7,7 +7,7 @@ import os, pickle
 import numpy as np
 # from tqdm import tqdm
 
-from bos import PBoS
+from pbos import PBoS
 from utils.load import load_vocab
 from utils.preprocess import normalize_prob
 

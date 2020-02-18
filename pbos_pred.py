@@ -4,7 +4,7 @@ from random import choice
 import numpy as np
 from tqdm import tqdm
 
-from bos import PBoS
+from pbos import PBoS
 
 import argparse, datetime, json, logging, os
 parser = argparse.ArgumentParser(description='Bag of substrings: prediction')
