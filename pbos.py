@@ -10,7 +10,7 @@ from utils.preprocess import normalize_prob
 
 logging.basicConfig(level=logging.DEBUG)
 
-EPS = 1e-5
+EPS = 1e-6
 
 def calc_prefix_prob(w, subword_prob, backward=False):
     w = w[::-1] if backward else w
@@ -56,13 +56,28 @@ def calc_subword_weights(w, subword_prob, boundary=False):
         logging.warning(f"zero weights for '{w}'")
         return {}
 
+def calc_subword_weights_bos(w, subword_prob, boundary=False):
+    if boundary:
+        w = '<' + w + '>'
+    subword_weights = {}
+    for j in range(1, len(w) + 1):
+        for i in range(j):
+            sub = w[i:j]
+            if sub in subword_prob:
+                subword_weights[sub] = 1
+    try:
+        return normalize_prob(subword_weights)
+    except ZeroDivisionError:
+        logging.warning(f"zero weights for '{w}'")
+        return {}
+
 
 class PBoS (BoS):
     def __init__(self, embedding_dim, * , subword_prob, boundary=False):
         self.semb = defaultdict(float)
         self.subword_prob = subword_prob
         self._calc_subword_weights = lru_cache(maxsize=32)(
-            partial(calc_subword_weights, subword_prob=subword_prob, boundary=boundary))
+            partial(calc_subword_weights_bos, subword_prob=subword_prob, boundary=boundary))
         self.config = dict(embedding_dim=embedding_dim, subword_prob=subword_prob, boundary=boundary)
         self._zero_emb = np.zeros(self.config['embedding_dim'])
 
