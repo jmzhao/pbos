@@ -28,7 +28,7 @@ sp.call(f'''
       --target {pretrained_processed_path} \
       --word_list {wordlist_path} \
       --save {model_path} \
-      --epochs 10 --lr_decay #--boundary
+      --epochs 10 --lr_decay
 '''.split())
 
 BENCHS = {
