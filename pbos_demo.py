@@ -1,10 +1,19 @@
 #!/usr/bin/python3
+import argparse
 import os
 import subprocess as sp
 import sys
 
+parser = argparse.ArgumentParser(
+    formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+parser.add_argument('--model_path', '-m',
+    default= "./results/pbos/demo/model.pbos",
+    help="The path to the model to be evaluated. "
+    "If the model is not there, a new model will be trained and saved.")
+args = parser.parse_args()
+
 datasets_dir="./datasets"
-results_dir="./results/pbos/demo"
+results_dir, _ = os.path.split(args.model_path)
 
 os.makedirs(results_dir, exist_ok=True)
 os.makedirs(datasets_dir, exist_ok=True)
@@ -22,44 +31,50 @@ if not os.path.exists(wordlist_path):
         for line in f:
             print(line.split()[0], file=fout)
 
-model_path = f"{results_dir}/model.pbos"
-sp.call(f'''
-    python pbos_train.py \
-      --target {pretrained_processed_path} \
-      --word_list {wordlist_path} \
-      --save {model_path} \
-      --epochs 10 --lr_decay
-'''.split())
+model_path = args.model_path
+if not os.path.exists(model_path):
+    sp.call(f'''
+        python pbos_train.py \
+          --target {pretrained_processed_path} \
+          --word_list {wordlist_path} \
+          --save {model_path} \
+          --epochs 10 --lr 1 --lr_decay
+    '''.split())
 
 BENCHS = {
     'rw' : {
         'url' : "https://nlp.stanford.edu/~lmthang/morphoNLM/rw.zip",
-        'btxt_rel_path' : 'rw/rw.txt',
+        'raw_txt_rel_path' : 'rw/rw.txt',
     },
     'wordsim353' : {
         'url' : "https://leviants.com/wp-content/uploads/2020/01/wordsim353.zip",
-        'btxt_rel_path' : 'combined.tab',
+        'raw_txt_rel_path' : 'combined.tab',
         'skip_lines' : 1,
     }
 }
 
 for bname, binfo in BENCHS.items():
-    btxt_rel_path = binfo.get("btxt_rel_path", f"{bname}.txt")
-    btxt_path = f"{datasets_dir}/{bname}/{btxt_rel_path}"
-    if not os.path.exists(btxt_path):
+    raw_txt_rel_path = binfo["raw_txt_rel_path"]
+    raw_txt_path = f"{datasets_dir}/{bname}/{raw_txt_rel_path}"
+    btxt_path = f"{datasets_dir}/{bname}/{bname}.txt"
+    if not os.path.exists(raw_txt_path):
         sp.call(f'''
             wget -c {binfo['url']} -P {datasets_dir}
         '''.split())
         sp.call(f'''
             unzip {datasets_dir}/{bname}.zip -d {datasets_dir}/{bname}
         '''.split())
+    if not os.path.exists(btxt_path):
+        with open(raw_txt_path) as f, open(btxt_path, 'w') as fout:
+            for i, line in enumerate(f):
+                if i < binfo.get('skip_lines', 0):
+                    continue
+                print(line, end='', file=fout)
     bquery_path = f"{datasets_dir}/{bname}/queries.txt"
     if not os.path.exists(bquery_path):
         words = set()
         with open(btxt_path) as f:
-            for i, line in enumerate(f):
-                if i < binfo.get('skip_lines', 0):
-                    continue
+            for line in f:
                 w1, w2 = line.split()[:2]
                 words.add(w1)
                 words.add(w2)

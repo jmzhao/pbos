@@ -73,12 +73,18 @@ def calc_subword_weights_bos(w, subword_prob, boundary=False):
 
 
 class PBoS (BoS):
-    def __init__(self, embedding_dim, * , subword_prob, boundary=False):
+    def __init__(self, embedding_dim, * , subword_prob, boundary=False, mock_bos=False):
         self.semb = defaultdict(float)
         self.subword_prob = subword_prob
         self._calc_subword_weights = lru_cache(maxsize=32)(
-            partial(calc_subword_weights_bos, subword_prob=subword_prob, boundary=boundary))
-        self.config = dict(embedding_dim=embedding_dim, subword_prob=subword_prob, boundary=boundary)
+            partial(calc_subword_weights_bos if mock_bos else calc_subword_weights,
+                subword_prob=subword_prob, boundary=boundary))
+        self.config = dict(
+            embedding_dim=embedding_dim,
+            subword_prob=subword_prob,
+            boundary=boundary,
+            mock_bos=mock_bos,
+        )
         self._zero_emb = np.zeros(self.config['embedding_dim'])
 
     def embed(self, w):

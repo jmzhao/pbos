@@ -71,17 +71,18 @@ subword_prob = normalize_prob(subword_count, take_root=True)
 logging.info(f"subword vocab size: {len(subword_prob)}")
 
 def MSE(pred, target) :
-    return sum((pred - target) ** 2 / 2) / len(target)
+    return sum((pred - target) ** 2) / 2 #/ len(target)
 def MSE_backward(pred, target) :
-    return (pred - target) / len(target)
+    return (pred - target) #/ len(target)
 
 model = PBoS(embedding_dim=len(emb[0]),
     subword_prob=subword_prob,
     boundary=args.boundary,
 )
-h = []
 start_time = time()
 for i_epoch in range(args.epochs) :
+    h = []
+    h_epoch = []
     lr = args.lr / (1 + i_epoch) ** 0.5 if args.lr_decay else args.lr
     logging.info('epoch {:>2} / {} | lr {:.5f}'.format(1 + i_epoch, args.epochs, lr))
     epoch_start_time = time()
@@ -92,19 +93,21 @@ for i_epoch in range(args.epochs) :
         g = MSE_backward(e, tar)
 
         if i_inst % 20 == 0 :
-            loss = MSE(e, tar)
+            loss = MSE(e, tar) / len(tar) # only average over dimension for easy reading
             h.append(loss)
         if i_inst % 10000 == 0 :
             width = len(f"{len(vocab)}")
             fmt = 'processed {:%d}/{:%d} | loss {:.5f}' % (width, width)
             logging.info(fmt.format(i_inst, len(vocab), np.average(h)))
+            h_epoch.extend(h)
             h = []
 
         d = - lr * g
         model.step(w, d)
     now_time = time()
-    logging.info('epoch {i_epoch:>2} / {n_epoch} | time {epoch_time:.2f}s / {training_time:.2f}s'.format(
+    logging.info('epoch {i_epoch:>2} / {n_epoch} | loss {loss:.5f} | time {epoch_time:.2f}s / {training_time:.2f}s'.format(
         i_epoch = 1 + i_epoch, n_epoch = args.epochs,
+        loss = np.average(h_epoch),
         epoch_time = now_time - epoch_start_time,
         training_time = now_time - start_time,
     ))
