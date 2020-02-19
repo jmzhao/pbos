@@ -4,13 +4,18 @@ import os
 import subprocess as sp
 import sys
 
+from pbos_train import add_model_args, add_training_args
+
 parser = argparse.ArgumentParser(
     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument('--model_path', '-m',
     default= "./results/pbos/demo/model.pbos",
     help="The path to the model to be evaluated. "
     "If the model is not there, a new model will be trained and saved.")
+add_model_args(parser)
+add_training_args(parser)
 args = parser.parse_args()
+args.lr_decay = True
 
 datasets_dir="./datasets"
 results_dir, _ = os.path.split(args.model_path)
@@ -33,13 +38,16 @@ if not os.path.exists(wordlist_path):
 
 model_path = args.model_path
 if not os.path.exists(model_path):
+    options = []
+    if args.mock_bos: options.append('--mock_bos')
+    if args.lr_decay: options.append('--lr_decay')
     sp.call(f'''
         python pbos_train.py \
           --target {pretrained_processed_path} \
           --word_list {wordlist_path} \
           --save {model_path} \
-          --epochs 10 --lr 1 --lr_decay
-    '''.split())
+          --epochs {args.epochs} --lr {args.lr}
+    '''.split() + options)
 
 BENCHS = {
     'rw' : {
@@ -56,7 +64,6 @@ BENCHS = {
 for bname, binfo in BENCHS.items():
     raw_txt_rel_path = binfo["raw_txt_rel_path"]
     raw_txt_path = f"{datasets_dir}/{bname}/{raw_txt_rel_path}"
-    btxt_path = f"{datasets_dir}/{bname}/{bname}.txt"
     if not os.path.exists(raw_txt_path):
         sp.call(f'''
             wget -c {binfo['url']} -P {datasets_dir}
@@ -64,28 +71,51 @@ for bname, binfo in BENCHS.items():
         sp.call(f'''
             unzip {datasets_dir}/{bname}.zip -d {datasets_dir}/{bname}
         '''.split())
+    btxt_path = f"{datasets_dir}/{bname}/{bname}.txt"
     if not os.path.exists(btxt_path):
         with open(raw_txt_path) as f, open(btxt_path, 'w') as fout:
             for i, line in enumerate(f):
+                ## discard head lines
                 if i < binfo.get('skip_lines', 0):
                     continue
+                ## NOTE: in `fastText/eval.py`, golden words get lowercased anyways,
+                ## but predicted words remain as they are.
                 print(line, end='', file=fout)
     bquery_path = f"{datasets_dir}/{bname}/queries.txt"
-    if not os.path.exists(bquery_path):
-        words = set()
-        with open(btxt_path) as f:
-            for line in f:
-                w1, w2 = line.split()[:2]
-                words.add(w1)
-                words.add(w2)
-        with open(bquery_path, 'w') as fout:
-            for w in words:
-                print(w, file=fout)
+    bquery_lower_path = f"{datasets_dir}/{bname}/queries.lower.txt"
+    if not os.path.exists(bquery_path) or not os.path.exists(bquery_lower_path):
+        def process(query_path, lower):
+            words = set()
+            with open(btxt_path) as f:
+                for line in f:
+                    if lower:
+                        line = line.lower()
+                    w1, w2 = line.split()[:2]
+                    words.add(w1)
+                    words.add(w2)
+            with open(query_path, 'w') as fout:
+                for w in words:
+                    print(w, file=fout)
+        process(bquery_path, lower=False)
+        process(bquery_lower_path, lower=True)
 
     bpred_path = f"{results_dir}/{bname}_vectors.txt"
+    ## eval on original benchmark
     sp.call(f'''
         python pbos_pred.py \
           --queries {bquery_path} \
+          --save {bpred_path} \
+          --model {model_path}
+    '''.split())
+    sp.call(f'''
+        python ./fastText/eval.py \
+          --data {btxt_path} \
+          --model {bpred_path}
+    '''.split())
+    ## eval on lowercased benchmark
+    sp.call(f'''
+        python pbos_pred.py \
+          --queries {bquery_lower_path} \
           --save {bpred_path} \
           --model {model_path}
     '''.split())
