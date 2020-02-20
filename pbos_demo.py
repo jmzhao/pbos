@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 import argparse
+import logging
 import os
 import subprocess as sp
 import sys
@@ -8,15 +9,23 @@ import pbos_train
 
 parser = argparse.ArgumentParser(
     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-parser.add_argument('--model_path', '-m',
-    default= "./results/pbos/demo/model.pbos",
-    help="The path to the model to be evaluated. "
-    "If the model is not there, a new model will be trained and saved.")
-pbos_train.add_model_args(parser)
-pbos_train.add_training_args(parser)
-parser.add_argument('--loglevel', default='INFO',
-help='log level used by logging module')
+pbos_train.add_args(parser)
+for action in parser._actions:
+    if action.dest == "target_vectors":
+        action.required = False
+    elif action.dest == "model_path":
+        action.required = False
+        action.default = "./results/pbos/demo/model.pbos"
+        action.help = "The path to the model to be evaluated. "
+        "If the model is not there, a new model will be trained and saved."
 args = parser.parse_args()
+
+
+numeric_level = getattr(logging, args.loglevel.upper(), None)
+if not isinstance(numeric_level, int):
+    raise ValueError('Invalid log level: %s' % args.loglevel)
+logging.basicConfig(level=numeric_level)
+logging.info(args)
 
 datasets_dir="./datasets"
 results_dir, _ = os.path.split(args.model_path)
@@ -38,11 +47,8 @@ if not os.path.exists(wordlist_path):
             print(line.split()[0], file=fout)
 
 if not os.path.exists(args.model_path):
-    train_args = argparse.Namespace(
-        target_vectors = pretrained_processed_path,
-        **vars(args),
-    )
-    pbos_train.main(train_args)
+    args.target_vectors = pretrained_processed_path
+    pbos_train.main(args)
 
 BENCHS = {
     'rw' : {

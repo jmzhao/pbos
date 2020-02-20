@@ -29,6 +29,7 @@ def add_args(parser):
         help='log level used by logging module')
     add_training_args(parser)
     add_model_args(parser)
+    add_subword_args(parser)
 
 def add_training_args(parser):
     training_group = parser.add_argument_group('training arguments')
@@ -43,11 +44,16 @@ def add_model_args(parser):
     model_group = parser.add_argument_group('PBoS model arguments')
     parser.add_argument('--word_list', default="./datasets/unigram_freq.csv",
         help="list of words to create subword vocab")
-    parser.add_argument('--boundary', '-b', action='store_true',
-        help="annotate word boundary")
     parser.add_argument('--mock_bos', action='store_true',
         help="mock BoS model")
 
+def add_subword_args(parser):
+    parser.add_argument('--boundary', '-b', action='store_true',
+        help="annotate word boundary")
+    parser.add_argument('--sub_min_count', type=int, default=5,
+        help="subword min count for it to be included in vocab")
+    parser.add_argument('--sub_min_len', type=int, default=3,
+        help="subword min length for it to be included in vocab")
 
 
 def main(args):
@@ -83,7 +89,11 @@ def main(args):
     emb = np.array(emb)
 
     logging.info(f"building subword vocab from `{args.word_list}`...")
-    subword_count = load_vocab(args.word_list, boundary=args.boundary)
+    subword_count = load_vocab(args.word_list,
+        boundary=args.boundary,
+        cutoff=args.sub_min_count,
+        min_len=args.sub_min_len,
+    )
     subword_prob = normalize_prob(subword_count, take_root=True)
     logging.info(f"subword vocab size: {len(subword_prob)}")
 
