@@ -55,7 +55,7 @@ python make_dataset.py \
   --vocab $LANG_DIR/vocab-ud.txt
 ```
 
-3. Download pre-trained word embeddings and frequency from polyglot
+3. Download pre-trained word embeddings from polyglot
 
 ```shell script
 wget -O $LANG_DIR/enembeddings_pkl.tar.bz2 http://polyglot.cs.stonybrook.edu/~polyglot/embeddings2/$LANG_CODE/embeddings_pkl.tar.bz2
@@ -66,7 +66,7 @@ tar -xjf $LANG_DIR/enembeddings_pkl.tar.bz2 -C $LANG_DIR
 # mv $LANG_DIR/counts/en.docs.txt.voc $LANG_DIR/freq.txt
 ```
 
-4. Predict vocab embeddings using mimick
+4. mimick: Predict vocab embeddings using the target embeddings
 
 ```shell script
 python mimick/inter_nearest_vecs.py \
@@ -77,7 +77,7 @@ python mimick/inter_nearest_vecs.py \
   --output $LANG_DIR/embeddings-mimick.txt 
 ```
 
-5. Test POS and morphosyntactic attributes using mimick
+5. mimick: Test POS and morphosyntactic attributes
 
 ```shell script
 python model.py \
@@ -87,7 +87,7 @@ python model.py \
   --no-we-update 
 ```
 
-6. Train pbos
+6. pbos: Train (using word list from the word embedding)
 ```shell script
 python ../pbos_train.py \
   --target_vectors $LANG_DIR/words_embeddings_32.pkl \
@@ -96,7 +96,7 @@ python ../pbos_train.py \
   --sub_min_len 3
 ```
 
-6. Predict vocab embeddings using pbos
+6. pbos: Predict vocab embeddings
 
 ```shell script
 python ../pbos_pred.py \
@@ -105,7 +105,7 @@ python ../pbos_pred.py \
   --model $LANG_DIR/model-pbos.pbos
 ```
 
-7. Test POS and morphosyntactic attributes using pbos
+7. pbos: Test POS and morphosyntactic attributes 
 
 ```shell script
 python model.py \
