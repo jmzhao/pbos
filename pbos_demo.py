@@ -100,7 +100,7 @@ for bname, binfo in BENCHS.items():
         python pbos_pred.py \
           --queries {bquery_path} \
           --save {bpred_path} \
-          --model {model_path}
+          --model {args.model_path}
     '''.split())
     sp.call(f'''
         python ./fastText/eval.py \
@@ -112,7 +112,7 @@ for bname, binfo in BENCHS.items():
         python pbos_pred.py \
           --queries {bquery_lower_path} \
           --save {bpred_path} \
-          --model {model_path}
+          --model {args.model_path}
     '''.split())
     sp.call(f'''
         python ./fastText/eval.py \
