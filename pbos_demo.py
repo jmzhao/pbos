@@ -49,6 +49,7 @@ if not os.path.exists(wordlist_path):
 if not os.path.exists(args.model_path):
     args.target_vectors = pretrained_processed_path
     args.word_list=wordlist_path
+    args.word_list_has_freq=False
     pbos_train.main(args)
 
 BENCHS = {

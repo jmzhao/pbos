@@ -24,7 +24,7 @@ def load_vocab(filename: str, cutoff=5, min_len=1, max_len=None, boundary=False,
 
             if boundary:
                 part = '<' + part + '>'
-            for part in get_substrings(part, min_len=min_len, max_len=min_len):
+            for part in get_substrings(part, min_len=min_len, max_len=max_len):
                 part_count[part] += count
 
     return {k:v for k, v in part_count.items() if v >= cutoff}
@@ -38,7 +38,7 @@ def build_substring_counts(word_list, cutoff=5, min_len=1, max_len=None, boundar
     for word in word_list:
         if boundary:
             part = '<' + word + '>'
-        for part in get_substrings(word, min_len=min_len, max_len=min_len):
+        for part in get_substrings(word, min_len=min_len, max_len=max_len):
             part_count[part] += 1
 
     return {k:v for k, v in part_count.items() if v >= cutoff}

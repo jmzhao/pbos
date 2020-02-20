@@ -97,7 +97,8 @@ def main(args):
 
     logging.info(f"building subword vocab from `{args.word_list or 'vocab'}`...")
     if args.word_list:
-        subword_count = load_vocab(args.word_list,
+        subword_count = load_vocab(
+            args.word_list,
             boundary=args.boundary,
             cutoff=args.sub_min_count,
             min_len=args.sub_min_len,
