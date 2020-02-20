@@ -1,17 +1,21 @@
-from collections import Counter
+from itertools import count
+import argparse
+import datetime
+import json
+import logging
+import os
+import pickle
 from itertools import count
 from time import time
-from random import choice
-import os, pickle
 
 import numpy as np
-# from tqdm import tqdm
-
-from pbos import PBoS
-from utils.load import load_vocab
+from utils.load import load_vocab, build_substring_counts
 from utils.preprocess import normalize_prob
 
-import argparse, datetime, json, logging, os
+from pbos import PBoS
+
+
+# from tqdm import tqdm
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Bag of substrings',
@@ -42,8 +46,9 @@ def add_training_args(parser):
 
 def add_model_args(parser):
     model_group = parser.add_argument_group('PBoS model arguments')
-    parser.add_argument('--word_list', default="./datasets/unigram_freq.csv",
-        help="list of words to create subword vocab")
+    parser.add_argument('--word_list', help="list of words to create subword vocab")
+    parser.add_argument('--word_list_has_freq', action='store_true', default=True,
+                        help="if the word list contains frequency")
     parser.add_argument('--mock_bos', action='store_true',
         help="mock BoS model")
 
@@ -85,18 +90,29 @@ def main(args):
             if i % 10000 == 0 :
                 logging.info('{} lines loaded'.format(i))
     elif ext in (".pickle", ".pkl") :
-        vocab, emb = pickle.load(open(args.target_vectors, 'rb'))
+        vocab, emb = pickle.load(open(args.target_vectors, 'rb'), encoding='bytes')
     else :
         raise ValueError('Unsupported target vector file extent: {}'.format(args.target_vectors))
     emb = np.array(emb)
 
-    logging.info(f"building subword vocab from `{args.word_list}`...")
-    subword_count = load_vocab(args.word_list,
-        boundary=args.boundary,
-        cutoff=args.sub_min_count,
-        min_len=args.sub_min_len,
-        max_len=args.sub_max_len,
-    )
+    logging.info(f"building subword vocab from `{args.word_list or 'vocab'}`...")
+    if args.word_list:
+        subword_count = load_vocab(args.word_list,
+            boundary=args.boundary,
+            cutoff=args.sub_min_count,
+            min_len=args.sub_min_len,
+            max_len=args.sub_max_len,
+            has_freq=args.word_list_has_freq,
+        )
+    else:
+        subword_count = build_substring_counts(
+            vocab,
+            boundary=args.boundary,
+            cutoff=args.sub_min_count,
+            min_len=args.sub_min_len,
+            max_len=args.sub_max_len,
+        )
+
     subword_prob = normalize_prob(subword_count, take_root=True)
     logging.info(f"subword vocab size: {len(subword_prob)}")
 
