@@ -20,9 +20,10 @@ def parse_args():
     return parser.parse_args()
 
 def add_args(parser):
-    parser.add_argument('--target', required=True,
+    parser.add_argument('--target_vectors', required=True,
         help='pretrained target word vectors')
-    parser.add_argument('--save', default="./results/run_{timestamp}/model.pbos",
+    parser.add_argument('--model_path', required=True,
+        default="./results/run_{timestamp}/model.pbos",
         help='save path')
     parser.add_argument('--loglevel', default='INFO',
         help='log level used by logging module')
@@ -35,7 +36,7 @@ def add_training_args(parser):
         help='number of training epochs')
     training_group.add_argument('--lr', type=float, default=1.0,
         help='learning rate')
-    training_group.add_argument('--lr_decay', action='store_true',
+    training_group.add_argument('--lr_decay', action='store_true', default=True,
         help='reduce learning learning rate between epochs')
 
 def add_model_args(parser):
@@ -55,7 +56,7 @@ def main(args):
         raise ValueError('Invalid log level: %s' % args.loglevel)
     logging.basicConfig(level=numeric_level)
 
-    save_path = args.save.format(timestamp=datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S'))
+    save_path = args.model_path.format(timestamp=datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S'))
     save_dir, _ = os.path.split(save_path)
     try :
         os.makedirs(save_dir)
@@ -66,19 +67,19 @@ def main(args):
         json.dump(vars(args), fout)
 
     logging.info('loading target vectors...')
-    _, ext = os.path.splitext(args.target)
+    _, ext = os.path.splitext(args.target_vectors)
     if ext in (".txt", ) :
         vocab, emb = [], []
-        for i, line in zip(count(1), open(args.target)) :
+        for i, line in zip(count(1), open(args.target_vectors)) :
             ss = line.split()
             vocab.append(ss[0])
             emb.append([float(x) for x in ss[1:]])
             if i % 10000 == 0 :
                 logging.info('{} lines loaded'.format(i))
     elif ext in (".pickle", ".pkl") :
-        vocab, emb = pickle.load(open(args.target, 'rb'))
+        vocab, emb = pickle.load(open(args.target_vectors, 'rb'))
     else :
-        raise ValueError('Unsupported target vector file extent: {}'.format(args.target))
+        raise ValueError('Unsupported target vector file extent: {}'.format(args.target_vectors))
     emb = np.array(emb)
 
     logging.info(f"building subword vocab from `{args.word_list}`...")

@@ -4,7 +4,7 @@ import os
 import subprocess as sp
 import sys
 
-from pbos_train import add_model_args, add_training_args
+import pbos_train
 
 parser = argparse.ArgumentParser(
     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -12,10 +12,11 @@ parser.add_argument('--model_path', '-m',
     default= "./results/pbos/demo/model.pbos",
     help="The path to the model to be evaluated. "
     "If the model is not there, a new model will be trained and saved.")
-add_model_args(parser)
-add_training_args(parser)
+pbos_train.add_model_args(parser)
+pbos_train.add_training_args(parser)
+parser.add_argument('--loglevel', default='INFO',
+help='log level used by logging module')
 args = parser.parse_args()
-args.lr_decay = True
 
 datasets_dir="./datasets"
 results_dir, _ = os.path.split(args.model_path)
@@ -36,18 +37,12 @@ if not os.path.exists(wordlist_path):
         for line in f:
             print(line.split()[0], file=fout)
 
-model_path = args.model_path
-if not os.path.exists(model_path):
-    options = []
-    if args.mock_bos: options.append('--mock_bos')
-    if args.lr_decay: options.append('--lr_decay')
-    sp.call(f'''
-        python pbos_train.py \
-          --target {pretrained_processed_path} \
-          --word_list {wordlist_path} \
-          --save {model_path} \
-          --epochs {args.epochs} --lr {args.lr}
-    '''.split() + options)
+if not os.path.exists(args.model_path):
+    train_args = argparse.Namespace(
+        target_vectors = pretrained_processed_path,
+        **vars(args),
+    )
+    pbos_train.main(train_args)
 
 BENCHS = {
     'rw' : {
