@@ -3,12 +3,15 @@ from itertools import combinations
 from typing import List, Dict
 
 
-def get_substrings(s: str) -> List[str]:
+def get_substrings(s: str, min_len=1, max_len=None) -> List[str]:
     """
     :param s: string
     :return: a list of contiguous substrings
     """
-    return [s[x:y] for x, y in combinations(range(len(s) + 1), r=2)]
+    max_len = max_len or len(s)
+    for j in range(min_len, len(s)):
+        for i in range(max(0, j - max_len), max(0, j - min_len + 1)):
+            yield s[i:j]
 
 
 def count_subwords(vocab: List[str]) -> Dict[str, int]:

@@ -54,6 +54,8 @@ def add_subword_args(parser):
         help="subword min count for it to be included in vocab")
     parser.add_argument('--sub_min_len', type=int, default=3,
         help="subword min length for it to be included in vocab")
+    parser.add_argument('--sub_max_len', type=int, default=None,
+        help="subword max length for it to be included in vocab")
 
 
 def main(args):
@@ -93,6 +95,7 @@ def main(args):
         boundary=args.boundary,
         cutoff=args.sub_min_count,
         min_len=args.sub_min_len,
+        max_len=args.sub_max_len,
     )
     subword_prob = normalize_prob(subword_count, take_root=True)
     logging.info(f"subword vocab size: {len(subword_prob)}")
