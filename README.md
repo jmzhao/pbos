@@ -41,7 +41,17 @@ wget -O ud-treebanks-v1.4.tgz https://lindat.mff.cuni.cz/repository/xmlui/bitstr
 tar zxvf ud-treebanks-v1.4.tgz
 ```
 
-2. Make Universal Dependencies dataset
+2. Unzip models 
+
+```shell script
+for f in *.tar.gz
+do
+  tar -zxvf $f 
+done
+mv mimick/models/models/* mimick/models
+```
+
+3. Make Universal Dependencies dataset
 
 ```shell script
 LANG_DIR=./ud-treebanks-v1.4/UD_English
@@ -55,7 +65,7 @@ python make_dataset.py \
   --vocab $LANG_DIR/vocab-ud.txt
 ```
 
-3. Download pre-trained word embeddings from polyglot
+4. Download pre-trained word embeddings from polyglot
 
 ```shell script
 wget -O $LANG_DIR/enembeddings_pkl.tar.bz2 http://polyglot.cs.stonybrook.edu/~polyglot/embeddings2/$LANG_CODE/embeddings_pkl.tar.bz2
@@ -66,7 +76,7 @@ tar -xjf $LANG_DIR/enembeddings_pkl.tar.bz2 -C $LANG_DIR
 # mv $LANG_DIR/counts/en.docs.txt.voc $LANG_DIR/freq.txt
 ```
 
-4. mimick: Predict vocab embeddings using the target embeddings
+5. mimick: Predict vocab embeddings using the target embeddings
 
 ```shell script
 python mimick/inter_nearest_vecs.py \
@@ -77,7 +87,7 @@ python mimick/inter_nearest_vecs.py \
   --output $LANG_DIR/embeddings-mimick.txt 
 ```
 
-5. mimick: Test POS and morphosyntactic attributes
+6. mimick: Test POS and morphosyntactic attributes
 
 ```shell script
 python model.py \
@@ -87,7 +97,7 @@ python model.py \
   --no-we-update 
 ```
 
-6. pbos: Train (using word list from the word embedding)
+7. pbos: Train (using word list from the word embedding)
 ```shell script
 python ../pbos_train.py \
   --target_vectors $LANG_DIR/words_embeddings_32.pkl \
@@ -96,7 +106,7 @@ python ../pbos_train.py \
   --sub_min_len 3
 ```
 
-6. pbos: Predict vocab embeddings
+8. pbos: Predict vocab embeddings
 
 ```shell script
 python ../pbos_pred.py \
@@ -105,7 +115,7 @@ python ../pbos_pred.py \
   --model $LANG_DIR/model-pbos.pbos
 ```
 
-7. pbos: Test POS and morphosyntactic attributes 
+9. pbos: Test POS and morphosyntactic attributes 
 
 ```shell script
 python model.py \
