@@ -5,10 +5,8 @@ from datasets.pre_trained.polyglot import get_polyglot_embeddings_path
 from datasets.universal_dependencies import get_universal_dependencies_path
 from datasets.word_freq.polyglot import get_polyglot_frequency_path
 
-languages = ['kk', 'ta', 'lv', 'vi', 'hu', 'tr', 'el', 'bg', 'sv', 'eu', 'ru', 'da', 'id', 'zh', 'fa', 'he', 'ro',
-             'en', 'ar', 'hi', 'it', 'es', 'cs']
 
-def evaluate(language_code, mock_bos=False):
+def evaluate_pbos(language_code, mock_bos=False):
     target_embeddings_path = get_polyglot_embeddings_path(language_code)
     word_frequency_path = get_polyglot_frequency_path(language_code)
     result_path = f'./results/pbos/polyglot/{language_code}' if not mock_bos else f'./results/bos/polyglot/{language_code}'
@@ -57,7 +55,10 @@ def evaluate(language_code, mock_bos=False):
     """.split())
 
 
-for language_code in ['en']:
-    evaluate(language_code, mock_bos=False)
-    evaluate(language_code, mock_bos=True)
+if __name__ == '__main__':
+    languages = ['kk', 'ta', 'lv', 'vi', 'hu', 'tr', 'el', 'bg', 'sv', 'eu', 'ru', 'da', 'id', 'zh', 'fa', 'he', 'ro',
+                 'en', 'ar', 'hi', 'it', 'es', 'cs']
+    for language_code in ['en']:
+        evaluate_pbos(language_code, mock_bos=False)
+        evaluate_pbos(language_code, mock_bos=True)
 
