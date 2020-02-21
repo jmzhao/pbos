@@ -1,3 +1,4 @@
+import logging
 import os
 import shutil
 import tarfile
@@ -12,10 +13,12 @@ def get_polyglot_embeddings_path(language_code):
     tar_path = f"{dir_path}/polyglot-{language_code}.tar.bz2"
 
     if not os.path.exists(tar_path):
+        logging.info(f"Downloading {tar_path}")
         url = f"http://polyglot.cs.stonybrook.edu/~polyglot/embeddings2/{language_code}/embeddings_pkl.tar.bz2"
         sp.run(f"wget -O {tar_path} {url}".split())
 
     if not os.path.exists(pkl_path):
+        logging.info(f"Unzipping {tar_path}")
         with tarfile.open(tar_path) as tar, open(pkl_path, 'wb+') as dst_file:
             src_file = tar.extractfile("./words_embeddings_32.pkl")
             shutil.copyfileobj(src_file, dst_file)

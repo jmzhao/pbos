@@ -1,3 +1,5 @@
+import logging
+import multiprocessing as mp
 import os
 import subprocess as sp
 
@@ -5,11 +7,14 @@ from datasets.pre_trained.polyglot import get_polyglot_embeddings_path
 from datasets.universal_dependencies import get_universal_dependencies_path
 from datasets.word_freq.polyglot import get_polyglot_frequency_path
 
+logging.basicConfig(level=logging.INFO)
+
 
 def evaluate_pbos(language_code, mock_bos=False):
+    print(f"evaluate_pbos({language_code}, mock_bos={mock_bos})")
     target_embeddings_path = get_polyglot_embeddings_path(language_code)
     word_frequency_path = get_polyglot_frequency_path(language_code)
-    result_path = f'./results/pbos/polyglot/{language_code}' if not mock_bos else f'./results/bos/polyglot/{language_code}'
+    result_path = f'./results/polyglot/{language_code}/{"bos" if mock_bos else "pbos"}'
     subword_embedding_model_path = result_path + '/model.pbos'
     training_log_path = subword_embedding_model_path + ".log"
     os.makedirs(result_path, exist_ok=True)
@@ -30,14 +35,13 @@ def evaluate_pbos(language_code, mock_bos=False):
             if mock_bos:
                 command += " --mock_bos"
 
-            p = sp.Popen(command.split(), stdout=log, stderr=log)
-            p.wait()
+            sp.call(command.split(), stdout=log, stderr=log)
 
     ud_data_path, ud_vocab_path = get_universal_dependencies_path(language_code)
     ud_vocab_embedding_path = result_path + "/ud_vocab_embedding.txt"
 
     if not os.path.exists(ud_vocab_embedding_path):
-        sp.run(f"""
+        sp.call(f"""
         python pbos_pred.py \
           --queries {ud_vocab_path} \
           --save {ud_vocab_embedding_path} \
@@ -45,7 +49,7 @@ def evaluate_pbos(language_code, mock_bos=False):
         """.split())
 
     ud_log_path = result_path + "/ud-log"
-    sp.run(f"""
+    sp.call(f"""
     python ./Mimick/model.py \
       --dataset {ud_data_path} \
       --word-embeddings {ud_vocab_embedding_path}  \
@@ -58,7 +62,15 @@ def evaluate_pbos(language_code, mock_bos=False):
 if __name__ == '__main__':
     languages = ['kk', 'ta', 'lv', 'vi', 'hu', 'tr', 'el', 'bg', 'sv', 'eu', 'ru', 'da', 'id', 'zh', 'fa', 'he', 'ro',
                  'en', 'ar', 'hi', 'it', 'es', 'cs']
-    for language_code in languages:
-        evaluate_pbos(language_code, mock_bos=False)
-        evaluate_pbos(language_code, mock_bos=True)
 
+    # for language_code in ['lv']:
+    #     evaluate_pbos(language_code, False)
+    #     evaluate_pbos(language_code, True)
+
+    with mp.Pool() as pool:
+        for language_code in languages:
+            pool.apply_async(evaluate_pbos, (language_code, False,))
+            pool.apply_async(evaluate_pbos, (language_code, True,))
+
+        pool.close()
+        pool.join()
