@@ -71,10 +71,11 @@ python make_dataset.py \
 wget -O $LANG_DIR/enembeddings_pkl.tar.bz2 http://polyglot.cs.stonybrook.edu/~polyglot/embeddings2/$LANG_CODE/embeddings_pkl.tar.bz2
 tar -xjf $LANG_DIR/enembeddings_pkl.tar.bz2 -C $LANG_DIR
 
-# wget -O $LANG_DIR/freq.tar.bz2 http://polyglot.cs.stonybrook.edu/~polyglot/counts2/$LANG_CODE/$LANG_CODE.voc.tar.bz2
-# tar -xjf $LANG_DIR/freq.tar.bz2 -C $LANG_DIR
-# mv $LANG_DIR/counts/en.docs.txt.voc $LANG_DIR/freq.txt
+wget -O $LANG_DIR/freq.tar.bz2 http://polyglot.cs.stonybrook.edu/~polyglot/counts2/$LANG_CODE/$LANG_CODE.voc.tar.bz2
+tar -xjf $LANG_DIR/freq.tar.bz2 -C $LANG_DIR
+mv $LANG_DIR/counts/en.docs.txt.voc $LANG_DIR/freq.txt
 ```
+
 
 5. mimick: Predict vocab embeddings using the target embeddings
 
@@ -97,17 +98,18 @@ python model.py \
   --no-we-update 
 ```
 
-7. pbos: Train (using word list from the word embedding)
+7. pbos: Train using word list from polyglot
 ```shell script
 python ../pbos_train.py \
   --target_vectors $LANG_DIR/words_embeddings_32.pkl \
   --model_path $LANG_DIR/model-pbos.pbos \
+  --word_list $LANG_DIR/freq2.txt \
+  --word_list_has_freq \
   --boundary \
   --sub_min_len 3
 ```
 
 8. pbos: Predict vocab embeddings
-
 ```shell script
 python ../pbos_pred.py \
   --queries $LANG_DIR/vocab-ud.txt \
@@ -122,5 +124,29 @@ python model.py \
   --dataset $LANG_DIR/$LANG_PREFIX.pkl \
   --word-embeddings $LANG_DIR/embeddings-pbos.txt  \
   --log-dir $LANG_DIR/log-pbos \
+  --dropout 0.5 \
   --no-we-update 
+```
+
+
+Optional pbos: test on rw and wordsim353 to check the learned model
+```shell script
+python ../pbos_pred.py \
+  --queries ../datasets/rw/queries.txt \
+  --save $LANG_DIR/rw_pbos_pred.txt \
+  --model $LANG_DIR/model-pbos.pbos
+
+python ../fastText/eval.py \
+      --data ../datasets/rw/rw.txt \
+      --model $LANG_DIR/rw_pbos_pred.txt
+
+
+python ../pbos_pred.py \
+  --queries ../datasets/wordsim353/queries.txt \
+  --save $LANG_DIR/wordsim353_pbos_pred.txt \
+  --model $LANG_DIR/model-pbos.pbos
+
+python ../fastText/eval.py \
+      --data ../datasets/wordsim353/wordsim353.txt \
+      --model $LANG_DIR/wordsim353_pbos_pred.txt
 ```
