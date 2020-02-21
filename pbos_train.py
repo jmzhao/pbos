@@ -41,6 +41,8 @@ def add_training_args(parser):
         help='number of training epochs')
     training_group.add_argument('--lr', type=float, default=1.0,
         help='learning rate')
+    training_group.add_argument('--random_seed', type=int, default=42,
+                                help='random seed used in training')
     training_group.add_argument('--lr_decay', action='store_true', default=True,
         help='reduce learning learning rate between epochs')
 
@@ -134,6 +136,7 @@ def main(args):
         lr = args.lr / (1 + i_epoch) ** 0.5 if args.lr_decay else args.lr
         logging.info('epoch {:>2} / {} | lr {:.5f}'.format(1 + i_epoch, args.epochs, lr))
         epoch_start_time = time()
+        np.random.seed(args.random_seed)
         for i_inst, wi in zip(count(1), np.random.choice(len(vocab), len(vocab), replace=False)) :
             w = vocab[wi]
             e = model.embed(w)
