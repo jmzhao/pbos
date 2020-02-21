@@ -1,3 +1,4 @@
 gensim==3.8
 pattern==3.6
 tqdm>=4.29
+numpy
