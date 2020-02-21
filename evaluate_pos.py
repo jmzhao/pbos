@@ -58,7 +58,7 @@ def evaluate_pbos(language_code, mock_bos=False):
 if __name__ == '__main__':
     languages = ['kk', 'ta', 'lv', 'vi', 'hu', 'tr', 'el', 'bg', 'sv', 'eu', 'ru', 'da', 'id', 'zh', 'fa', 'he', 'ro',
                  'en', 'ar', 'hi', 'it', 'es', 'cs']
-    for language_code in ['en']:
+    for language_code in languages:
         evaluate_pbos(language_code, mock_bos=False)
         evaluate_pbos(language_code, mock_bos=True)
 
