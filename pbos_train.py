@@ -51,6 +51,8 @@ def add_model_args(parser):
     parser.add_argument('--word_list', help="list of words to create subword vocab")
     parser.add_argument('--word_list_has_freq', action='store_true', default=True,
                         help="if the word list contains frequency")
+    parser.add_argument('--word_list_size', type=int, default=10000000,
+                        help="the maximum size of wordlist, ignore if there is more")
     parser.add_argument('--mock_bos', action='store_true',
         help="mock BoS model")
 
@@ -106,6 +108,7 @@ def main(args):
             min_len=args.sub_min_len,
             max_len=args.sub_max_len,
             has_freq=args.word_list_has_freq,
+            word_list_size=args.word_list_size,
         )
     else:
         subword_count = build_substring_counts(
