@@ -12,15 +12,20 @@ logging.basicConfig(level=logging.INFO)
 
 def evaluate_pbos(language_code, mock_bos=False):
     print(f"evaluate_pbos({language_code}, mock_bos={mock_bos})")
+
+    # Input files
     target_embeddings_path = get_polyglot_embeddings_path(language_code)
     word_frequency_path = get_polyglot_frequency_path(language_code)
-    result_path = f'./results/polyglot/{language_code}/{"bos" if mock_bos else "pbos"}'
-    subword_embedding_model_path = result_path + '/model.pbos'
-    training_log_path = subword_embedding_model_path + ".log"
-    os.makedirs(result_path, exist_ok=True)
 
+    # Output/result files
+    result_path = f'./results/polyglot/{language_code}/{"bos" if mock_bos else "pbos"}'
+    os.makedirs(result_path, exist_ok=True)
+    subword_embedding_model_path = result_path + "/model.pbos"
+    training_log_path = subword_embedding_model_path + ".log"
+
+    # train subword embedding model using target embeddings and word freq
     if not os.path.exists(subword_embedding_model_path):
-        with open(training_log_path, 'w+') as log:
+        with open(training_log_path, "w+") as log:
             command = f"""
             python pbos_train.py \
               --target_vectors {target_embeddings_path} \
@@ -40,28 +45,57 @@ def evaluate_pbos(language_code, mock_bos=False):
     ud_data_path, ud_vocab_path = get_universal_dependencies_path(language_code)
     ud_vocab_embedding_path = result_path + "/ud_vocab_embedding.txt"
 
+    # predict embeddings for ud vocabs
     if not os.path.exists(ud_vocab_embedding_path):
-        sp.call(f"""
-        python pbos_pred.py \
-          --queries {ud_vocab_path} \
-          --save {ud_vocab_embedding_path} \
-          --model {subword_embedding_model_path}
-        """.split())
+        sp.call(
+            f"""
+            python pbos_pred.py \
+            --queries {ud_vocab_path} \
+            --save {ud_vocab_embedding_path} \
+            --model {subword_embedding_model_path}
+            """.split()
+        )
 
+    # train pos tagging
     ud_log_path = result_path + "/ud-log"
-    sp.call(f"""
-    python ./Mimick/model.py \
-      --dataset {ud_data_path} \
-      --word-embeddings {ud_vocab_embedding_path}  \
-      --log-dir {ud_log_path} \
-      --dropout 0.5 \
-      --no-we-update 
-    """.split())
+    sp.call(
+        f"""
+        python ./Mimick/model.py \
+        --dataset {ud_data_path} \
+        --word-embeddings {ud_vocab_embedding_path}  \
+        --log-dir {ud_log_path} \
+        --dropout 0.5 \
+        --no-we-update 
+        """.split()
+    )
 
 
-if __name__ == '__main__':
-    languages = ['kk', 'ta', 'lv', 'vi', 'hu', 'tr', 'el', 'bg', 'sv', 'eu', 'ru', 'da', 'id', 'zh', 'fa', 'he', 'ro',
-                 'en', 'ar', 'hi', 'it', 'es', 'cs']
+if __name__ == "__main__":
+    languages = [
+        "kk",
+        "ta",
+        "lv",
+        "vi",
+        "hu",
+        "tr",
+        "el",
+        "bg",
+        "sv",
+        "eu",
+        "ru",
+        "da",
+        "id",
+        "zh",
+        "fa",
+        "he",
+        "ro",
+        "en",
+        "ar",
+        "hi",
+        "it",
+        "es",
+        "cs",
+    ]
 
     # for language_code in ['lv']:
     #     evaluate_pbos(language_code, False)

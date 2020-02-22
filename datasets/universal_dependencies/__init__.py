@@ -49,13 +49,15 @@ language_code_to_folder = {
     "sa": "UD_Sanskrit",
     "sv": "UD_Swedish",
     "ar": "UD_Arabic",
-    "fi": "UD_Finnish"
+    "fi": "UD_Finnish",
 }
 
 
 def get_universal_dependencies_path(language_code):
     tgz_path = f"{dir_path}/ud-treebanks-v1.4.tgz"
-    language_folder_path = f"{dir_path}/ud-treebanks-v1.4/{language_code_to_folder[language_code]}"
+    language_folder_path = (
+        f"{dir_path}/ud-treebanks-v1.4/{language_code_to_folder[language_code]}"
+    )
     vocab_path = f"{language_folder_path}/vocab.txt"
     data_path = f"{language_folder_path}/combined.pkl"
 
@@ -68,21 +70,46 @@ def get_universal_dependencies_path(language_code):
             tar.extractall(dir_path)
 
     if not os.path.exists(vocab_path) or not os.path.exists(data_path):
-        sp.run(f"""
-            python make_dataset.py \
+        sp.run(
+            f"""
+            python {dir_path}/make_dataset.py \
               --training-data {language_folder_path}/{language_code}-ud-train.conllu \
               --dev-data {language_folder_path}/{language_code}-ud-dev.conllu \
               --test-data {language_folder_path}/{language_code}-ud-test.conllu \
               --output {data_path} \
               --vocab {vocab_path}
-            """.split())
+            """.split()
+        )
 
     return data_path, vocab_path
 
 
-if __name__ == '__main__':
-    languages = ['kk', 'ta', 'lv', 'vi', 'hu', 'tr', 'el', 'bg', 'sv', 'eu', 'ru', 'da', 'id', 'zh', 'fa', 'he', 'ro',
-                 'en', 'ar', 'hi', 'it', 'es', 'cs']
+if __name__ == "__main__":
+    languages = [
+        "kk",
+        "ta",
+        "lv",
+        "vi",
+        "hu",
+        "tr",
+        "el",
+        "bg",
+        "sv",
+        "eu",
+        "ru",
+        "da",
+        "id",
+        "zh",
+        "fa",
+        "he",
+        "ro",
+        "en",
+        "ar",
+        "hi",
+        "it",
+        "es",
+        "cs",
+    ]
     for language_code in languages:
         print(get_universal_dependencies_path(language_code))
 

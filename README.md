@@ -30,7 +30,7 @@ python pbos_demo.py --boundary --sub_min_len 3 --model_path ./results/pbos/demo/
 ```shell script
 git submodule init
 git submodule update
-git apply --stat ../mimick.patch
+git apply --stat mimick.patch
 cd mimick
 ```
 
