@@ -8,11 +8,10 @@ all: 20k.txt unigram_freq.csv GoogleNews-vectors-negative300.pkl
 
 # 1/3 Million Most Frequent English Words on the Web
 # See https://www.kaggle.com/rtatman/english-word-frequency
-unigram_freq.zip:
-	wget -O unigram_freq.zip "https://storage.googleapis.com/kaggle-data-sets/2367/3976/bundle/archive.zip?GoogleAccessId=web-data@kaggle-161607.iam.gserviceaccount.com&Expires=1581943782&Signature=oU9Qa1fgHq36iDOv81tnFCqiFZ79fa%2F2Wc0gmtFM5lvEF57cYNfao4GzFbQ4zhS9yzioiOEPwgIeEoa0w7gvQxaBiYE0HbFGXajUll1ahntsXEl7x485Jn0f%2FPuquNJlUgYd7a1szewL6m5sdXFXSNJSNErhMvjNfce3HgU0hdCtRAMAebESa3UJIv1BBZQhHjMRLshh%2B9oO8ahnpwouDmJdIpxaV6oBZWnexUXVEIeDn55g77O5QLMF2uDDsbKLkPkiO7gmZ3ZxfBAtE8LRpWVNzw0syyWRUroswRiJREdXBuMUlDY9ZRyXah09kICLcMPEjsaLBfuEuRbc1NIzZw%3D%3D&response-content-disposition=attachment%3B+filename%3Denglish-word-frequency.zip"
 
-unigram_freq.csv: unigram_freq.zip
-	unzip unigram_freq.zip
+unigram_freq.csv:
+	wget https://raw.githubusercontent.com/jai-dewani/Word-completion/master/unigram_freq.csv
+	sed -i 's/,/\t/g' unigram_freq.csv
 	tail -n +2 unigram_freq.csv > unigram_freq.csv.tmp
 	mv unigram_freq.csv.tmp unigram_freq.csv
 
