@@ -52,7 +52,11 @@ BENCHS = {
         "raw_txt_rel_path": "combined.tab",
         "skip_lines": 1,
     },
-    "card—660": {"raw_txt_rel_path": "rare_word/card-660.txt"},
+    "card_660": {
+        "url": "https://pilehvar.github.io/card-660/dataset.tsv",
+        "no_zip": True,
+        "raw_txt_rel_path": "dataset.tsv",
+    },
 }
 
 for bname, binfo in BENCHS.items():
@@ -61,14 +65,15 @@ for bname, binfo in BENCHS.items():
     if not os.path.exists(raw_txt_path):
         sp.call(
             f"""
-            wget -c {binfo['url']} -P {datasets_dir}
+            wget -c {binfo['url']} -P {datasets_dir}/{bname}
         """.split()
         )
-        sp.call(
-            f"""
-            unzip {datasets_dir}/{bname}.zip -d {datasets_dir}/{bname}
-        """.split()
-        )
+        if not binfo.get("no_zip"):
+            sp.call(
+                f"""
+                unzip {datasets_dir}/{bname}/{bname}.zip -d {datasets_dir}/{bname}
+            """.split()
+            )
     btxt_path = f"{datasets_dir}/{bname}/{bname}.txt"
     if not os.path.exists(btxt_path):
         with open(raw_txt_path) as f, open(btxt_path, "w") as fout:
