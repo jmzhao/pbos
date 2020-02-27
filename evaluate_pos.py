@@ -3,9 +3,9 @@ import multiprocessing as mp
 import os
 import subprocess as sp
 
-from datasets.pre_trained.polyglot import get_polyglot_embeddings_path
+from datasets.polyglot_embeddings import get_polyglot_embeddings_path
 from datasets.universal_dependencies import get_universal_dependencies_path
-from datasets.word_freq.polyglot import get_polyglot_frequency_path
+from datasets.polyglot_freq import get_polyglot_frequency_path
 
 logging.basicConfig(level=logging.INFO)
 
