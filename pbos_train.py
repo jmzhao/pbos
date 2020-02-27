@@ -133,13 +133,13 @@ def main(args):
         mock_bos=args.mock_bos,
     )
     start_time = time()
+    # np.random.seed(args.random_seed)
     for i_epoch in range(args.epochs) :
         h = []
         h_epoch = []
         lr = args.lr / (1 + i_epoch) ** 0.5 if args.lr_decay else args.lr
         logging.info('epoch {:>2} / {} | lr {:.5f}'.format(1 + i_epoch, args.epochs, lr))
         epoch_start_time = time()
-        np.random.seed(args.random_seed)
         for i_inst, wi in zip(count(1), np.random.choice(len(vocab), len(vocab), replace=False)) :
             w = vocab[wi]
             e = model.embed(w)
