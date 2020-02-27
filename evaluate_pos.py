@@ -9,6 +9,32 @@ from datasets.word_freq.polyglot import get_polyglot_frequency_path
 
 logging.basicConfig(level=logging.INFO)
 
+languages = [
+    "ar",
+    "bg",
+    "cs",
+    "da",
+    "el",
+    "en",
+    "es",
+    "eu",
+    "fa",
+    "he",
+    "hi",
+    "hu",
+    "id",
+    "it",
+    "kk",
+    "lv",
+    "ro",
+    "ru",
+    "sv",
+    "ta",
+    "tr",
+    "vi",
+    "zh",
+]
+
 
 def evaluate_pbos(language_code, mock_bos=False):
     print(f"evaluate_pbos({language_code}, mock_bos={mock_bos})")
@@ -70,41 +96,44 @@ def evaluate_pbos(language_code, mock_bos=False):
     )
 
 
+def evaulate_polyglot_embedding(language_code):
+    import pickle
+
+    result_path = f"./results/polyglot/{language_code}/polyglot"
+    os.makedirs(result_path, exist_ok=True)
+
+    ud_data_path, ud_vocab_path = get_universal_dependencies_path(language_code)
+
+    embeddings_pkl_path = get_polyglot_embeddings_path(language_code)
+    embeddings_txt_path = result_path + "/vocab_embedding.txt"
+
+    if not os.path.exists(embeddings_txt_path):
+        with open(embeddings_pkl_path, "rb") as fin:
+            with open(embeddings_txt_path, "w+") as fout:
+                vocab, emb = pickle.load(fin, encoding="bytes")
+                for v, e in zip(vocab, emb):
+                    print(v, *e, file=fout)
+
+    # train pos tagging
+    ud_log_path = result_path + "/ud-log"
+    sp.call(
+        f"""
+        python ./Mimick/model.py \
+        --dataset {ud_data_path} \
+        --word-embeddings {embeddings_txt_path}  \
+        --log-dir {ud_log_path} \
+        --dropout 0.5 \
+        --no-we-update 
+        """.split()
+    )
+
+
 if __name__ == "__main__":
-    languages = [
-        "kk",
-        "ta",
-        "lv",
-        "vi",
-        "hu",
-        "tr",
-        "el",
-        "bg",
-        "sv",
-        "eu",
-        "ru",
-        "da",
-        "id",
-        "zh",
-        "fa",
-        "he",
-        "ro",
-        "en",
-        "ar",
-        "hi",
-        "it",
-        "es",
-        "cs",
-    ]
-
-    # for language_code in ['lv']:
-    #     evaluate_pbos(language_code, False)
-    #     evaluate_pbos(language_code, True)
-
     with mp.Pool() as pool:
         for language_code in languages:
-            pool.apply_async(evaluate_pbos, (language_code, False,))
-            pool.apply_async(evaluate_pbos, (language_code, True,))
+            # pool.apply_async(evaluate_pbos, (language_code, False,))
+            # pool.apply_async(evaluate_pbos, (language_code, True,))
+            pool.apply_async(evaulate_polyglot_embedding, (language_code,))
 
         pool.close()
         pool.join()
