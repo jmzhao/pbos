@@ -77,7 +77,8 @@ def get_universal_dependencies_path(language_code):
               --dev-data {language_folder_path}/{language_code}-ud-dev.conllu \
               --test-data {language_folder_path}/{language_code}-ud-test.conllu \
               --output {data_path} \
-              --vocab {vocab_path}
+              --vocab {vocab_path} \
+              --ud-tags
             """.split()
         )
 

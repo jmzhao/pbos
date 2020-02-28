@@ -131,8 +131,10 @@ def evaulate_polyglot_embedding(language_code):
 if __name__ == "__main__":
     with mp.Pool() as pool:
         for language_code in languages:
-            # pool.apply_async(evaluate_pbos, (language_code, False,))
-            # pool.apply_async(evaluate_pbos, (language_code, True,))
+            if language_code == 'cs':
+                continue
+            pool.apply_async(evaluate_pbos, (language_code, False,))
+            pool.apply_async(evaluate_pbos, (language_code, True,))
             pool.apply_async(evaulate_polyglot_embedding, (language_code,))
 
         pool.close()

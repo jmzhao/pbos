@@ -91,8 +91,8 @@ def read_file(filename, w2i, t2is, c2i, options):
 
                 # parse token information in line
                 data = line.split("\t")
-                if '-' in data[
-                    0]:  # Some UD languages have contractions on a separate line, we don't want to include them also
+                if '-' in data[0]:  
+                    # Some UD languages have contractions on a separate line, we don't want to include them also
                     continue
                 try:
                     idx = int(data[0])

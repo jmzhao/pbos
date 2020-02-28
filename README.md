@@ -14,12 +14,12 @@ python n_shortest_path.py
 
 - To replicate BoS results
 ```
-python pbos_demo.py --boundary --sub_min_len 3 --model_path ./results/bos/demo/model.bos --mock_bos
+python pbos_demo.py --boundary --sub_min_len 3 --word_list ./datasets/unigram_freq.csv --word_list_has_freq --model_path ./results/bos/demo/model.bos --mock_bos
 ```
 
 - To replicate PBoS results
 ```
-python pbos_demo.py --boundary --sub_min_len 3 --model_path ./results/pbos/demo/model.pbos
+python pbos_demo.py --boundary --sub_min_len 3 --word_list ./datasets/unigram_freq.csv --word_list_has_freq --model_path ./results/pbos/demo/model.pbos
 ```
 
 
