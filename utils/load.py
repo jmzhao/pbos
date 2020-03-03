@@ -33,7 +33,7 @@ def load_vocab(filename: str, cutoff=5, min_len=1, max_len=None, boundary=False,
 
             word_count += 1
 
-    return {k:v for k, v in part_count.items() if v >= cutoff}
+    return {k:v for k, v in part_count.items() if v >= cutoff} if cutoff else dict(part_count.items())
 
 # TODO: decouple reading file and counting substrings
 def build_substring_counts(word_list, cutoff=5, min_len=1, max_len=None, boundary=False) -> Dict[str, int]:
@@ -47,7 +47,7 @@ def build_substring_counts(word_list, cutoff=5, min_len=1, max_len=None, boundar
         for part in get_substrings(word, min_len=min_len, max_len=max_len):
             part_count[part] += 1
 
-    return {k:v for k, v in part_count.items() if v >= cutoff}
+    return {k:v for k, v in part_count.items() if v >= cutoff} if cutoff else dict(part_count.items())
 
 
 def load_embedding(filename: str) -> (List[str], np.ndarray):

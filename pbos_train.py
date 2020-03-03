@@ -59,11 +59,11 @@ def add_model_args(parser):
 def add_subword_args(parser):
     parser.add_argument('--boundary', '-b', action='store_true',
         help="annotate word boundary")
-    parser.add_argument('--sub_min_count', type=int, default=5,
+    parser.add_argument('--sub_min_count', type=int,
         help="subword min count for it to be included in vocab")
     parser.add_argument('--sub_min_len', type=int, default=3,
         help="subword min length for it to be included in vocab")
-    parser.add_argument('--sub_max_len', type=int, default=None,
+    parser.add_argument('--sub_max_len', type=int,
         help="subword max length for it to be included in vocab")
 
 
@@ -133,7 +133,7 @@ def main(args):
         mock_bos=args.mock_bos,
     )
     start_time = time()
-    # np.random.seed(args.random_seed)
+    np.random.seed(args.random_seed)
     for i_epoch in range(args.epochs) :
         h = []
         h_epoch = []
