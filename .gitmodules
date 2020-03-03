@@ -4,3 +4,6 @@
 [submodule "Mimick"]
 	path = Mimick
 	url = https://github.com/yuvalpinter/Mimick.git
+[submodule "compact_reconstruction"]
+	path = compact_reconstruction
+	url = git@github.com:losyer/compact_reconstruction.git
