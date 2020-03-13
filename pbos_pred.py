@@ -38,7 +38,8 @@ logging.debug(type(model.semb))
 logging.info("generating...")
 queries = [l.strip() for l in open(args.queries, "r", encoding="utf-8")]
 if args.pre_trained:
-    vectors = [pre_trained_emb[pre_trained_vocab.index(w)] if w in pre_trained_vocab else model.embed(w) for w in queries]
+    pre_trained_vocab_set = set(pre_trained_vocab)
+    vectors = [pre_trained_emb[pre_trained_vocab.index(w)] if w in pre_trained_vocab_set else model.embed(w) for w in queries]
 else:
     vectors = [model.embed(w) for w in queries]
 logging.info("saving...")

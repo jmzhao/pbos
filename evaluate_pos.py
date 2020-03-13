@@ -56,15 +56,19 @@ def evaluate_pbos(language_code, mock_bos=False):
             python pbos_train.py \
               --target_vectors {target_embeddings_path} \
               --model_path {subword_embedding_model_path} \
-              --word_list {word_frequency_path} \
-              --word_list_has_freq \
               --boundary \
               --word_list_size 1000000 \
-              --sub_min_len 3 
+              --sub_min_count 5 
             """
 
             if mock_bos:
                 command += " --mock_bos"
+                command += " --sub_min_len 3"
+                command += " --sub_max_len 6"
+            else:
+                command += f" --word_list {word_frequency_path}"
+                command += " --word_list_has_freq"
+                command += " --sub_min_len 1"
 
             sp.call(command.split(), stdout=log, stderr=log)
 
@@ -77,6 +81,7 @@ def evaluate_pbos(language_code, mock_bos=False):
             f"""
             python pbos_pred.py \
             --queries {ud_vocab_path} \
+            --pre_trained {target_embeddings_path} \
             --save {ud_vocab_embedding_path} \
             --model {subword_embedding_model_path}
             """.split()
@@ -135,7 +140,7 @@ if __name__ == "__main__":
                 continue
             pool.apply_async(evaluate_pbos, (language_code, False,))
             pool.apply_async(evaluate_pbos, (language_code, True,))
-            pool.apply_async(evaulate_polyglot_embedding, (language_code,))
+            # pool.apply_async(evaulate_polyglot_embedding, (language_code,))
 
         pool.close()
         pool.join()

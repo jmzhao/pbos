@@ -28,7 +28,8 @@ languages = [
     "zh",
 ]
 
-methods = ["polyglot", "bos", "pbos"]
+# methods = ["polyglot", "bos", "pbos"]
+methods = ["bos", "pbos"]
 
 for language_code in languages:
     if language_code == "cs":
