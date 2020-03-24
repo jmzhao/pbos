@@ -4,7 +4,7 @@ from typing import Dict, List
 import numpy as np
 
 
-def load_vocab(filename: str, cutoff=5, min_len=1, max_len=None, boundary=False, has_freq=False, word_list_size=None) -> Dict[str, int]:
+def load_vocab(filename: str, cutoff=None, min_len=1, max_len=None, boundary=False, has_freq=False) -> Dict[str, int]:
     """
     :param filename: a .txt file
     :return: dictionary {word: count}
@@ -16,11 +16,8 @@ def load_vocab(filename: str, cutoff=5, min_len=1, max_len=None, boundary=False,
     part_count = collections.defaultdict(int)
     with open(filename, "r") as f:
         for line in f:
-            if word_list_size and word_count > word_list_size:
-                break
-
             if has_freq:
-                part, count = line.strip().split("\t")
+                part, count = line.strip().split()
                 count = int(count)
             else:
                 part = line.strip()
