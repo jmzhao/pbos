@@ -1,24 +1,21 @@
-from itertools import count
 import argparse
 import datetime
 import json
 import logging
 import os
 import pickle
-from itertools import count
 from time import time
 
 import numpy as np
-from utils.load import load_vocab, build_substring_counts
-from utils.preprocess import normalize_prob
+from tqdm import tqdm
 
 from pbos import PBoS
+from load import load_embedding
+from utils import file_tqdm, normalize_prob
 
-
-# from tqdm import tqdm
 
 def parse_args():
-    parser = argparse.ArgumentParser(description='Bag of substrings',
+    parser = argparse.ArgumentParser(description='Bag of substrings trainer',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     add_args(parser)
     return parser.parse_args()
@@ -33,38 +30,35 @@ def add_args(parser):
         help='log level used by logging module')
     add_training_args(parser)
     add_model_args(parser)
-    add_subword_args(parser)
+    return parser
 
 def add_training_args(parser):
-    training_group = parser.add_argument_group('training arguments')
-    training_group.add_argument('--epochs', type=int, default=20,
+    group = parser.add_argument_group('training hyperparameters')
+    group.add_argument('--epochs', type=int, default=20,
         help='number of training epochs')
-    training_group.add_argument('--lr', type=float, default=1.0,
+    group.add_argument('--lr', type=float, default=1.0,
         help='learning rate')
-    training_group.add_argument('--random_seed', type=int, default=42,
-                                help='random seed used in training')
-    training_group.add_argument('--lr_decay', action='store_true', default=True,
+    group.add_argument('--random_seed', type=int, default=42,
+        help='random seed used in training')
+    group.add_argument('--lr_decay', action='store_true', default=True,
         help='reduce learning learning rate between epochs')
+    group.add_argument('--no_lr_decay', dest='lr_decay', action='store_false')
+    return parser
 
 def add_model_args(parser):
-    model_group = parser.add_argument_group('PBoS model arguments')
-    parser.add_argument('--word_list', help="list of words to create subword vocab")
-    parser.add_argument('--word_list_has_freq', action='store_true', default=True,
-                        help="if the word list contains frequency")
-    parser.add_argument('--word_list_size', type=int, default=10000000,
-                        help="the maximum size of wordlist, ignore if there is more")
-    parser.add_argument('--mock_bos', action='store_true',
-        help="mock BoS model")
-
-def add_subword_args(parser):
-    parser.add_argument('--boundary', '-b', action='store_true',
-        help="annotate word boundary")
-    parser.add_argument('--sub_min_count', type=int,
-        help="subword min count for it to be included in vocab")
-    parser.add_argument('--sub_min_len', type=int, default=3,
-        help="subword min length for it to be included in vocab")
-    parser.add_argument('--sub_max_len', type=int,
-        help="subword max length for it to be included in vocab")
+    group = parser.add_argument_group('PBoS model arguments')
+    group.add_argument('--subword_vocab', required=True,
+        help="list of subwords to maintain subword embeddings")
+    group.add_argument('--subword_prob',
+        help="dict of subwords and their likelihood of presence. "
+        "If not specified, assume uniform likelihood, aka fall back to BoS.")
+    group.add_argument('--subword_weight_threshold', type=float, default=1e-3,
+        help="minimum weight of a subword within a word for it to contribute "
+        "to the word embedding")
+    group.add_argument('--subword_prob_eps', type=float, default=1e-6,
+        help="default likelihood of a subword if it is not present in "
+        "the given `subword_prob`")
+    return parser
 
 
 def main(args):
@@ -72,6 +66,8 @@ def main(args):
     if not isinstance(numeric_level, int):
         raise ValueError('Invalid log level: %s' % args.loglevel)
     logging.basicConfig(level=numeric_level)
+    print(args)
+    return
 
     save_path = args.model_path.format(timestamp=datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S'))
     save_dir, _ = os.path.split(save_path)
@@ -83,76 +79,59 @@ def main(args):
     with open(os.path.join(save_dir, 'args.json'), 'w') as fout :
         json.dump(vars(args), fout)
 
-    logging.info('loading target vectors...')
-    _, ext = os.path.splitext(args.target_vectors)
-    if ext in (".txt", ) :
-        vocab, emb = [], []
-        for i, line in zip(count(1), open(args.target_vectors)) :
-            ss = line.split()
-            vocab.append(ss[0])
-            emb.append([float(x) for x in ss[1:]])
-            if i % 10000 == 0 :
-                logging.info('{} lines loaded'.format(i))
-    elif ext in (".pickle", ".pkl") :
-        vocab, emb = pickle.load(open(args.target_vectors, 'rb'), encoding='bytes')
-    else :
-        raise ValueError('Unsupported target vector file extent: {}'.format(args.target_vectors))
-    emb = np.array(emb)
+    logging.info(f'loading target vectors from `{args.target_vectors}`...')
+    target_words, target_emb = load_embedding(args.target_vectors, show_progress=True)
+    logging.info(f'embeddings loaded with {len(target_words)} words')
 
-    logging.info(f"building subword vocab from `{args.word_list or 'vocab'}`...")
-    if args.word_list:
-        subword_count = load_vocab(
-            args.word_list,
-            boundary=args.boundary,
-            cutoff=args.sub_min_count,
-            min_len=args.sub_min_len,
-            max_len=args.sub_max_len,
-            has_freq=args.word_list_has_freq,
-            word_list_size=args.word_list_size,
-        )
+    logging.info(f"loading subword vocab from `{args.subword_vocab}`...")
+    with open(args.subword_vocab) as file_tqdm(fin):
+        subword_vocab = [json.loads(line) for line in fin]
+    logging.info(f"subword vocab size: {len(subword_vocab)}")
+
+    if args.subword_prob:
+        logging.info(f"loading subword prob from `{args.subword_prob}`...")
+        with open(args.subword_prob) as file_tqdm(fin):
+            subword_prob = dict(json.loads(line) for line in fin)
     else:
-        subword_count = build_substring_counts(
-            vocab,
-            boundary=args.boundary,
-            cutoff=args.sub_min_count,
-            min_len=args.sub_min_len,
-            max_len=args.sub_max_len,
-        )
+        subword_prob = None
 
-    subword_prob = normalize_prob(subword_count, take_root=True)
-    logging.info(f"subword vocab size: {len(subword_prob)}")
+    np.random.seed(args.random_seed)
 
     def MSE(pred, target) :
-        return sum((pred - target) ** 2) / 2 #/ len(target)
+        return sum((pred - target) ** 2) / 2
     def MSE_backward(pred, target) :
-        return (pred - target) #/ len(target)
+        return (pred - target)
 
-    model = PBoS(embedding_dim=len(emb[0]),
+    model = PBoS(
+        embedding_dim=len(target_emb[0]),
+        subword_vocab=subword_vocab,
         subword_prob=subword_prob,
-        boundary=args.boundary,
-        mock_bos=args.mock_bos,
+        weight_threshold=args.subword_weight_threshold,
+        eps=args.subword_prob_eps,
     )
     start_time = time()
-    np.random.seed(args.random_seed)
     for i_epoch in range(args.epochs) :
         h = []
         h_epoch = []
         lr = args.lr / (1 + i_epoch) ** 0.5 if args.lr_decay else args.lr
         logging.info('epoch {:>2} / {} | lr {:.5f}'.format(1 + i_epoch, args.epochs, lr))
         epoch_start_time = time()
-        for i_inst, wi in zip(count(1), np.random.choice(len(vocab), len(vocab), replace=False)) :
-            w = vocab[wi]
+        for i_inst, wi in enumerate(
+            np.random.choice(len(target_words), len(target_words), replace=False),
+            start=1,
+        ) :
+            w = target_words[wi]
             e = model.embed(w)
-            tar = emb[wi]
+            tar = target_emb[wi]
             g = MSE_backward(e, tar)
 
             if i_inst % 20 == 0 :
-                loss = MSE(e, tar) / len(tar) # only average over dimension for easy reading
+                loss = MSE(e, tar) / len(tar) # average over dimension for easy reading
                 h.append(loss)
             if i_inst % 10000 == 0 :
-                width = len(f"{len(vocab)}")
+                width = len(f"{len(target_words)}")
                 fmt = 'processed {:%d}/{:%d} | loss {:.5f}' % (width, width)
-                logging.info(fmt.format(i_inst, len(vocab), np.average(h)))
+                logging.info(fmt.format(i_inst, len(target_words), np.average(h)))
                 h_epoch.extend(h)
                 h = []
 
