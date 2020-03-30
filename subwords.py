@@ -5,7 +5,8 @@ import logging
 
 from tqdm import tqdm
 
-from utils import file_tqdm, get_substrings
+from utils import file_tqdm, get_substrings, normalize_prob
+from utils.args import add_logging_args, logging_config
 
 
 def build_subword_counter(
@@ -24,23 +25,19 @@ def build_subword_counter(
             subword_counter[subword] += count
 
     if max_size:
-        subword_counter = subword_counter.most_common(max_size)
+        subword_count_pairs = subword_counter.most_common(max_size)
     else:
-        subword_counter = subword_counter.items()
+        subword_count_pairs = subword_counter.items()
     if min_count:
-        subword_counter = ((k, v) for k, v in subword_counter if v >= min_count)
-    return Counter(subword_counter)
+        subword_counter = ((k, v) for k, v in subword_count_pairs if v >= min_count)
+    return Counter(dict(subword_counter))
 
 
 def build_subword_prob(subword_counter, min_prob=None, take_root=False):
     subword_prob = normalize_prob(subword_counter, take_root=take_root)
     if min_prob:
-        subword_prob = {k : v for k, v in subword_prob if v >= min_prob}
+        subword_prob = Counter({k : v for k, v in subword_prob.items() if v >= min_prob})
     return subword_prob
-
-
-def build_subword_vocab(subword_counter):
-    return list(subword_counter)
 
 
 def parse_args():
@@ -53,12 +50,16 @@ def parse_args():
 def add_args(parser):
     parser.add_argument('command', choices=['build_vocab', 'build_prob'])
     parser.add_argument('--word_freq', required=True,
-        help='word frequencies (.jsonl)')
+        help='word frequencies (.jsonl). '
+        'Each line is a pair of word and its count.')
     parser.add_argument('--output', default='subword.json',
-        help='output file (.jsonl)')
-    parser.add_argument('--loglevel', default='INFO',
-        help='log level used by logging module')
+        help='output file (.jsonl). '
+        'Each line is a pair of word and count (build_vocab) '
+        'or a pair of word and score (build_prob).')
+    add_logging_args(parser)
     add_subword_args(parser)
+    add_subword_vocab_args(parser)
+    add_subword_prob_args(parser)
     return parser
 
 
@@ -68,8 +69,6 @@ def add_subword_args(parser):
         help="annotate word boundary with '<' and '>'")
     group.add_argument('--no_word_boundary',
         dest='word_boundary', action='store_false')
-    group.add_argument('--subword_max_num', type=int,
-        help="maximum size of subword vocab")
     group.add_argument('--subword_min_count', type=int,
         help="subword min count for it to be included in vocab")
     group.add_argument('--subword_min_len', type=int, default=1,
@@ -98,6 +97,7 @@ def add_subword_prob_args(parser):
 
 
 def build_subword_vocab_cli(args):
+    logging.info("loading...")
     with open(args.word_freq) as fin:
         word_count_iter = (json.loads(line) for line in file_tqdm(fin))
         subword_counter = build_subword_counter(
@@ -108,13 +108,16 @@ def build_subword_vocab_cli(args):
             max_len=args.subword_max_len,
             word_boundary=args.word_boundary,
         )
-    subword_vocab = build_subword_vocab(subword_counter)
+    logging.info("processing...")
+    subword_vocab = subword_counter
+    logging.info("saving...")
     with open(args.output, 'w') as fout:
-        for subword in tqdm(subword_vocab):
-            print(json.dumps(subword), file=fout)
+        for (subword, count) in tqdm(subword_vocab.most_common()):
+            print(json.dumps((subword, count)), file=fout)
 
 
 def build_subword_prob_cli(args):
+    logging.info("loading...")
     with open(args.word_freq) as fin:
         word_count_iter = (json.loads(line) for line in file_tqdm(fin))
         subword_counter = build_subword_counter(
@@ -124,17 +127,20 @@ def build_subword_prob_cli(args):
             max_len=args.subword_max_len,
             word_boundary=args.word_boundary,
         )
+    logging.info("processing...")
     subword_prob = build_subword_prob(
         subword_counter,
         min_prob=args.subword_prob_min_prob,
         take_root=args.subword_prob_take_root,
     )
+    logging.info("saving...")
     with open(args.output, 'w') as fout:
-        for (subword, prob) in tqdm(subword_prob):
+        for (subword, prob) in tqdm(subword_prob.most_common()):
             print(json.dumps((subword, prob)), file=fout)
 
 
 def main_cli(args):
+    logging_config(args)
     if args.command == 'build_vocab':
         build_subword_vocab_cli(args)
     elif args.command == 'build_prob':

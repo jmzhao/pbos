@@ -4,7 +4,7 @@ import logging
 
 import numpy as np
 
-from utils.preprocess import normalize_prob
+from utils import normalize_prob
 
 
 logging.basicConfig(level=logging.DEBUG)

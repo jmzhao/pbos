@@ -9,7 +9,7 @@ def get_substrings(s: str, min_len=1, max_len=None) -> List[str]:
     :return: a list of contiguous substrings
     """
     max_len = max_len or len(s)
-    for j in range(min_len, len(s)):
+    for j in range(min_len, len(s) + 1):
         for i in range(max(0, j - max_len), max(0, j - min_len + 1)):
             yield s[i:j]
 

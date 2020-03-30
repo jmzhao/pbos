@@ -36,6 +36,11 @@ os.makedirs(datasets_dir, exist_ok=True)
 
 pretrained_processed_path, wordlist_path = get_google_news_paths()
 
+"""
+python subwords.py build_vocab --word_freq datasets/google_news/word_freq.jsonl --output datasets/google_news/subword_vocab.jsonl -wb --subword_min_count 5
+python subwords.py build_prob --word_freq datasets/google_news/word_freq.jsonl --output datasets/google_news/subword_prob.jsonl -wb --subword_prob_min_prob 1e-6 --subword_prob_take_root
+"""
+
 if not os.path.exists(args.model_path):
     args.target_vectors = pretrained_processed_path
     pbos_train.main(args)

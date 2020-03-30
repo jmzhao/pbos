@@ -11,7 +11,8 @@ from tqdm import tqdm
 
 from pbos import PBoS
 from load import load_embedding
-from utils import file_tqdm, normalize_prob
+from utils import file_tqdm
+from utils.args import add_logging_args, logging_config
 
 
 def parse_args():
@@ -26,8 +27,7 @@ def add_args(parser):
     parser.add_argument('--model_path', required=True,
         default="./results/run_{timestamp}/model.pbos",
         help='save path')
-    parser.add_argument('--loglevel', default='INFO',
-        help='log level used by logging module')
+    add_logging_args(parser)
     add_training_args(parser)
     add_model_args(parser)
     return parser
@@ -62,12 +62,7 @@ def add_model_args(parser):
 
 
 def main(args):
-    numeric_level = getattr(logging, args.loglevel.upper(), None)
-    if not isinstance(numeric_level, int):
-        raise ValueError('Invalid log level: %s' % args.loglevel)
-    logging.basicConfig(level=numeric_level)
-    print(args)
-    return
+    logging_config(args)
 
     save_path = args.model_path.format(timestamp=datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S'))
     save_dir, _ = os.path.split(save_path)
@@ -84,14 +79,14 @@ def main(args):
     logging.info(f'embeddings loaded with {len(target_words)} words')
 
     logging.info(f"loading subword vocab from `{args.subword_vocab}`...")
-    with open(args.subword_vocab) as file_tqdm(fin):
-        subword_vocab = [json.loads(line) for line in fin]
+    with open(args.subword_vocab) as fin:
+        subword_vocab = dict(json.loads(line) for line in file_tqdm(fin))
     logging.info(f"subword vocab size: {len(subword_vocab)}")
 
     if args.subword_prob:
         logging.info(f"loading subword prob from `{args.subword_prob}`...")
-        with open(args.subword_prob) as file_tqdm(fin):
-            subword_prob = dict(json.loads(line) for line in fin)
+        with open(args.subword_prob) as fin:
+            subword_prob = dict(json.loads(line) for line in file_tqdm(fin))
     else:
         subword_prob = None
 
