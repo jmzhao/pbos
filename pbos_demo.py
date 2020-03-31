@@ -1,32 +1,58 @@
 #!/usr/bin/python3
 import argparse
+from collections import ChainMap
+import json
 import logging
 import os
 import subprocess as sp
 import sys
 
-from datasets.google_news import get_google_news_paths
-
+from datasets.google_news import prepare_google_news_paths
+from datasets.unigram_freq import prepare_unigram_freq_paths
 import pbos_train
+import subwords
+from utils import dotdict
+from utils.args import add_logging_args, logging_config
+
+
+# default arguments, if not otherwise overwritten by command line arguments.
+demo_config = dict(
+    subword_min_count = 1,
+    subword_prob_min_prob = 1e-6,
+    word_boundary = True,
+)
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-pbos_train.add_args(parser)
-for action in parser._actions:
-    if action.dest == "target_vectors":
-        action.required = False
-    elif action.dest == "model_path":
-        action.required = False
-        action.default = "./results/pbos/demo/model.pbos"
-        action.help = "The path to the model to be evaluated. "
-        "If the model is not there, a new model will be trained and saved."
-args = parser.parse_args()
+parser.add_argument('--target_vectors', default='google_news',
+    choices=['google_news'],
+    help="target word vectors")
+parser.add_argument('--model_path', default="./results/pbos/demo/model.pbos",
+    help="The path to the model to be evaluated. "
+    "If the model is not there, a new model will be trained and saved.")
+parser.add_argument('--model_type', default="pbos",
+    choices=["bos", "pbos"],
+    help="model type")
+add_logging_args(parser)
+pbos_train.add_training_args(parser)
+pbos_train.add_model_args(parser)
+subwords.add_subword_args(parser)
+subwords.add_subword_prob_args(parser)
+subwords.add_subword_vocab_args(parser)
+parser_action_lookup = {
+    action.dest : action
+    for action in parser._actions
+    # the following test is needed, otherwise `--no_<flag>` option will
+    # overwrite `--<flag>` option.
+    if not any(s.startswith('--no_') for s in action.option_strings)
+}
+parser_action_lookup["subword_vocab"].required = False
+for dest, value in demo_config.items():
+    parser_action_lookup[dest].default = value
+args = dotdict(vars(parser.parse_args()))
 
 
-numeric_level = getattr(logging, args.loglevel.upper(), None)
-if not isinstance(numeric_level, int):
-    raise ValueError("Invalid log level: %s" % args.loglevel)
-logging.basicConfig(level=numeric_level)
-logging.info(args)
+logging_config(args)
+logging.info(json.dumps(args, indent=2))
 
 datasets_dir = "./datasets"
 results_dir, _ = os.path.split(args.model_path)
@@ -34,16 +60,63 @@ results_dir, _ = os.path.split(args.model_path)
 os.makedirs(results_dir, exist_ok=True)
 os.makedirs(datasets_dir, exist_ok=True)
 
-pretrained_processed_path, wordlist_path = get_google_news_paths()
 
 """
-python subwords.py build_vocab --word_freq datasets/google_news/word_freq.jsonl --output datasets/google_news/subword_vocab.jsonl -wb --subword_min_count 5
-python subwords.py build_prob --word_freq datasets/google_news/word_freq.jsonl --output datasets/google_news/subword_prob.jsonl -wb --subword_prob_min_prob 1e-6 --subword_prob_take_root
+python subwords.py build_vocab --word_freq datasets/google_news/word_freq.jsonl --output datasets/google_news/subword_vocab.jsonl -wb --subword_min_count 5;
+python subwords.py build_prob --word_freq datasets/google_news/word_freq.jsonl --output datasets/google_news/subword_prob.jsonl -wb --subword_prob_min_prob 1e-6 --subword_prob_take_root;
+
+RDIR=results/trials/pbos/unigram_freq/no_take_root; mkdir -p ${RDIR};
+python pbos_train.py --target_vectors datasets/google_news/embedding.txt --model_path ${RDIR}/model.pbos --subword_vocab datasets/google_news/subword_vocab.jsonl --subword_prob datasets/unigram_freq/subword_prob.jsonl 2> >(tee -a ${RDIR}/train.log);
+
+RDIR=results/trials/pbos/unigram_freq/take_root; mkdir -p ${RDIR};
+python pbos_train.py --target_vectors datasets/google_news/embedding.txt --model_path ${RDIR}/model.pbos --subword_vocab datasets/google_news/subword_vocab.jsonl --subword_prob datasets/unigram_freq/subword_prob.jsonl --subword_prob_take_root 2> >(tee -a ${RDIR}/train.log);
 """
 
 if not os.path.exists(args.model_path):
-    args.target_vectors = pretrained_processed_path
+    # model does not exist, need to train a model.
+    if args.target_vectors.lower() == "google_news": # default, use google vectors
+        google_news_paths = prepare_google_news_paths()
+        args.target_vectors = google_news_paths.txt_emb_path
+
+
+        subword_vocab_path = os.path.join(google_news_paths.dir_path, "subword_vocab.jsonl")
+        if not os.path.exists(subword_vocab_path):
+            subword_vocab_args = dotdict(ChainMap(
+                dict(
+                    command = "build_vocab",
+                    word_freq = google_news_paths.word_freq_path,
+                    output = subword_vocab_path,
+                ),
+                args,
+            ))
+            subwords.build_subword_vocab_cli(subword_vocab_args)
+        args.subword_vocab = subword_vocab_path
+    else:
+        raise NotImplementedError
+
+    if args.model_type.lower() == 'pbos':
+        unigram_freq_paths = prepare_unigram_freq_paths()
+
+        subword_prob_path = os.path.join(unigram_freq_paths.dir_path, "subword_prob.jsonl")
+        if not os.path.exists(subword_prob_path):
+            subword_prob_args = dotdict(ChainMap(
+                dict(
+                    command = "build_prob",
+                    word_freq = unigram_freq_paths.word_freq_path,
+                    output = subword_prob_path,
+                    subword_prob_take_root = False,
+                ),
+                args,
+            ))
+            subwords.build_subword_prob_cli(subword_prob_args)
+        args.subword_prob = subword_prob_path
+    elif args.model_type.lower() == 'bos':
+        args.subword_prob = None
+    else:
+        raise NotImplementedError
+
     pbos_train.main(args)
+
 
 BENCHS = {
     "rw": {
@@ -55,7 +128,7 @@ BENCHS = {
         "raw_txt_rel_path": "combined.tab",
         "skip_lines": 1,
     },
-    "card_660": {
+    "card660": {
         "url": "https://pilehvar.github.io/card-660/dataset.tsv",
         "no_zip": True,
         "raw_txt_rel_path": "dataset.tsv",
@@ -114,7 +187,8 @@ for bname, binfo in BENCHS.items():
         python pbos_pred.py \
           --queries {bquery_path} \
           --save {bpred_path} \
-          --model {args.model_path}
+          --model {args.model_path} \
+          {'--' if args.word_boundary else '--no_'}word_boundary
     """.split()
     )
     sp.call(
@@ -130,7 +204,8 @@ for bname, binfo in BENCHS.items():
         python pbos_pred.py \
           --queries {bquery_lower_path} \
           --save {bpred_path} \
-          --model {args.model_path}
+          --model {args.model_path} \
+          {'--' if args.word_boundary else '--no_'}word_boundary
     """.split()
     )
     sp.call(

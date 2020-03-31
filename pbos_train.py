@@ -11,12 +11,13 @@ from tqdm import tqdm
 
 from pbos import PBoS
 from load import load_embedding
+from subwords import add_subword_prob_args, subword_prob_post_process
 from utils import file_tqdm
 from utils.args import add_logging_args, logging_config
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description='Bag of substrings trainer',
+    parser = argparse.ArgumentParser(description='PBoS trainer',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     add_args(parser)
     return parser.parse_args()
@@ -30,7 +31,8 @@ def add_args(parser):
     add_logging_args(parser)
     add_training_args(parser)
     add_model_args(parser)
-    return parser
+    add_subword_prob_args(parser)
+    return group
 
 def add_training_args(parser):
     group = parser.add_argument_group('training hyperparameters')
@@ -43,7 +45,7 @@ def add_training_args(parser):
     group.add_argument('--lr_decay', action='store_true', default=True,
         help='reduce learning learning rate between epochs')
     group.add_argument('--no_lr_decay', dest='lr_decay', action='store_false')
-    return parser
+    return group
 
 def add_model_args(parser):
     group = parser.add_argument_group('PBoS model arguments')
@@ -58,24 +60,27 @@ def add_model_args(parser):
     group.add_argument('--subword_prob_eps', type=float, default=1e-6,
         help="default likelihood of a subword if it is not present in "
         "the given `subword_prob`")
-    return parser
+    return group
 
 
 def main(args):
     logging_config(args)
 
-    save_path = args.model_path.format(timestamp=datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S'))
+    save_path = args.model_path.format(
+        timestamp=datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S'))
     save_dir, _ = os.path.split(save_path)
     try :
         os.makedirs(save_dir)
     except FileExistsError :
-        logging.warning("Things will get overwritten for directory {}".format(save_dir))
+        logging.warning(
+            "Things will get overwritten for directory {}".format(save_dir))
 
     with open(os.path.join(save_dir, 'args.json'), 'w') as fout :
         json.dump(vars(args), fout)
 
     logging.info(f'loading target vectors from `{args.target_vectors}`...')
-    target_words, target_emb = load_embedding(args.target_vectors, show_progress=True)
+    target_words, target_emb = \
+        load_embedding(args.target_vectors, show_progress=True)
     logging.info(f'embeddings loaded with {len(target_words)} words')
 
     logging.info(f"loading subword vocab from `{args.subword_vocab}`...")
@@ -87,6 +92,11 @@ def main(args):
         logging.info(f"loading subword prob from `{args.subword_prob}`...")
         with open(args.subword_prob) as fin:
             subword_prob = dict(json.loads(line) for line in file_tqdm(fin))
+        subword_prob = subword_prob_post_process(
+            subword_prob,
+            min_prob=args.subword_prob_min_prob,
+            take_root=args.subword_prob_take_root,
+        )
     else:
         subword_prob = None
 

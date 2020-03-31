@@ -33,11 +33,22 @@ def build_subword_counter(
     return Counter(dict(subword_counter))
 
 
-def build_subword_prob(subword_counter, min_prob=None, take_root=False):
-    subword_prob = normalize_prob(subword_counter, take_root=take_root)
+
+def subword_prob_post_process(subword_prob, min_prob=None, take_root=False):
     if min_prob:
-        subword_prob = Counter({k : v for k, v in subword_prob.items() if v >= min_prob})
+        subword_prob = {k : v for k, v in subword_prob.items() if v >= min_prob}
+    if take_root:
+        subword_prob = {k : (v ** (1 / len(k))) for k, v in subword_prob.items()}
     return subword_prob
+
+def build_subword_prob(subword_counter, min_prob=None, take_root=False):
+    subword_prob = normalize_prob(subword_counter)
+    subword_prob = subword_prob_post_process(
+        subword_prob,
+        min_prob=min_prob,
+        take_root=take_root,
+    )
+    return Counter(subword_prob)
 
 
 def parse_args():
@@ -60,29 +71,33 @@ def add_args(parser):
     add_subword_args(parser)
     add_subword_vocab_args(parser)
     add_subword_prob_args(parser)
-    return parser
+    return group
 
-
-def add_subword_args(parser):
-    group = parser.add_argument_group('subword arguments')
+def add_word_args(parser):
+    group = parser.add_argument_group('word arguments')
     group.add_argument('--word_boundary', '-wb', action='store_true',
         help="annotate word boundary with '<' and '>'")
-    group.add_argument('--no_word_boundary',
+    group.add_argument('--no_word_boundary', '-Nwb',
         dest='word_boundary', action='store_false')
+    return group
+
+def add_subword_args(parser):
+    add_word_args(parser)
+    group = parser.add_argument_group('subword arguments')
     group.add_argument('--subword_min_count', type=int,
         help="subword min count for it to be included in vocab")
     group.add_argument('--subword_min_len', type=int, default=1,
         help="subword min length for it to be included in vocab")
     group.add_argument('--subword_max_len', type=int,
         help="subword max length for it to be included in vocab")
-    return parser
+    return group
 
 
 def add_subword_vocab_args(parser):
     group = parser.add_argument_group('subword vocab arguments')
     group.add_argument('--subword_vocab_max_size', type=int,
         help="maximum size of subword vocab")
-    return parser
+    return group
 
 
 def add_subword_prob_args(parser):
@@ -93,7 +108,7 @@ def add_subword_prob_args(parser):
         help="take `** (1 / len(subword))` for prob score")
     group.add_argument('--no_subword_prob_take_root',
         dest='subword_prob_take_root', action='store_false')
-    return parser
+    return group
 
 
 def build_subword_vocab_cli(args):

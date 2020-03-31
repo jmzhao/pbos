@@ -4,7 +4,7 @@ def add_logging_args(parser):
     group = parser.add_argument_group('logging arguments')
     group.add_argument('--log_level', default='INFO',
         help='log level used by logging module')
-    return parser
+    return group
 
 def logging_config(args):
     """Set log level using args.log_level"""

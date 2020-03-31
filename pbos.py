@@ -1,14 +1,14 @@
-from collections import defaultdict
+from collections import Counter, defaultdict
 from functools import lru_cache, partial
 import logging
 
 import numpy as np
 
 from utils import normalize_prob
+from utils.args import add_logging_args, logging_config
 
 
-logging.basicConfig(level=logging.DEBUG)
-
+logger = logging.getLogger(__name__)
 
 def calc_prefix_prob(w, subword_prob, backward=False, eps=1e-6):
     w = w[::-1] if backward else w
@@ -48,7 +48,7 @@ def calc_subword_weights(
         else:
             return normalize_prob(subword_weights)
     except ZeroDivisionError:
-        logging.warning(f"zero weights for '{w}'")
+        logger.warning(f"zero weights for '{w}'")
         return {}
 
 
@@ -124,6 +124,7 @@ class PBoS:
 
     def embed(self, w):
         subword_weights = self._calc_subword_weights(w)
+        logger.debug(Counter(subword_weights).most_common())
         wemb = sum(w * self.semb[sub] for sub, w in subword_weights.items())
         return wemb if isinstance(wemb, np.ndarray) else self._zero_emb
 
@@ -152,12 +153,15 @@ if __name__ == '__main__':
                         help="take root when normalize subword frequencies into probabilities")
     parser.add_argument('--interactive', '-i', action='store_true',
                         help="interactive mode")
+    add_logging_args(parser)
     args = parser.parse_args()
 
-    logging.info(f"building subword vocab from `{args.word_list}`...")
+    logging_config(args)
+
+    logger.info(f"building subword vocab from `{args.word_list}`...")
     subword_count = load_vocab(args.word_list, boundary=args.boundary, has_freq=True)
     subword_prob = normalize_prob(subword_count, take_root=args.subword_freq_take_root)
-    logging.info(f"subword vocab size: {len(subword_prob)}")
+    logger.info(f"subword vocab size: {len(subword_prob)}")
 
     test_words = [
         "lowest",
