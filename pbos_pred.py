@@ -9,6 +9,8 @@ from subwords import add_word_args
 from utils.args import add_logging_args, logging_config
 
 
+logger = logging.getLogger(__name__)
+
 parser = argparse.ArgumentParser(description="Bag of substrings: prediction")
 parser.add_argument("--pre_trained",
     help="If this variable is specified, only use the model for OOV, "
@@ -30,9 +32,9 @@ if args.pre_trained:
     pre_trained_vocab, pre_trained_emb = load_embedding(args.pre_trained)
     pre_trained_emb_lookup = dict(zip(pre_trained_vocab, pre_trained_emb))
 
-logging.info("loading...")
+logger.info("loading...")
 model = PBoS.load(args.model)
-logging.debug(type(model.semb))
+logger.debug(type(model.semb))
 logging.info("generating...")
 if args.queries:
     fin = open(args.queries, "r", encoding="utf-8")
@@ -43,7 +45,7 @@ if args.save:
     try:
         os.makedirs(save_dir)
     except FileExistsError:
-        logging.warning("Things will get overwritten for directory {}".format(save_dir))
+        logger.warning("Things will get overwritten for directory {}".format(save_dir))
     fout = open(args.save, "w", encoding="utf-8")
 else:
     fout = sys.stdout

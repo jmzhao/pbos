@@ -16,6 +16,8 @@ from utils import file_tqdm
 from utils.args import add_logging_args, logging_config
 
 
+logger = logging.getLogger(__name__)
+
 def parse_args():
     parser = argparse.ArgumentParser(description='PBoS trainer',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -54,7 +56,7 @@ def add_model_args(parser):
     group.add_argument('--subword_prob',
         help="dict of subwords and their likelihood of presence. "
         "If not specified, assume uniform likelihood, aka fall back to BoS.")
-    group.add_argument('--subword_weight_threshold', type=float, default=1e-3,
+    group.add_argument('--subword_weight_threshold', type=float,
         help="minimum weight of a subword within a word for it to contribute "
         "to the word embedding")
     group.add_argument('--subword_prob_eps', type=float, default=1e-6,
@@ -65,6 +67,7 @@ def add_model_args(parser):
 
 def main(args):
     logging_config(args)
+    logger.info(json.dumps(args if isinstance(args, dict) else vars(args), indent=2))
 
     save_path = args.model_path.format(
         timestamp=datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S'))
@@ -72,30 +75,30 @@ def main(args):
     try :
         os.makedirs(save_dir)
     except FileExistsError :
-        logging.warning(
+        logger.warning(
             "Things will get overwritten for directory {}".format(save_dir))
 
     with open(os.path.join(save_dir, 'args.json'), 'w') as fout :
         json.dump(vars(args), fout)
 
-    logging.info(f'loading target vectors from `{args.target_vectors}`...')
+    logger.info(f'loading target vectors from `{args.target_vectors}`...')
     target_words, target_emb = \
         load_embedding(args.target_vectors, show_progress=True)
-    logging.info(f'embeddings loaded with {len(target_words)} words')
+    logger.info(f'embeddings loaded with {len(target_words)} words')
 
-    logging.info(f"loading subword vocab from `{args.subword_vocab}`...")
+    logger.info(f"loading subword vocab from `{args.subword_vocab}`...")
     with open(args.subword_vocab) as fin:
         subword_vocab = dict(json.loads(line) for line in file_tqdm(fin))
-    logging.info(f"subword vocab size: {len(subword_vocab)}")
+    logger.info(f"subword vocab size: {len(subword_vocab)}")
 
     if args.subword_prob:
-        logging.info(f"loading subword prob from `{args.subword_prob}`...")
+        logger.info(f"loading subword prob from `{args.subword_prob}`...")
         with open(args.subword_prob) as fin:
             subword_prob = dict(json.loads(line) for line in file_tqdm(fin))
         subword_prob = subword_prob_post_process(
             subword_prob,
             min_prob=args.subword_prob_min_prob,
-            take_root=args.subword_prob_take_root,
+            # take_root=args.subword_prob_take_root,
         )
     else:
         subword_prob = None
@@ -113,13 +116,14 @@ def main(args):
         subword_prob=subword_prob,
         weight_threshold=args.subword_weight_threshold,
         eps=args.subword_prob_eps,
+        take_root=args.subword_prob_take_root,
     )
     start_time = time()
     for i_epoch in range(args.epochs) :
         h = []
         h_epoch = []
         lr = args.lr / (1 + i_epoch) ** 0.5 if args.lr_decay else args.lr
-        logging.info('epoch {:>2} / {} | lr {:.5f}'.format(1 + i_epoch, args.epochs, lr))
+        logger.info('epoch {:>2} / {} | lr {:.5f}'.format(1 + i_epoch, args.epochs, lr))
         epoch_start_time = time()
         for i_inst, wi in enumerate(
             np.random.choice(len(target_words), len(target_words), replace=False),
@@ -136,21 +140,21 @@ def main(args):
             if i_inst % 10000 == 0 :
                 width = len(f"{len(target_words)}")
                 fmt = 'processed {:%d}/{:%d} | loss {:.5f}' % (width, width)
-                logging.info(fmt.format(i_inst, len(target_words), np.average(h)))
+                logger.info(fmt.format(i_inst, len(target_words), np.average(h)))
                 h_epoch.extend(h)
                 h = []
 
             d = - lr * g
             model.step(w, d)
         now_time = time()
-        logging.info('epoch {i_epoch:>2} / {n_epoch} | loss {loss:.5f} | time {epoch_time:.2f}s / {training_time:.2f}s'.format(
+        logger.info('epoch {i_epoch:>2} / {n_epoch} | loss {loss:.5f} | time {epoch_time:.2f}s / {training_time:.2f}s'.format(
             i_epoch = 1 + i_epoch, n_epoch = args.epochs,
             loss = np.average(h_epoch),
             epoch_time = now_time - epoch_start_time,
             training_time = now_time - start_time,
         ))
 
-    logging.info('saving model...')
+    logger.info('saving model...')
     model.dump(save_path)
 
 

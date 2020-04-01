@@ -18,6 +18,7 @@ from utils.args import add_logging_args, logging_config
 # default arguments, if not otherwise overwritten by command line arguments.
 demo_config = dict(
     subword_min_count = 1,
+    # subword_weight_threshold = 1e-3,
     subword_prob_min_prob = 1e-6,
     word_boundary = True,
 )
@@ -135,7 +136,7 @@ BENCHS = {
     },
 }
 
-for bname, binfo in BENCHS.items():
+def prepare_bench_paths(bname, binfo):
     raw_txt_rel_path = binfo["raw_txt_rel_path"]
     raw_txt_path = f"{datasets_dir}/{bname}/{raw_txt_rel_path}"
     if not os.path.exists(raw_txt_path):
@@ -180,38 +181,42 @@ for bname, binfo in BENCHS.items():
         process(bquery_path, lower=False)
         process(bquery_lower_path, lower=True)
 
-    bpred_path = f"{results_dir}/{bname}_vectors.txt"
-    ## eval on original benchmark
-    sp.call(
-        f"""
-        python pbos_pred.py \
-          --queries {bquery_path} \
-          --save {bpred_path} \
-          --model {args.model_path} \
-          {'--' if args.word_boundary else '--no_'}word_boundary
-    """.split()
-    )
-    sp.call(
-        f"""
+    return dotdict(locals())
+
+## collect and predict all query words to save model load time.
+all_words = set()
+for bname, binfo in BENCHS.items():
+    bench_paths = prepare_bench_paths(bname, binfo)
+    with open(bench_paths.bquery_path) as fin:
+        for line in fin:
+            all_words.add(line.strip())
+            all_words.add(line.strip().lower())
+bquery_path = f"{results_dir}/queries.txt"
+with open(bquery_path, 'w') as fout:
+    for w in all_words:
+        print(w, file=fout)
+bpred_path = f"{results_dir}/vectors.txt"
+sp.call(f"""
+    python pbos_pred.py \
+      --queries {bquery_path} \
+      --save {bpred_path} \
+      --model {args.model_path} \
+      {'--' if args.word_boundary else '--no_'}word_boundary
+""".split())
+
+for bname, binfo in BENCHS.items():
+    bench_paths = prepare_bench_paths(bname, binfo)
+    ## eval on original benchmark (possiblly uppercase words)
+    sp.call(f"""
         python ./fastText/eval.py \
-          --data {btxt_path} \
-          --model {bpred_path}
-    """.split()
-    )
+          --data {bench_paths.btxt_path} \
+          --model {bpred_path} \
+          --no_lower \
+    """.split())
     ## eval on lowercased benchmark
-    sp.call(
-        f"""
-        python pbos_pred.py \
-          --queries {bquery_lower_path} \
-          --save {bpred_path} \
-          --model {args.model_path} \
-          {'--' if args.word_boundary else '--no_'}word_boundary
-    """.split()
-    )
-    sp.call(
-        f"""
+    sp.call(f"""
         python ./fastText/eval.py \
-          --data {btxt_path} \
+          --data {bench_paths.btxt_path} \
           --model {bpred_path}
-    """.split()
-    )
+          --lower \
+    """.split())
