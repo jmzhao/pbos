@@ -1,5 +1,6 @@
 import gzip
 import json
+import logging
 import shutil
 import subprocess as sp
 import os
