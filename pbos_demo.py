@@ -7,6 +7,8 @@ import os
 import subprocess as sp
 import sys
 
+# default arguments, if not otherwise overwritten by command line arguments.
+from configs import demo_config
 from datasets.google_news import prepare_google_news_paths
 from datasets.unigram_freq import prepare_unigram_freq_paths
 import pbos_train
@@ -14,14 +16,6 @@ import subwords
 from utils import dotdict
 from utils.args import add_logging_args, logging_config
 
-
-# default arguments, if not otherwise overwritten by command line arguments.
-demo_config = dict(
-    subword_min_count = 1,
-    # subword_weight_threshold = 1e-3,
-    subword_prob_min_prob = 1e-6,
-    word_boundary = True,
-)
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument('--target_vectors', default='google_news',
@@ -201,8 +195,9 @@ sp.call(f"""
       --queries {bquery_path} \
       --save {bpred_path} \
       --model {args.model_path} \
-      {'--' if args.word_boundary else '--no_'}word_boundary
-""".split())
+      --no_word_boundary \
+""".split()) ## always use `--no_word_boundary` when pred
+      # {'--' if args.word_boundary else '--no_'}word_boundary \
 
 for bname, binfo in BENCHS.items():
     bench_paths = prepare_bench_paths(bname, binfo)

@@ -1,10 +1,13 @@
 import gzip
 import json
+import logging
 import subprocess as sp
 import os
 
 from utils import dotdict
 
+
+logger = logging.getLogger(__name__)
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 csv_path = f"{dir_path}/unigram_freq.csv"

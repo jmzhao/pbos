@@ -26,7 +26,12 @@ def load_embedding(filename: str, show_progress=False) -> (List[str], np.ndarray
         emb = np.array(emb)
     elif ext in (".pickle", ".pkl"):
         import pickle
-        vocab, emb = pickle.load(open(filename, 'rb'))
+        try:
+            with open(filename, 'rb') as bfin:
+                vocab, emb = pickle.load(bfin)
+        except UnicodeDecodeError:
+            with open(filename, 'rb') as bfin:
+                vocab, emb = pickle.load(bfin, encoding='bytes')
     else:
         raise ValueError(f'Unsupported target vector file extent: {filename}')
 

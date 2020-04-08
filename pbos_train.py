@@ -30,11 +30,11 @@ def add_args(parser):
     parser.add_argument('--model_path', required=True,
         default="./results/run_{timestamp}/model.pbos",
         help='save path')
-    add_logging_args(parser)
     add_training_args(parser)
     add_model_args(parser)
     add_subword_prob_args(parser)
-    return group
+    add_logging_args(parser)
+    return parser
 
 def add_training_args(parser):
     group = parser.add_argument_group('training hyperparameters')

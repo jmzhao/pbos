@@ -2,7 +2,7 @@ import logging
 
 def add_logging_args(parser):
     group = parser.add_argument_group('logging arguments')
-    group.add_argument('--log_level', default='INFO',
+    group.add_argument('--log_level', '-ll', default='INFO',
         help='log level used by logging module')
     return group
 

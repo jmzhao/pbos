@@ -9,6 +9,9 @@ from utils import file_tqdm, get_substrings, normalize_prob
 from utils.args import add_logging_args, logging_config
 
 
+logger = logging.getLogger(__name__)
+
+
 def build_subword_counter(
     word_count_iter,
     max_size=None,
@@ -71,7 +74,7 @@ def add_args(parser):
     add_subword_args(parser)
     add_subword_vocab_args(parser)
     add_subword_prob_args(parser)
-    return group
+    return parser
 
 def add_word_args(parser):
     group = parser.add_argument_group('word arguments')
@@ -112,7 +115,7 @@ def add_subword_prob_args(parser):
 
 
 def build_subword_vocab_cli(args):
-    logging.info("loading...")
+    logger.info("loading...")
     with open(args.word_freq) as fin:
         word_count_iter = (json.loads(line) for line in file_tqdm(fin))
         subword_counter = build_subword_counter(
@@ -123,16 +126,16 @@ def build_subword_vocab_cli(args):
             max_len=args.subword_max_len,
             word_boundary=args.word_boundary,
         )
-    logging.info("processing...")
+    logger.info("processing...")
     subword_vocab = subword_counter
-    logging.info("saving...")
+    logger.info("saving...")
     with open(args.output, 'w') as fout:
         for (subword, count) in tqdm(subword_vocab.most_common()):
             print(json.dumps((subword, count)), file=fout)
 
 
 def build_subword_prob_cli(args):
-    logging.info("loading...")
+    logger.info("loading...")
     with open(args.word_freq) as fin:
         word_count_iter = (json.loads(line) for line in file_tqdm(fin))
         subword_counter = build_subword_counter(
@@ -142,13 +145,15 @@ def build_subword_prob_cli(args):
             max_len=args.subword_max_len,
             word_boundary=args.word_boundary,
         )
-    logging.info("processing...")
+    logger.info("processing...")
+    if args.subword_prob_take_root:
+        logger.warning("`args.subword_prob_take_root = True` ignored at this step.")
     subword_prob = build_subword_prob(
         subword_counter,
         min_prob=args.subword_prob_min_prob,
-        take_root=args.subword_prob_take_root,
+        # take_root=args.subword_prob_take_root,
     )
-    logging.info("saving...")
+    logger.info("saving...")
     with open(args.output, 'w') as fout:
         for (subword, prob) in tqdm(subword_prob.most_common()):
             print(json.dumps((subword, prob)), file=fout)

@@ -7,6 +7,8 @@ import os
 from utils import dotdict
 
 
+logger = logging.getLogger(__name__)
+
 dir_path = os.path.dirname(os.path.realpath(__file__))
 gz_path = f"{dir_path}/embedding.bin.gz"
 bin_emb_path = f"{dir_path}/embedding.bin"
