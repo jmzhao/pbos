@@ -17,6 +17,8 @@ parser.add_argument('--dataset',
     help="path to processed UD dataset")
 parser.add_argument('--embeddings',
     help="path to word embeddings")
+parser.add_argument('--random_seed', type=int, default=42,
+    help="random seed for training the classifier")
 add_logging_args(parser)
 args = parser.parse_args()
 
@@ -79,6 +81,7 @@ test_X,  test_y  = make_X_y(test_instances)
 
 ## Train a logistic regression classifier and report scores
 logging.info("training...")
-clsfr = LogisticRegression(random_state=0, verbose=False).fit(train_X, train_y)
+clsfr = LogisticRegression(random_state=args.random_seed, verbose=False)
+clsfr.fit(train_X, train_y)
 print("Train acc: {}".format(clsfr.score(train_X, train_y)))
 print("Test acc:  {}".format(clsfr.score( test_X,  test_y)))

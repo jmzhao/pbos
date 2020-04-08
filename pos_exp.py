@@ -48,35 +48,36 @@ def evaluate_pbos(language_code, model_type):
     logger.info(f"[evaluate_pbos({language_code}, model_type={model_type})]"
         f" result_path=`{result_path}`")
 
-    # build subword vocab from target words
-    logger.info(f"[evaluate_pbos({language_code}, model_type={model_type})]"
-        f" building subword vocab...")
-    cmd = f"""
-        python subwords.py build_vocab \
-            --word_freq {polyglot_embeddings_path.word_freq_path} \
-            --output {subword_vocab_path} \
-            --word_boundary \
-    """.split()
-    sp.call(cmd)
-
-    if model_type == 'pbos':
-        # build subword prob from word freqs
-        logger.info(f"[evaluate_pbos({language_code}, model_type={model_type})]"
-            f" building subword prob...")
-        cmd = f"""
-            python subwords.py build_prob \
-                --word_freq {polyglot_frequency_path.word_freq_path} \
-                --output {subword_prob_path} \
-                --word_boundary \
-                --subword_prob_min_prob 1e-6 \
-        """.split()
-        sp.call(cmd)
-    else:
-        logger.info(f"[evaluate_pbos({language_code}, model_type={model_type})]"
-            f" skipped building subword prob.")
-
     # train subword embedding model using target embeddings and word freq
     if not os.path.exists(subword_embedding_model_path):
+        # build subword vocab from target words
+        logger.info(f"[evaluate_pbos({language_code}, model_type={model_type})]"
+            f" building subword vocab...")
+        cmd = f"""
+            python subwords.py build_vocab \
+                --word_freq {polyglot_embeddings_path.word_freq_path} \
+                --output {subword_vocab_path} \
+                --word_boundary \
+        """.split()
+        sp.call(cmd)
+
+        if model_type == 'pbos':
+            # build subword prob from word freqs
+            logger.info(f"[evaluate_pbos({language_code}, model_type={model_type})]"
+                f" building subword prob...")
+            cmd = f"""
+                python subwords.py build_prob \
+                    --word_freq {polyglot_frequency_path.word_freq_path} \
+                    --output {subword_prob_path} \
+                    --word_boundary \
+                    --subword_prob_min_prob 1e-6 \
+            """.split()
+            sp.call(cmd)
+        else:
+            logger.info(f"[evaluate_pbos({language_code}, model_type={model_type})]"
+                f" skipped building subword prob.")
+
+        # invoke training of subword model
         logger.info(f"[evaluate_pbos({language_code}, model_type={model_type})]"
             f" training subword model...")
         cmd = f"""
@@ -106,11 +107,11 @@ def evaluate_pbos(language_code, model_type):
         cmd = f"""
             python pbos_pred.py \
             --queries {ud_vocab_path} \
-            --pre_trained {polyglot_embeddings_path.pkl_path} \
             --save {ud_vocab_embedding_path} \
             --model {subword_embedding_model_path} \
             --no_word_boundary \
         """.split()
+            # --pre_trained {polyglot_embeddings_path.pkl_path} \
         sp.call(cmd)
     else:
         logger.info(f"[evaluate_pbos({language_code}, model_type={model_type})]"
