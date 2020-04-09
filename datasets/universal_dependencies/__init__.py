@@ -1,6 +1,9 @@
+import logging
 import os
 import subprocess as sp
 import tarfile
+
+logger = logging.getLogger(__name__)
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
@@ -113,4 +116,3 @@ if __name__ == "__main__":
     ]
     for language_code in languages:
         print(get_universal_dependencies_path(language_code))
-
