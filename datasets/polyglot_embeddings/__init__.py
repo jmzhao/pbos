@@ -63,14 +63,18 @@ def get_polyglot_codecs_path(language_code, *, n_min=3, n_max=30, dir_path=dir_p
     """
 
     language_dir_path = os.path.join(dir_path, language_code)
+
+    # input
     w2v_path = get_polyglot_embeddings_path(language_code, dir_path=dir_path).w2v_path
+
+    # output
     unsorted_codecs_path = os.path.join(language_dir_path, f"codecs-min{n_min}max{n_max}.unsorted")
     sorted_codecs_path = os.path.join(language_dir_path, f"codecs-min{n_min}max{n_max}.sorted")
 
     if not os.path.exists(unsorted_codecs_path):
         sp.run(
             f"""
-            python {dir_path}/make_ngram_dic.py
+            python {dir_path}/../make_ngram_dic.py
                 --ref_vec_path {w2v_path}
                 --output {unsorted_codecs_path}
                 --n_max {n_max}
