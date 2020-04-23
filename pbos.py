@@ -167,8 +167,8 @@ class PBoS:
 if __name__ == '__main__':
     import argparse
     from itertools import islice
-    from utils.load import load_vocab
-    from utils.preprocess import normalize_prob
+    from load import load_vocab
+    from utils import normalize_prob
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--word_list', '-f', default="./datasets/unigram_freq.csv",
