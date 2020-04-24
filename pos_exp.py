@@ -127,25 +127,6 @@ def evaluate_pbos(language_code, model_type):
         f" done.")
 
 
-def evaulate_polyglot_embedding(language_code):
-    import pickle
-
-    result_path = os.path.join("results", "polyglot", language_code, "polyglot")
-    os.makedirs(result_path, exist_ok=True)
-
-    ud_data_path, ud_vocab_path = get_universal_dependencies_path(language_code)
-
-    polyglot_embeddings_path = get_polyglot_embeddings_path(language_code)
-    embeddings_txt_path = os.path.join(result_path, "vocab_embedding.txt")
-
-    if not os.path.exists(embeddings_txt_path):
-        vocab, emb = load_embedding(polyglot_embeddings_path.pkl_path)
-        with open(embeddings_txt_path, "w+") as fout:
-            for v, e in zip(vocab, emb):
-                print(v, *e, file=fout)
-
-    pos_eval(ud_data_path, embeddings_txt_path, result_path)
-
 
 def main():
     import argparse
@@ -173,7 +154,6 @@ def main():
             get_universal_dependencies_path(language_code)
             apply(evaluate_pbos, (language_code, 'pbos',))
             apply(evaluate_pbos, (language_code, 'bos',))
-            # apply(evaulate_polyglot_embedding, (language_code,))
     if args.num_processes == 1:
         def apply(func, args):
             return func(*args)
