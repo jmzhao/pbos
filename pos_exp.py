@@ -8,6 +8,7 @@ from datasets.polyglot_embeddings import languages as all_language_codes
 from datasets.polyglot_freq import get_polyglot_frequency_path
 from datasets.universal_dependencies import get_universal_dependencies_path
 from utils.args import add_logging_args, logging_config
+from load import load_embedding
 
 logger = logging.getLogger(__name__)
 
