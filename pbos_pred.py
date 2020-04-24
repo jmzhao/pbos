@@ -5,7 +5,7 @@ import numpy as np
 from tqdm import tqdm
 
 from pbos import PBoS
-from subwords import add_word_args
+from subwords import add_word_args, bound_word
 from utils.args import add_logging_args, logging_config
 
 
@@ -52,10 +52,7 @@ else:
 
 for line in fin:
     ori_query = line.strip()
-    if args.word_boundary:
-        query = '<' + ori_query + '>'
-    else:
-        query = ori_query
+    query = bound_word(ori_query) if args.word_boundary else ori_query
     if args.pre_trained:
         vector = (
             pre_trained_emb_lookup[query]

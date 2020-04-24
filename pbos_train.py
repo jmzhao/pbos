@@ -11,7 +11,12 @@ from tqdm import tqdm
 
 from pbos import PBoS
 from load import load_embedding
-from subwords import add_subword_prob_args, subword_prob_post_process
+from subwords import (
+    add_subword_prob_args,
+    add_word_args,
+    bound_word,
+    subword_prob_post_process,
+)
 from utils import file_tqdm
 from utils.args import add_logging_args, logging_config
 
@@ -32,6 +37,7 @@ def add_args(parser):
         help='save path')
     add_training_args(parser)
     add_model_args(parser)
+    add_word_args(parser)
     add_subword_prob_args(parser)
     add_logging_args(parser)
     return parser
@@ -82,7 +88,7 @@ def main(args):
         json.dump(vars(args), fout)
 
     logger.info(f'loading target vectors from `{args.target_vectors}`...')
-    target_words, target_emb = \
+    target_words, target_embs = \
         load_embedding(args.target_vectors, show_progress=True)
     logger.info(f'embeddings loaded with {len(target_words)} words')
 
@@ -111,7 +117,7 @@ def main(args):
         return (pred - target)
 
     model = PBoS(
-        embedding_dim=len(target_emb[0]),
+        embedding_dim=len(target_embs[0]),
         subword_vocab=subword_vocab,
         subword_prob=subword_prob,
         weight_threshold=args.subword_weight_threshold,
@@ -129,13 +135,14 @@ def main(args):
             np.random.choice(len(target_words), len(target_words), replace=False),
             start=1,
         ) :
-            w = target_words[wi]
-            e = model.embed(w)
-            tar = target_emb[wi]
-            g = MSE_backward(e, tar)
+            target_emb = target_embs[wi]
+            word = target_words[wi]
+            model_word = bound_word(word) if args.word_boundary else word
+            model_emb = model.embed(model_word)
+            grad = MSE_backward(model_emb, target_emb)
 
             if i_inst % 20 == 0 :
-                loss = MSE(e, tar) / len(tar) # average over dimension for easy reading
+                loss = MSE(model_emb, target_emb) / len(target_emb) # average over dimension for easy reading
                 h.append(loss)
             if i_inst % 10000 == 0 :
                 width = len(f"{len(target_words)}")
@@ -144,8 +151,8 @@ def main(args):
                 h_epoch.extend(h)
                 h = []
 
-            d = - lr * g
-            model.step(w, d)
+            d = - lr * grad
+            model.step(model_word, d)
         now_time = time()
         logger.info('epoch {i_epoch:>2} / {n_epoch} | loss {loss:.5f} | time {epoch_time:.2f}s / {training_time:.2f}s'.format(
             i_epoch = 1 + i_epoch, n_epoch = args.epochs,
