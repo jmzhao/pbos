@@ -196,9 +196,10 @@ if True:
           --queries {bquery_path} \
           --save {bpred_path} \
           --model {args.model_path} \
-          --no_word_boundary \
-    """.split()) ## always use `--no_word_boundary` when pred
-          # {'--' if args.word_boundary else '--no_'}word_boundary \
+          {'--' if args.word_boundary else '--no_'}word_boundary \
+    """.split()) ## use `word_boundary` consistent with training
+          # {'--' if args.word_boundary else '--no_'}word_boundary \ ## use `word_boundary` consistent with training
+          # --no_word_boundary \ ## always use `--no_word_boundary` when pred
 
 for bname, binfo in BENCHS.items():
     bench_paths = prepare_bench_paths(bname, binfo)

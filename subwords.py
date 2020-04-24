@@ -12,6 +12,11 @@ from utils.args import add_logging_args, logging_config
 logger = logging.getLogger(__name__)
 
 
+
+def bound_word(word):
+    return '<' + word + '>'
+
+
 def build_subword_counter(
     word_count_iter,
     max_size=None,
@@ -23,7 +28,7 @@ def build_subword_counter(
     subword_counter = Counter()
     for word, count in iter(word_count_iter):
         if word_boundary:
-            word = '<' + word + '>'
+            word = bound_word(word)
         for subword in get_substrings(word, min_len=min_len, max_len=max_len):
             subword_counter[subword] += count
 
