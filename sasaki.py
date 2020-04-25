@@ -21,6 +21,8 @@ def train(
     freq_path=None,
     codecs_path=None,
     embed_dim=64,
+    H=100000,
+    F=100000,
     use_hash=False,
 ):
     cmd = f"""
@@ -30,7 +32,7 @@ def train(
             --embed_dim {embed_dim} 
             --maxlen 200 
             --network_type 3 
-            --limit_size 100000 
+            --limit_size {F} 
             --result_dir {result_path} 
             --unique_false 
         """
@@ -42,11 +44,11 @@ def train(
         cmd += f" --codecs_path {codecs_path} "
 
     if use_hash:
-        cmd += """
+        cmd += f"""
             --subword_type 4
             --multi_hash two
             --hashed_idx
-            --bucket_size 100000 
+            --bucket_size {H} 
         """
     else:
         cmd += " --subword_type 0 "
@@ -67,12 +69,12 @@ def inference(model_path, codecs_path, oov_word_path):
     sp.call(cmd.split())
 
 
-def evaluate_word_similarity(data, model):
+def evaluate_ws(data, model):
     sp.call(
         f"""
         python ws_eval.py \
           --data {data} \
-          --model 
+          --model {model}
           --lower \
     """.split()
     )
@@ -108,29 +110,3 @@ def train_demo():
         embed_dim=300,
         use_hash=False,
     )
-
-
-def train_google_news():
-    emb_path = prepare_google_news_paths().w2v_path
-    freq_path = prepare_google_news_paths().raw_count_path
-    codecs_path = prepare_google_news_codecs_path()
-    result_path = f"results/compact_reconstruction/google_news"
-    train(
-        emb_path,
-        result_path,
-        codecs_path=codecs_path,
-        embed_dim=300,
-        use_hash=False,
-    )
-
-train_google_news()
-# train_demo()
-# model_path = "./results/compact_reconstruction/google_news/sep_kvq/20200414_21_54_50/model_epoch_300"
-# oov_word_path="/nobackup/prob-subword-embedding/datasets/rw/queries.lower.txt"
-# inference(model_path=model_path, codecs_path=codecs_path, oov_word_path=oov_word_path)
-
-# model  = "./results/compact_reconstruction/google_news/sep_kvq/20200414_21_54_50/inference_embedding_epoch300/embedding.txt"
-# evaluate()
-
-
-# train_all_polyglot_models()
