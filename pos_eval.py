@@ -50,10 +50,14 @@ test_instances = dataset["test_instances"]
 vocab, emb = load_embedding(args.embeddings)
 emb_w2i = {w : i for i, w in enumerate(vocab)}
 
+emb_unk_i = vocab.index('<UNK>')
+# assert '<UNK>' == vocab[0], vocab[0]
+assert '<UNK>' ==   i2w[0],   i2w[0]
+
 ## Prepare training and testing data arrays
 def make_X(instance, ipad=0, hws=2):
     i_seq = chain(repeat(ipad, hws), instance.sentence, repeat(ipad, hws))
-    emb_i_seq = [emb_w2i[i2w[i]] for i in i_seq]
+    emb_i_seq = [emb_w2i.get(i2w[i], emb_unk_i) for i in i_seq]
     len_sen = len(instance.sentence)
     ws = 2 * hws + 1
     emb_i_X = [emb_i_seq[i : i + ws] for i in range(len_sen)]
@@ -71,9 +75,6 @@ def make_X_y(instances):
     logging.info(f"y.shape = {y.shape}")
     return X, y
 
-assert '<UNK>' == vocab[0], vocab[0]
-assert '<UNK>' ==   i2w[0],   i2w[0]
-
 logging.info("building training instances...")
 train_X, train_y = make_X_y(training_instances)
 logging.info("building test instances...")
@@ -83,5 +84,5 @@ test_X,  test_y  = make_X_y(test_instances)
 logging.info("training...")
 clsfr = LogisticRegression(random_state=args.random_seed, verbose=False)
 clsfr.fit(train_X, train_y)
-print("Train acc: {}".format(clsfr.score(train_X, train_y)))
+# print("Train acc: {}".format(clsfr.score(train_X, train_y)))
 print("Test acc:  {}".format(clsfr.score( test_X,  test_y)))
