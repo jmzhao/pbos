@@ -11,7 +11,7 @@ from utils.args import add_logging_args, logging_config
 logger = logging.getLogger(__name__)
 
 def get_subword_prob(sub, subword_prob, eps=None, take_root=False):
-    prob = subword_prob.get(sub, eps)
+    prob = subword_prob.get(sub, eps ** len(sub))
     if take_root:
         prob = prob ** (1 / len(sub))
     return prob
@@ -70,7 +70,7 @@ class PBoS:
         embedding_dim=None,
         subword_prob=None,
         weight_threshold=None,
-        eps=1e-6,
+        eps=1e-2,
         take_root=False,
     ):
         """
@@ -93,7 +93,7 @@ class PBoS:
                 Extremely low-weighted subword will be discarded for effiency.
                 If None, consider subwords with any weights.
 
-            eps (default: 1e-6) - the default subword probability if it is not
+            eps (default: 1e-2) - the default subword probability if it is not
                 present in `subword_prob`. This is needed to keep the segmenation
                 graph connected.
                 Only effective when `subword_prob` is present.
@@ -183,7 +183,7 @@ if __name__ == '__main__':
                         help="the number of segmentations to show")
     parser.add_argument('--word_boundary', '-wb', action='store_true',
                         help="annotate word boundary")
-    parser.add_argument('--subword_prob_eps', '-spe', type=float, default=1e-6,
+    parser.add_argument('--subword_prob_eps', '-spe', type=float, default=1e-2,
                         help="the infinitesimal prob for unseen subwords")
     parser.add_argument('--subword_weight_threshold', '-swt', type=float,
                         help="the minimum weight of a subword to be considered")
