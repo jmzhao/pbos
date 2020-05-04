@@ -20,10 +20,11 @@ def train(
     result_path,
     freq_path=None,
     codecs_path=None,
+    epoch=20,
     embed_dim=64,
     H=100000,
-    F=100000,
-    use_hash=False,
+    F=1000000,
+    use_hash=True,
 ):
     cmd = f"""
         python compact_reconstruction/src/train.py 
@@ -35,6 +36,8 @@ def train(
             --limit_size {F} 
             --result_dir {result_path} 
             --unique_false 
+            --epoch {epoch}
+            --snapshot_interval 10
         """
 
     if freq_path:
@@ -79,22 +82,14 @@ def evaluate_ws(data, model):
     """.split()
     )
 
-
-def train_all_polyglot_models():
-    with mp.Pool() as pool:
-        for lang in languages[:1]:
-            # input
-            emb_path = get_polyglot_embeddings_path(lang).w2v_path
-            freq_path = get_polyglot_frequency_path(lang).raw_count_path
-            codecs_path = get_polyglot_codecs_path(lang)
-
-            # output
-            result_path = f"results/compact_reconstruction/polyglot_KVQ_F/{lang}"
-
-            pool.apply_async(train, (emb_path, result_path, freq_path, codecs_path))
-
-        pool.close()
-        pool.join()
+def evaluate_pos(ud_data_path, ud_vocab_embedding_path):
+    cmd = f"""
+        python pos_eval.py \
+        --dataset {ud_data_path} \
+        --embeddings {ud_vocab_embedding_path} \
+    """.split()
+    output = sp.check_output(cmd)
+    return output.decode('utf-8')
 
 
 def train_demo():
@@ -110,3 +105,7 @@ def train_demo():
         embed_dim=300,
         use_hash=False,
     )
+
+
+def get_latest(dir_path):
+    return max(dir_path.iterdir(), key=lambda x: x.stat().st_mtime)

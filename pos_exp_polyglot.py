@@ -12,10 +12,6 @@ from datasets.universal_dependencies import get_universal_dependencies_path
 
 import subprocess as sp
 
-import logging
-
-logging.disable(logging.NOTSET)
-
 for language_code in sorted(all_language_codes):
     ud_vocab_embedding_path = get_polyglot_embeddings_path(language_code).pkl_path
     ud_data_path, ud_vocab_path = get_universal_dependencies_path(language_code)
@@ -26,5 +22,5 @@ for language_code in sorted(all_language_codes):
         --embeddings {ud_vocab_embedding_path} \
     """.split()
     output = sp.check_output(cmd)
-    print(f"{language_code}{output.decode('utf-8')}")
+    print(f"{language_code}: {output.decode('utf-8')}")
     
