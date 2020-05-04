@@ -167,7 +167,7 @@ class PBoS:
 if __name__ == '__main__':
     import argparse
     from itertools import islice
-    from load import load_vocab
+    from subwords import build_subword_counter, build_subword_prob, subword_prob_post_process
     from utils import normalize_prob
 
     parser = argparse.ArgumentParser()
@@ -189,8 +189,15 @@ if __name__ == '__main__':
     logging_config(args)
 
     logger.info(f"building subword vocab from `{args.word_list}`...")
-    subword_count = load_vocab(args.word_list, boundary=args.boundary, has_freq=True)
-    subword_prob = normalize_prob(subword_count, take_root=args.subword_freq_take_root)
+    
+    def parse(l):
+        k, v = l.split("\t")
+        return k, int(v)
+    
+    with open(args.word_list) as f: 
+        subword_count = build_subword_counter((parse(l) for l in f), word_boundary=args.boundary)
+    subword_prob = normalize_prob(subword_count)
+    
     logger.info(f"subword vocab size: {len(subword_prob)}")
 
     test_words = [
@@ -200,17 +207,24 @@ if __name__ == '__main__':
         "electronics",
     ]
 
+    get_subword_prob=partial(
+        get_subword_prob,
+        subword_prob=subword_prob,
+        take_root=args.subword_freq_take_root,
+        eps=1e-6
+    )
+
     def test_word(w):
         if args.boundary:
             w = '<' + w + '>'
-        p_prefix = calc_prefix_prob(w, subword_prob)
+        p_prefix = calc_prefix_prob(w, get_subword_prob)
         print("p_prefix:", '\t'.join(f"{x:.5e}" for x in p_prefix))
-        p_suffix = calc_prefix_prob(w[::-1], subword_prob)[::-1]
+        p_suffix = calc_prefix_prob(w[::-1], get_subword_prob)[::-1]
         print("p_suffix:", '\t'.join(f"{x:.5e}" for x in p_suffix))
         subword_weights = calc_subword_weights(
             w,
-            subword_prob=subword_prob,
             subword_vocab=subword_prob,
+            get_subword_prob=get_subword_prob,
             weight_threshold=args.subword_weight_threshold,
         )
         print("top subword_weights:")
