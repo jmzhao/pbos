@@ -168,8 +168,10 @@ if __name__ == '__main__':
     import argparse
     from itertools import islice
     import json
+    import math
 
     from datasets.unigram_freq import prepare_unigram_freq_paths
+    from nshortest import nshortest
     from subwords import build_subword_counter, build_subword_prob, subword_prob_post_process
     from utils import normalize_prob
 
@@ -181,6 +183,8 @@ if __name__ == '__main__':
                         help="the number of segmentations to show")
     parser.add_argument('--word_boundary', '-wb', action='store_true',
                         help="annotate word boundary")
+    parser.add_argument('--subword_prob_eps', '-spe', type=float, default=1e-6,
+                        help="the infinitesimal prob for unseen subwords")
     parser.add_argument('--subword_weight_threshold', '-swt', type=float,
                         help="the minimum weight of a subword to be considered")
     parser.add_argument('--subword_freq_take_root', '-sftr', action='store_true',
@@ -205,37 +209,48 @@ if __name__ == '__main__':
 
     test_words = [
         "lowest",
-        "technically",
+        "technical",
         "electronics",
         "somnambulists", ## aka "sleep-walkers"
         "ilikeeatingapples",
+        "penpineappleapplepie",
     ]
 
     get_subword_prob=partial(
         get_subword_prob,
         subword_prob=subword_prob,
         take_root=args.subword_freq_take_root,
-        eps=1e-6
+        eps=args.subword_prob_eps,
     )
-
     subword_vocab = set(subword_prob) - set('<>')
+
     def test_word(w):
         if args.word_boundary:
             w = '<' + w + '>'
+
         p_prefix = calc_prefix_prob(w, get_subword_prob)
-        print("p_prefix:", '\t'.join(f"{x:.5e}" for x in p_prefix))
+        logging.info("p_prefix: " + '\t'.join(f"{x:.5e}" for x in p_prefix))
         p_suffix = calc_prefix_prob(w[::-1], get_subword_prob)[::-1]
-        print("p_suffix:", '\t'.join(f"{x:.5e}" for x in p_suffix))
+        logging.info("p_suffix: " + '\t'.join(f"{x:.5e}" for x in p_suffix))
+
+        print("top segmentations:")
+        adjmat = [[None for __ in range(len(w) + 1)] for _ in range(len(w) + 1)]
+        for i in range(len(w)):
+            for j in range(i + 1, len(w) + 1):
+                adjmat[i][j] = - math.log(get_subword_prob(w[i:j]))
+        segs = nshortest(adjmat, args.n_largest)
+        for score, seg in segs:
+            print("{:.5e} : {}".format(math.exp(-score), '/'.join(w[i:j] for i, j in zip(seg, seg[1:]))))
+
+        print("top subword weights:")
         subword_weights = calc_subword_weights(
             w,
             subword_vocab=subword_vocab,
             get_subword_prob=get_subword_prob,
             weight_threshold=args.subword_weight_threshold,
         )
-        print("top subword_weights:")
-        format_str = "{:%ds}: {:.5e}" % (len(w))
-        for sub, w in islice(sorted(subword_weights.items(), key=lambda t: t[1], reverse=True), args.n_largest):
-            print(format_str.format(sub, w))
+        for sub, weight in islice(sorted(subword_weights.items(), key=lambda t: t[1], reverse=True), args.n_largest):
+            print("{:.5e} : {}".format(weight, sub))
 
     for w in test_words:
         print("Word:", w)
