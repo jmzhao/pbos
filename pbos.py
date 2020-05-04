@@ -167,15 +167,19 @@ class PBoS:
 if __name__ == '__main__':
     import argparse
     from itertools import islice
+    import json
+
+    from datasets.unigram_freq import prepare_unigram_freq_paths
     from subwords import build_subword_counter, build_subword_prob, subword_prob_post_process
     from utils import normalize_prob
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--word_list', '-f', default="./datasets/unigram_freq.csv",
+    parser.add_argument('--word_freq', '-f', default="unigram_freq",
+                        choices=["unigram_freq"],
                         help="list of words to create subword vocab")
     parser.add_argument('--n_largest', '-n', type=int, default=20,
                         help="the number of segmentations to show")
-    parser.add_argument('--boundary', '-b', action='store_true',
+    parser.add_argument('--word_boundary', '-wb', action='store_true',
                         help="annotate word boundary")
     parser.add_argument('--subword_weight_threshold', '-swt', type=float,
                         help="the minimum weight of a subword to be considered")
@@ -188,23 +192,23 @@ if __name__ == '__main__':
 
     logging_config(args)
 
-    logger.info(f"building subword vocab from `{args.word_list}`...")
-    
-    def parse(l):
-        k, v = l.split("\t")
-        return k, int(v)
-    
-    with open(args.word_list) as f: 
-        subword_count = build_subword_counter((parse(l) for l in f), word_boundary=args.boundary)
+    logger.info(f"building subword vocab from `{args.word_freq}`...")
+
+    with open(prepare_unigram_freq_paths().word_freq_path) as f:
+        subword_count = build_subword_counter(
+            (json.loads(line) for line in f),
+            word_boundary=args.word_boundary,
+        )
     subword_prob = normalize_prob(subword_count)
-    
+
     logger.info(f"subword vocab size: {len(subword_prob)}")
 
     test_words = [
         "lowest",
-        "somnambulists", ## aka "sleep-walkers"
         "technically",
         "electronics",
+        "somnambulists", ## aka "sleep-walkers"
+        "ilikeeatingapples",
     ]
 
     get_subword_prob=partial(
@@ -214,8 +218,9 @@ if __name__ == '__main__':
         eps=1e-6
     )
 
+    subword_vocab = set(subword_prob) - set('<>')
     def test_word(w):
-        if args.boundary:
+        if args.word_boundary:
             w = '<' + w + '>'
         p_prefix = calc_prefix_prob(w, get_subword_prob)
         print("p_prefix:", '\t'.join(f"{x:.5e}" for x in p_prefix))
@@ -223,7 +228,7 @@ if __name__ == '__main__':
         print("p_suffix:", '\t'.join(f"{x:.5e}" for x in p_suffix))
         subword_weights = calc_subword_weights(
             w,
-            subword_vocab=subword_prob,
+            subword_vocab=subword_vocab,
             get_subword_prob=get_subword_prob,
             weight_threshold=args.subword_weight_threshold,
         )
