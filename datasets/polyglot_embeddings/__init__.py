@@ -90,8 +90,8 @@ def get_polyglot_codecs_path(language_code, *, n_min=3, n_max=30, dir_path=dir_p
 
 
 languages = [
-    'kk', 'ta', 'lv', 'vi', 'hu', 'tr', 'el', 'bg', 'sv', 'eu', 'ru', 'da',
-    'id', 'zh', 'fa', 'he', 'ro', 'en', 'ar', 'hi', 'it', 'es', 'cs'
+    'ar', 'bg', 'cs', 'da', 'el', 'en', 'es', 'eu', 'fa', 'he', 'hi', 'hu', 
+    'id', 'it', 'kk', 'lv', 'ro', 'ru', 'sv', 'ta', 'tr', 'vi', 'zh', 
 ]
 
 
