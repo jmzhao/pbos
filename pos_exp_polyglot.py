@@ -6,13 +6,12 @@ One can redirect the starnard output of this file to get rid of the training log
 python pos_exp_polyglot.py 2>train.log 1>eval.log
 """
 
-from datasets.polyglot_embeddings import get_polyglot_embeddings_path
-from datasets.polyglot_embeddings import languages as all_language_codes
-from datasets.universal_dependencies import get_universal_dependencies_path
-
 import subprocess as sp
 
-for language_code in sorted(all_language_codes):
+from datasets.polyglot_embeddings import get_polyglot_embeddings_path, languages
+from datasets.universal_dependencies import get_universal_dependencies_path
+
+for language_code in languages:
     ud_vocab_embedding_path = get_polyglot_embeddings_path(language_code).pkl_path
     ud_data_path, ud_vocab_path = get_universal_dependencies_path(language_code)
 
@@ -23,4 +22,3 @@ for language_code in sorted(all_language_codes):
     """.split()
     output = sp.check_output(cmd)
     print(f"{language_code}: {output.decode('utf-8')}")
-    
