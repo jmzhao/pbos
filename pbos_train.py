@@ -65,7 +65,7 @@ def add_model_args(parser):
     group.add_argument('--subword_weight_threshold', type=float,
         help="minimum weight of a subword within a word for it to contribute "
         "to the word embedding")
-    group.add_argument('--subword_prob_eps', type=float, default=1e-6,
+    group.add_argument('--subword_prob_eps', type=float, default=1e-2,
         help="default likelihood of a subword if it is not present in "
         "the given `subword_prob`")
     return group
