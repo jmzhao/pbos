@@ -20,6 +20,7 @@ def get_polyglot_embeddings_path(language_code, *, dir_path=dir_path):
     pkl_path = os.path.join(language_dir_path, "embeddings.pkl")
     w2v_path = os.path.join(language_dir_path, "embeddings.w2v")
     word_freq_path = os.path.join(language_dir_path, "word_freq.jsonl")
+    txt_emb_path = os.path.join(language_dir_path, "embeddings.txt")
 
     os.makedirs(language_dir_path, exist_ok=True)
 
@@ -46,6 +47,12 @@ def get_polyglot_embeddings_path(language_code, *, dir_path=dir_path):
             print(len(vocab), len(emb[0]), file=fout)
             for v, e in zip(vocab, emb):
                 print(v, *e, file=fout)
+    
+    if not os.path.exists(txt_emb_path):
+        vocab, emb = load_embedding(pkl_path)
+        with open(txt_emb_path, "w") as fout:
+            for v, e in zip(vocab, emb):
+                print(v, *e, file=fout)
 
     return dotdict(
         dir_path = dir_path,
@@ -54,6 +61,7 @@ def get_polyglot_embeddings_path(language_code, *, dir_path=dir_path):
         pkl_path = pkl_path,
         word_freq_path = word_freq_path,
         w2v_path = w2v_path,
+        txt_emb_path = txt_emb_path
     )
 
 def get_polyglot_codecs_path(language_code, *, n_min=3, n_max=30, dir_path=dir_path):
