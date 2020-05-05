@@ -172,7 +172,12 @@ if __name__ == '__main__':
 
     from datasets.unigram_freq import prepare_unigram_freq_paths
     from nshortest import nshortest
-    from subwords import build_subword_counter, build_subword_prob, subword_prob_post_process
+    from subwords import (
+        add_subword_prob_args,
+        add_word_args, 
+        build_subword_counter,
+        build_subword_prob,
+    )
     from utils import normalize_prob
 
     parser = argparse.ArgumentParser()
@@ -181,20 +186,19 @@ if __name__ == '__main__':
                         help="list of words to create subword vocab")
     parser.add_argument('--n_largest', '-n', type=int, default=20,
                         help="the number of segmentations to show")
-    parser.add_argument('--word_boundary', '-wb', action='store_true',
-                        help="annotate word boundary")
     parser.add_argument('--subword_prob_eps', '-spe', type=float, default=1e-2,
                         help="the infinitesimal prob for unseen subwords")
     parser.add_argument('--subword_weight_threshold', '-swt', type=float,
                         help="the minimum weight of a subword to be considered")
-    parser.add_argument('--subword_freq_take_root', '-sftr', action='store_true',
-                        help="take root when normalize subword frequencies into probabilities")
     parser.add_argument('--interactive', '-i', action='store_true',
                         help="interactive mode")
+    add_word_args(parser)
+    add_subword_prob_args(parser)
     add_logging_args(parser)
     args = parser.parse_args()
 
     logging_config(args)
+    logging.debug(json.dumps(vars(args)))
 
     logger.info(f"building subword vocab from `{args.word_freq}`...")
 
@@ -203,7 +207,10 @@ if __name__ == '__main__':
             (json.loads(line) for line in f),
             word_boundary=args.word_boundary,
         )
-    subword_prob = normalize_prob(subword_count)
+    subword_prob = build_subword_prob(
+        subword_count,
+        min_prob=args.subword_prob_min_prob,
+    )
 
     logger.info(f"subword vocab size: {len(subword_prob)}")
 
@@ -219,7 +226,7 @@ if __name__ == '__main__':
     get_subword_prob=partial(
         get_subword_prob,
         subword_prob=subword_prob,
-        take_root=args.subword_freq_take_root,
+        take_root=args.subword_prob_take_root,
         eps=args.subword_prob_eps,
     )
     subword_vocab = set(subword_prob) - set('<>')

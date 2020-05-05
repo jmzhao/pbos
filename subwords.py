@@ -110,11 +110,11 @@ def add_subword_vocab_args(parser):
 
 def add_subword_prob_args(parser):
     group = parser.add_argument_group('subword prob arguments')
-    group.add_argument('--subword_prob_min_prob', type=float,
+    group.add_argument('--subword_prob_min_prob', '-spmp', type=float,
         help="minimum prob score of subword vocab")
-    group.add_argument('--subword_prob_take_root', action='store_true',
+    group.add_argument('--subword_prob_take_root', '-sptr', action='store_true',
         help="take `** (1 / len(subword))` for prob score")
-    group.add_argument('--no_subword_prob_take_root',
+    group.add_argument('--no_subword_prob_take_root', '-Nsptr',
         dest='subword_prob_take_root', action='store_false')
     return group
 
