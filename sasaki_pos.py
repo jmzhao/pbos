@@ -14,7 +14,7 @@ from sasaki_utils import evaluate_ws, inference, train, get_latest, evaluate_pos
 from datasets.universal_dependencies import get_universal_dependencies_path
 
 def exp(lang):
-    epoch = 20
+    epoch = 300
 
     emb_path = get_polyglot_embeddings_path(lang).w2v_path
     freq_path = get_polyglot_frequency_path(lang).raw_count_path
@@ -22,7 +22,7 @@ def exp(lang):
     ud_data_path, ud_vocab_path = get_universal_dependencies_path(lang)
 
     result_path = Path(".") / "results" / "compact_reconstruction" / "polyglot_KVQ_F" / lang
-    train(emb_path, result_path, freq_path, codecs_path, epoch=epoch)
+    train(emb_path, result_path, freq_path, codecs_path, epoch=epoch, H=40_000, F=500_000)
 
      
     result_path  = get_latest(result_path / "sep_kvq")
