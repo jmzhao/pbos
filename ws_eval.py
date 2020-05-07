@@ -45,13 +45,13 @@ def load_vectors(modelPath):
     return vectors
 
 
-def eval_ws(modelPath, dataPath, lower, oov_handling="drop"):
+def eval_ws(emd_path, dataPath, lower, oov_handling="drop"):
     mysim = []
     gold = []
     drop = 0.0
     nwords = 0.0
 
-    vectors = load_vectors(modelPath)
+    vectors = load_vectors(emd_path)
 
     fin = open(dataPath, 'rb')
     for line in fin:
@@ -97,7 +97,7 @@ if __name__ == "__main__":
     parser.add_argument(
         '--model',
         '-m',
-        dest='modelPath',
+        dest='emd_path',
         action='store',
         required=True,
         help='path to model'

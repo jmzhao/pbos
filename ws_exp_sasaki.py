@@ -40,8 +40,10 @@ def exp(ref_vec_path, embed_dim, result_path):
 
     for name in BENCHS:
         bench_paths = prepare_bench_paths(name)
-        eval_ws(bench_paths.txt_path, result_emb_path, lower=True)
-        eval_ws(bench_paths.txt_path, result_emb_path, lower=False)
+        for lower in (True, False):
+            result = eval_ws(result_emb_path, bench_paths.txt_path, lower=lower)
+            with open(result_path / "ws_result.txt", "a+") as fout:
+                print(result, file=fout)
 
 
 for name, ref_vec_path, embed_dim in [
