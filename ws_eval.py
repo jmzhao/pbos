@@ -24,6 +24,23 @@ def similarity(v1, v2):
     n2 = np.linalg.norm(v2)
     return np.dot(v1, v2) / n1 / n2
 
+def edit_distence(s1, s2) :
+    if len(s1) > len(s2):
+        s1, s2 = s2, s1
+    distances = range(len(s1) + 1)
+    for i2, c2 in enumerate(s2):
+        distances_ = [i2+1]
+        for i1, c1 in enumerate(s1):
+            if c1 == c2:
+                distances_.append(distances[i1])
+            else:
+                distances_.append(1 + min((distances[i1], distances[i1 + 1], distances_[-1])))
+        distances = distances_
+    return distances[-1]
+
+def editsim(w1, w2):
+    return -edit_distence(w1, w2) / max(len(w1), len(w2))
+
 
 def load_vectors(modelPath):
     vectors = {}
@@ -45,13 +62,14 @@ def load_vectors(modelPath):
     return vectors
 
 
-def eval_ws(emd_path, dataPath, lower, oov_handling="drop"):
+def eval_ws(modelPath, dataPath, lower, oov_handling="drop"):
     mysim = []
     gold = []
     drop = 0.0
     nwords = 0.0
 
-    vectors = load_vectors(emd_path)
+    if modelPath != "EditSim":
+        vectors = load_vectors(modelPath)
 
     fin = open(dataPath, 'rb')
     for line in fin:
@@ -64,16 +82,19 @@ def eval_ws(emd_path, dataPath, lower, oov_handling="drop"):
             word1, word2 = word1.lower(), word2.lower()
         nwords = nwords + 1.0
 
-        if (word1 in vectors) and (word2 in vectors):
-            v1 = vectors[word1]
-            v2 = vectors[word2]
-            d = similarity(v1, v2)
+        if modelPath == "EditSim":
+            d = editsim(word1, word2)
         else:
-            drop = drop + 1.0
-            if oov_handling == "zero":
-                d = 0
+            if (word1 in vectors) and (word2 in vectors):
+                v1 = vectors[word1]
+                v2 = vectors[word2]
+                d = similarity(v1, v2)
             else:
-                continue
+                drop = drop + 1.0
+                if oov_handling == "zero":
+                    d = 0
+                else:
+                    continue
 
         mysim.append(d)
         gold.append(golden_score)
@@ -97,7 +118,7 @@ if __name__ == "__main__":
     parser.add_argument(
         '--model',
         '-m',
-        dest='emd_path',
+        dest='modelPath',
         action='store',
         required=True,
         help='path to model'
