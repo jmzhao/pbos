@@ -1,4 +1,5 @@
 from pathlib import Path
+import multiprocessing as mp
 
 from datasets.google import prepare_google_paths
 from datasets.polyglot_emb import prepare_polyglot_emb_paths
@@ -9,7 +10,8 @@ from ws_eval import eval_ws
 epoch = 300
 
 
-def exp(ref_vec_path, embed_dim, result_path):
+def exp(ref_vec_path, ref_vec_name, embed_dim):
+    result_path = Path(".") / "results" / f"ws_{ref_vec_name}_sasaki"
     codecs_path = prepare_codecs_path(ref_vec_path, result_path)
     train(
         ref_vec_path,
@@ -36,9 +38,12 @@ def exp(ref_vec_path, embed_dim, result_path):
                 print(result, file=fout)
 
 
-for name, ref_vec_path, embed_dim in [
-    ("polyglot", prepare_polyglot_emb_paths("en").w2v_path, 64),
-    ("google_news", prepare_google_paths().w2v_path, 300),
-]:
-    result_path = Path(".") / "results" / "sasaki" / f"ws_{name}"
-    exp(ref_vec_path, embed_dim, result_path)
+with mp.Pool() as pool:
+    for ref_vec_name, ref_vec_path, embed_dim in [
+        ("polyglot", prepare_polyglot_emb_paths("en").w2v_path, 64),
+        ("google_news", prepare_google_paths().w2v_path, 300),
+    ]:
+        pool.apply_async(exp, (ref_vec_path, ref_vec_name, embed_dim,))
+
+    pool.close()
+    pool.join()
