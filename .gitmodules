@@ -1,6 +1,3 @@
-[submodule "fastText"]
-	path = fastText
-	url = https://github.com/facebookresearch/fastText
 [submodule "Mimick"]
 	path = Mimick
 	url = https://github.com/yuvalpinter/Mimick.git

@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
-language_code_to_folder = {
+lang_folder_dic = {
     "cu": "UD_Old_Church_Slavonic",
     "id": "UD_Indonesian",
     "ug": "UD_Uyghur",
@@ -56,10 +56,10 @@ language_code_to_folder = {
 }
 
 
-def get_universal_dependencies_path(language_code):
+def prepare_ud_paths(language):
     tgz_path = f"{dir_path}/ud-treebanks-v1.4.tgz"
     language_folder_path = (
-        f"{dir_path}/ud-treebanks-v1.4/{language_code_to_folder[language_code]}"
+        f"{dir_path}/ud-treebanks-v1.4/{lang_folder_dic[language]}"
     )
     vocab_path = f"{language_folder_path}/vocab.txt"
     data_path = f"{language_folder_path}/combined.pkl"
@@ -76,9 +76,9 @@ def get_universal_dependencies_path(language_code):
         sp.run(
             f"""
             python {dir_path}/make_dataset.py \
-              --training-data {language_folder_path}/{language_code}-ud-train.conllu \
-              --dev-data {language_folder_path}/{language_code}-ud-dev.conllu \
-              --test-data {language_folder_path}/{language_code}-ud-test.conllu \
+              --training-data {language_folder_path}/{language}-ud-train.conllu \
+              --dev-data {language_folder_path}/{language}-ud-dev.conllu \
+              --test-data {language_folder_path}/{language}-ud-test.conllu \
               --output {data_path} \
               --vocab {vocab_path} \
               --ud-tags
@@ -90,29 +90,8 @@ def get_universal_dependencies_path(language_code):
 
 if __name__ == "__main__":
     languages = [
-        "kk",
-        "ta",
-        "lv",
-        "vi",
-        "hu",
-        "tr",
-        "el",
-        "bg",
-        "sv",
-        "eu",
-        "ru",
-        "da",
-        "id",
-        "zh",
-        "fa",
-        "he",
-        "ro",
-        "en",
-        "ar",
-        "hi",
-        "it",
-        "es",
-        "cs",
+        'ar', 'bg', 'cs', 'da', 'el', 'en', 'es', 'eu', 'fa', 'he', 'hi', 'hu',
+        'id', 'it', 'kk', 'lv', 'ro', 'ru', 'sv', 'ta', 'tr', 'vi', 'zh',
     ]
-    for language_code in languages:
-        print(get_universal_dependencies_path(language_code))
+    for language in languages:
+        prepare_ud_paths(language)
