@@ -22,7 +22,7 @@ raw_count_path = f"{dir_path}/word_freq.txt"
 
 
 
-def prepare_google_news_paths(
+def prepare_google_paths(
     dir_path = dir_path,
     gz_path = gz_path,
     bin_emb_path = bin_emb_path,
@@ -80,14 +80,14 @@ def prepare_google_news_paths(
     )
 
 
-def prepare_google_news_codecs_path(*, n_min=3, n_max=30, dir_path=dir_path):
+def prepare_google_codecs_path(*, n_min=3, n_max=30, dir_path=dir_path):
     """
     Get codecs file for [Sasaki]
     See https://github.com/losyer/compact_reconstruction/tree/master/src/preprocess
     """
 
     # input
-    w2v_path = prepare_google_news_paths().w2v_path
+    w2v_path = prepare_google_paths().w2v_path
 
     # output
     unsorted_codecs_path = os.path.join(dir_path, f"codecs-min{n_min}max{n_max}.unsorted")

@@ -5,14 +5,14 @@ import json
 import logging
 import os
 import subprocess as sp
-import sys
 
 # default arguments, if not otherwise overwritten by command line arguments.
 from configs import demo_config
-from datasets.google_news import prepare_google_news_paths
+from datasets.google import prepare_google_paths
 from datasets.unigram_freq import prepare_unigram_freq_paths
 import pbos_train
 import subwords
+from datasets.ws_bench import prepare_bench_paths, BENCHS, prepare_combined_bench_query_path
 from utils import dotdict
 from utils.args import add_logging_args, logging_config
 
@@ -70,7 +70,7 @@ python pbos_train.py --target_vectors datasets/google_news/embedding.txt --model
 if not os.path.exists(args.model_path):
     # model does not exist, need to train a model.
     if args.target_vectors.lower() == "google_news": # default, use google vectors
-        google_news_paths = prepare_google_news_paths()
+        google_news_paths = prepare_google_paths()
         args.target_vectors = google_news_paths.txt_emb_path
 
 
@@ -87,17 +87,17 @@ if not os.path.exists(args.model_path):
             subwords.build_subword_vocab_cli(subword_vocab_args)
         args.subword_vocab = subword_vocab_path
     elif args.target_vectors.lower() == "polyglot":
-        from datasets.polyglot_embeddings import get_polyglot_embeddings_path
+        from datasets.polyglot_emb import prepare_polyglot_emb_paths
         from pathlib import Path
         subword_vocab_path = str(Path(".") / "results" / "polyglot_subword.jsonl")
-        args.target_vectors = get_polyglot_embeddings_path("en").txt_emb_path
+        args.target_vectors = prepare_polyglot_emb_paths("en").txt_emb_path
 
 
         if not os.path.exists(subword_vocab_path):
             subword_vocab_args = dotdict(ChainMap(
                 dict(
                     command = "build_vocab",
-                    word_freq =  get_polyglot_embeddings_path("en").word_freq_path,
+                    word_freq =  prepare_polyglot_emb_paths("en").word_freq_path,
                     output = subword_vocab_path,
                 ),
                 args,
@@ -131,84 +131,10 @@ if not os.path.exists(args.model_path):
     pbos_train.main(args)
 
 
-BENCHS = {
-    "rw": {
-        "url": "https://nlp.stanford.edu/~lmthang/morphoNLM/rw.zip",
-        "raw_txt_rel_path": "rw/rw.txt",
-    },
-    "wordsim353": {
-        "url": "https://leviants.com/wp-content/uploads/2020/01/wordsim353.zip",
-        "raw_txt_rel_path": "combined.tab",
-        "skip_lines": 1,
-    },
-    "card660": {
-        "url": "https://pilehvar.github.io/card-660/dataset.tsv",
-        "no_zip": True,
-        "raw_txt_rel_path": "dataset.tsv",
-    },
-}
-
-def prepare_bench_paths(bname, binfo):
-    raw_txt_rel_path = binfo["raw_txt_rel_path"]
-    raw_txt_path = f"{datasets_dir}/{bname}/{raw_txt_rel_path}"
-    if not os.path.exists(raw_txt_path):
-        sp.call(
-            f"""
-            wget -c {binfo['url']} -P {datasets_dir}/{bname}
-        """.split()
-        )
-        if not binfo.get("no_zip"):
-            sp.call(
-                f"""
-                unzip {datasets_dir}/{bname}/{bname}.zip -d {datasets_dir}/{bname}
-            """.split()
-            )
-    btxt_path = f"{datasets_dir}/{bname}/{bname}.txt"
-    if not os.path.exists(btxt_path):
-        with open(raw_txt_path) as f, open(btxt_path, "w") as fout:
-            for i, line in enumerate(f):
-                ## discard head lines
-                if i < binfo.get("skip_lines", 0):
-                    continue
-                ## NOTE: in `fastText/eval.py`, golden words get lowercased anyways,
-                ## but predicted words remain as they are.
-                print(line, end="", file=fout)
-    bquery_path = f"{datasets_dir}/{bname}/queries.txt"
-    bquery_lower_path = f"{datasets_dir}/{bname}/queries.lower.txt"
-    if not os.path.exists(bquery_path) or not os.path.exists(bquery_lower_path):
-
-        def process(query_path, lower):
-            words = set()
-            with open(btxt_path) as f:
-                for line in f:
-                    if lower:
-                        line = line.lower()
-                    w1, w2 = line.split()[:2]
-                    words.add(w1)
-                    words.add(w2)
-            with open(query_path, "w") as fout:
-                for w in words:
-                    print(w, file=fout)
-
-        process(bquery_path, lower=False)
-        process(bquery_lower_path, lower=True)
-
-    return dotdict(locals())
-
-bquery_path = f"{results_dir}/queries.txt"
+bquery_path = prepare_combined_bench_query_path()
 bpred_path = f"{results_dir}/vectors.txt"
 if True:
     ## collect and predict all query words to save model load time.
-    all_words = set()
-    for bname, binfo in BENCHS.items():
-        bench_paths = prepare_bench_paths(bname, binfo)
-        with open(bench_paths.bquery_path) as fin:
-            for line in fin:
-                all_words.add(line.strip())
-                all_words.add(line.strip().lower())
-    with open(bquery_path, 'w') as fout:
-        for w in all_words:
-            print(w, file=fout)
     sp.call(f"""
         python pbos_pred.py \
           --queries {bquery_path} \
@@ -219,8 +145,8 @@ if True:
           # {'--' if args.word_boundary else '--no_'}word_boundary \ ## use `word_boundary` consistent with training
           # --no_word_boundary \ ## always use `--no_word_boundary` when pred
 
-for bname, binfo in BENCHS.items():
-    bench_paths = prepare_bench_paths(bname, binfo)
+for bname in BENCHS:
+    bench_paths = prepare_bench_paths(bname)
     ## eval on original benchmark (possiblly uppercase words)
     sp.call(f"""
         python ws_eval.py \

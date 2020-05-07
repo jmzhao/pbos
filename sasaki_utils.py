@@ -1,18 +1,5 @@
 import os
-import pickle
 import subprocess as sp
-import multiprocessing as mp
-
-from datasets.polyglot_embeddings import (
-    get_polyglot_embeddings_path,
-    get_polyglot_codecs_path,
-    languages,
-)
-from datasets.polyglot_freq import get_polyglot_frequency_path
-from datasets.google_news import (
-    prepare_google_news_paths,
-    prepare_google_news_codecs_path,
-)
 
 
 def train(
@@ -72,16 +59,6 @@ def inference(model_path, codecs_path, oov_word_path):
     sp.call(cmd.split())
 
 
-def evaluate_ws(data, model):
-    sp.call(
-        f"""
-        python ws_eval.py \
-          --data {data} \
-          --model {model}
-          --lower \
-    """.split()
-    )
-
 def evaluate_pos(ud_data_path, ud_vocab_embedding_path):
     cmd = f"""
         python pos_eval.py \
@@ -107,5 +84,5 @@ def train_demo():
     )
 
 
-def get_latest(dir_path):
+def get_latest_in_dir(dir_path):
     return max(dir_path.iterdir(), key=lambda x: x.stat().st_mtime)

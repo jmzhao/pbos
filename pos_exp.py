@@ -3,10 +3,10 @@ import multiprocessing as mp
 import os
 import subprocess as sp
 
-from datasets.polyglot_embeddings import get_polyglot_embeddings_path
-from datasets.polyglot_embeddings import languages as all_language_codes
+from datasets.polyglot_emb import prepare_polyglot_emb_paths
+from datasets.polyglot_emb import languages as all_language_codes
 from datasets.polyglot_freq import get_polyglot_frequency_path
-from datasets.universal_dependencies import get_universal_dependencies_path
+from datasets.ud import prepare_ud_paths
 from utils.args import add_logging_args, logging_config
 from load import load_embedding
 
@@ -36,7 +36,7 @@ def evaluate_pbos(language_code, model_type):
     logger.info(f"[evaluate_pbos({language_code}, model_type={model_type})] start...")
 
     # Input files
-    polyglot_embeddings_path = get_polyglot_embeddings_path(language_code)
+    polyglot_embeddings_path = prepare_polyglot_emb_paths(language_code)
     polyglot_frequency_path = get_polyglot_frequency_path(language_code)
 
     # Output/result files
@@ -99,7 +99,7 @@ def evaluate_pbos(language_code, model_type):
         logger.info(f"[evaluate_pbos({language_code}, model_type={model_type})]"
             f" skipped training subword model.")
 
-    ud_data_path, ud_vocab_path = get_universal_dependencies_path(language_code)
+    ud_data_path, ud_vocab_path = prepare_ud_paths(language_code)
     ud_vocab_embedding_path = os.path.join(result_path, "ud_vocab_embedding.txt")
 
     # predict embeddings for ud vocabs
@@ -149,9 +149,9 @@ def main():
         for language_code in language_codes:
             # prepare raw data without multiprocessing,
             # otherwise trouble comes with race conditions of file write
-            get_polyglot_embeddings_path(language_code)
+            prepare_polyglot_emb_paths(language_code)
             get_polyglot_frequency_path(language_code)
-            get_universal_dependencies_path(language_code)
+            prepare_ud_paths(language_code)
             apply(evaluate_pbos, (language_code, 'pbos',))
             apply(evaluate_pbos, (language_code, 'bos',))
     if args.num_processes == 1:

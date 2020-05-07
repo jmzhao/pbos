@@ -44,6 +44,7 @@ def load_vectors(modelPath):
     fin.close()
     return vectors
 
+
 def eval_ws(modelPath, dataPath, lower):
     mysim = []
     gold = []
@@ -75,7 +76,6 @@ def eval_ws(modelPath, dataPath, lower):
     corr = stats.spearmanr(mysim, gold)
     dataset = os.path.basename(dataPath)
     return "{0:20s}: {1:2.0f}  (OOV: {2:2.0f}%)".format(dataset, corr[0] * 100, math.ceil(drop / nwords * 100.0))
-   
 
 
 if __name__ == "__main__":
