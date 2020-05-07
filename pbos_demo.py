@@ -9,13 +9,14 @@ import subprocess as sp
 # default arguments, if not otherwise overwritten by command line arguments.
 from configs import demo_config
 from datasets.google import prepare_google_paths
+from datasets.polyglot_emb import prepare_polyglot_emb_paths
 from datasets.unigram_freq import prepare_unigram_freq_paths
 import pbos_train
 import subwords
 from datasets.ws_bench import prepare_bench_paths, BENCHS, prepare_combined_query_path
 from utils import dotdict
 from utils.args import add_logging_args, logging_config
-
+from ws_eval import eval_ws
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument('--target_vectors', default='google_news',
@@ -68,42 +69,28 @@ python pbos_train.py --target_vectors datasets/google_news/embedding.txt --model
 """
 
 if not os.path.exists(args.model_path):
+    def build_subword(word_freq, txt_emb_path):
+        subword_vocab_path = os.path.join(results_dir, "subword_vocab.jsonl")
+        if not os.path.exists(subword_vocab_path):
+            subword_vocab_args = dotdict(ChainMap(
+                dict(
+                    command="build_vocab",
+                    word_freq=word_freq,
+                    output=subword_vocab_path,
+                ),
+                args,
+            ))
+            subwords.build_subword_vocab_cli(subword_vocab_args)
+        args.subword_vocab = subword_vocab_path
+        args.target_vectors = txt_emb_path
+
     # model does not exist, need to train a model.
     if args.target_vectors.lower() == "google_news": # default, use google vectors
-        google_news_paths = prepare_google_paths()
-        args.target_vectors = google_news_paths.txt_emb_path
-
-
-        subword_vocab_path = os.path.join(google_news_paths.dir_path, "subword_vocab.jsonl")
-        if not os.path.exists(subword_vocab_path):
-            subword_vocab_args = dotdict(ChainMap(
-                dict(
-                    command = "build_vocab",
-                    word_freq = google_news_paths.word_freq_path,
-                    output = subword_vocab_path,
-                ),
-                args,
-            ))
-            subwords.build_subword_vocab_cli(subword_vocab_args)
-        args.subword_vocab = subword_vocab_path
+        paths = prepare_google_paths()
+        build_subword(paths.word_freq_path, paths.txt_emb_path)
     elif args.target_vectors.lower() == "polyglot":
-        from datasets.polyglot_emb import prepare_polyglot_emb_paths
-        from pathlib import Path
-        subword_vocab_path = str(Path(".") / "results" / "polyglot_subword.jsonl")
-        args.target_vectors = prepare_polyglot_emb_paths("en").txt_emb_path
-
-
-        if not os.path.exists(subword_vocab_path):
-            subword_vocab_args = dotdict(ChainMap(
-                dict(
-                    command = "build_vocab",
-                    word_freq =  prepare_polyglot_emb_paths("en").word_freq_path,
-                    output = subword_vocab_path,
-                ),
-                args,
-            ))
-            subwords.build_subword_vocab_cli(subword_vocab_args)
-        args.subword_vocab = subword_vocab_path
+        paths = prepare_polyglot_emb_paths("en")
+        build_subword(paths.word_freq_path, paths.txt_emb_path)
     else:
         raise NotImplementedError
 
@@ -133,31 +120,20 @@ if not os.path.exists(args.model_path):
 
 bquery_path = prepare_combined_query_path()
 bpred_path = f"{results_dir}/vectors.txt"
-if True:
-    ## collect and predict all query words to save model load time.
-    sp.call(f"""
-        python pbos_pred.py \
-          --queries {bquery_path} \
-          --save {bpred_path} \
-          --model {args.model_path} \
-          {'--' if args.word_boundary else '--no_'}word_boundary \
-    """.split()) ## use `word_boundary` consistent with training
-          # {'--' if args.word_boundary else '--no_'}word_boundary \ ## use `word_boundary` consistent with training
-          # --no_word_boundary \ ## always use `--no_word_boundary` when pred
+## collect and predict all query words to save model load time.
+sp.call(f"""
+    python pbos_pred.py \
+      --queries {bquery_path} \
+      --save {bpred_path} \
+      --model {args.model_path} \
+      {'--' if args.word_boundary else '--no_'}word_boundary \
+""".split()) ## use `word_boundary` consistent with training
+      # {'--' if args.word_boundary else '--no_'}word_boundary \ ## use `word_boundary` consistent with training
+      # --no_word_boundary \ ## always use `--no_word_boundary` when pred
 
 for bname in BENCHS:
     bench_paths = prepare_bench_paths(bname)
-    ## eval on original benchmark (possiblly uppercase words)
-    sp.call(f"""
-        python ws_eval.py \
-          --data {bench_paths.btxt_path} \
-          --model {bpred_path} \
-          --no_lower \
-    """.split())
-    ## eval on lowercased benchmark
-    sp.call(f"""
-        python ws_eval.py \
-          --data {bench_paths.btxt_path} \
-          --model {bpred_path}
-          --lower \
-    """.split())
+    for lower in (True, False):
+        result = eval_ws(bpred_path, bench_paths.txt_path, lower=lower)
+        with open(f"{results_dir}/ws_result.txt", "a+") as fout:
+            print(result, file=fout)
