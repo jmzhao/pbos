@@ -19,7 +19,7 @@ from utils.args import add_logging_args, logging_config
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument('--target_vectors', default='google_news',
-    choices=['google_news'],
+    choices=['google_news', 'polyglot'],
     help="target word vectors")
 parser.add_argument('--model_path', default="./results/pbos/demo/model.pbos",
     help="The path to the model to be evaluated. "
@@ -80,6 +80,24 @@ if not os.path.exists(args.model_path):
                 dict(
                     command = "build_vocab",
                     word_freq = google_news_paths.word_freq_path,
+                    output = subword_vocab_path,
+                ),
+                args,
+            ))
+            subwords.build_subword_vocab_cli(subword_vocab_args)
+        args.subword_vocab = subword_vocab_path
+    elif args.target_vectors.lower() == "polyglot":
+        from datasets.polyglot_embeddings import get_polyglot_embeddings_path
+        from pathlib import Path
+        subword_vocab_path = str(Path(".") / "results" / "polyglot_subword.jsonl")
+        args.target_vectors = get_polyglot_embeddings_path("en").txt_emb_path
+
+
+        if not os.path.exists(subword_vocab_path):
+            subword_vocab_args = dotdict(ChainMap(
+                dict(
+                    command = "build_vocab",
+                    word_freq =  get_polyglot_embeddings_path("en").word_freq_path,
                     output = subword_vocab_path,
                 ),
                 args,
