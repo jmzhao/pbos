@@ -6,7 +6,7 @@ from datasets.ws_bench import BENCHS, prepare_bench_paths, prepare_combined_quer
 from sasaki_utils import train, inference, get_latest_in_dir, prepare_codecs_path
 from ws_eval import eval_ws
 
-epoch = 20
+epoch = 300
 
 
 def exp(ref_vec_path, embed_dim, result_path):
