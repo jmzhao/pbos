@@ -78,7 +78,7 @@ def prepare_bench_paths(name):
     )
 
 
-def prepare_combined_bench_query_path():
+def prepare_combined_query_path():
     combined_query_path = f"{datasets_dir}/combined_query.txt"
 
     if os.path.exists(combined_query_path):
@@ -97,4 +97,4 @@ def prepare_combined_bench_query_path():
 
 
 if __name__ == '__main__':
-    prepare_combined_bench_query_path()
+    prepare_combined_query_path()

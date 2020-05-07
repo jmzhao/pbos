@@ -44,6 +44,7 @@ def load_vectors(modelPath):
     fin.close()
     return vectors
 
+
 def eval_ws(modelPath, dataPath, lower, oov_handling="drop"):
     mysim = []
     gold = []
@@ -80,11 +81,12 @@ def eval_ws(modelPath, dataPath, lower, oov_handling="drop"):
 
     corr = stats.spearmanr(mysim, gold)
     dataset = os.path.basename(dataPath)
-    return "{:20s}: {:2.0f}  (OOV: {:2.0f}%, {})".format(
+    return "{:20s}: {:2.0f}  (OOV: {:2.0f}%, {}, lower={})".format(
         dataset,
         corr[0] * 100,
         math.ceil(drop / nwords * 100.0),
         oov_handling,
+        lower
     )
 
 

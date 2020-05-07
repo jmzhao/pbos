@@ -12,7 +12,7 @@ from datasets.google import prepare_google_paths
 from datasets.unigram_freq import prepare_unigram_freq_paths
 import pbos_train
 import subwords
-from datasets.ws_bench import prepare_bench_paths, BENCHS, prepare_combined_bench_query_path
+from datasets.ws_bench import prepare_bench_paths, BENCHS, prepare_combined_query_path
 from utils import dotdict
 from utils.args import add_logging_args, logging_config
 
@@ -131,7 +131,7 @@ if not os.path.exists(args.model_path):
     pbos_train.main(args)
 
 
-bquery_path = prepare_combined_bench_query_path()
+bquery_path = prepare_combined_query_path()
 bpred_path = f"{results_dir}/vectors.txt"
 if True:
     ## collect and predict all query words to save model load time.
