@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 
-def get_polyglot_embeddings_path(language_code, *, dir_path=dir_path):
+def prepare_polyglot_emb_paths(language_code, *, dir_path=dir_path):
     language_dir_path = os.path.join(dir_path, language_code)
     tar_path = os.path.join(language_dir_path, "embeddings.tar.bz2")
     pkl_path = os.path.join(language_dir_path, "embeddings.pkl")
@@ -40,14 +40,14 @@ def get_polyglot_embeddings_path(language_code, *, dir_path=dir_path):
         with open(word_freq_path, "w") as fout:
             for word in vocab:
                 print(json.dumps((word, 1)), file=fout)
-    
+
     if not os.path.exists(w2v_path):
         vocab, emb = load_embedding(pkl_path)
         with open(w2v_path, "w") as fout:
             print(len(vocab), len(emb[0]), file=fout)
             for v, e in zip(vocab, emb):
                 print(v, *e, file=fout)
-    
+
     if not os.path.exists(txt_emb_path):
         vocab, emb = load_embedding(pkl_path)
         with open(txt_emb_path, "w") as fout:
@@ -64,6 +64,7 @@ def get_polyglot_embeddings_path(language_code, *, dir_path=dir_path):
         txt_emb_path = txt_emb_path
     )
 
+
 def get_polyglot_codecs_path(language_code, *, n_min=3, n_max=30, dir_path=dir_path):
     """
     Get codecs file for [Sasaki]
@@ -73,7 +74,7 @@ def get_polyglot_codecs_path(language_code, *, n_min=3, n_max=30, dir_path=dir_p
     language_dir_path = os.path.join(dir_path, language_code)
 
     # input
-    w2v_path = get_polyglot_embeddings_path(language_code, dir_path=dir_path).w2v_path
+    w2v_path = prepare_polyglot_emb_paths(language_code, dir_path=dir_path).w2v_path
 
     # output
     unsorted_codecs_path = os.path.join(language_dir_path, f"codecs-min{n_min}max{n_max}.unsorted")
@@ -98,11 +99,11 @@ def get_polyglot_codecs_path(language_code, *, n_min=3, n_max=30, dir_path=dir_p
 
 
 languages = [
-    'ar', 'bg', 'cs', 'da', 'el', 'en', 'es', 'eu', 'fa', 'he', 'hi', 'hu', 
-    'id', 'it', 'kk', 'lv', 'ro', 'ru', 'sv', 'ta', 'tr', 'vi', 'zh', 
+    'ar', 'bg', 'cs', 'da', 'el', 'en', 'es', 'eu', 'fa', 'he', 'hi', 'hu',
+    'id', 'it', 'kk', 'lv', 'ro', 'ru', 'sv', 'ta', 'tr', 'vi', 'zh',
 ]
 
 
 if __name__ == '__main__':
     for language_code in languages:
-        get_polyglot_embeddings_path(language_code)
+        prepare_polyglot_emb_paths(language_code)

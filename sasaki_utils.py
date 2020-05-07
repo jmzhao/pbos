@@ -1,30 +1,18 @@
 import os
-import pickle
 import subprocess as sp
-import multiprocessing as mp
-
-from datasets.polyglot_embeddings import (
-    get_polyglot_embeddings_path,
-    get_polyglot_codecs_path,
-    languages,
-)
-from datasets.polyglot_freq import get_polyglot_frequency_path
-from datasets.google_news import (
-    prepare_google_news_paths,
-    prepare_google_news_codecs_path,
-)
+from utils import dotdict
 
 
 def train(
-    emb_path,
-    result_path,
-    freq_path=None,
-    codecs_path=None,
-    epoch=20,
-    embed_dim=64,
-    H=100000,
-    F=1000000,
-    use_hash=True,
+        emb_path,
+        result_path,
+        freq_path=None,
+        codecs_path=None,
+        epoch=20,
+        embed_dim=64,
+        H=100000,
+        F=1000000,
+        use_hash=True,
 ):
     cmd = f"""
         python compact_reconstruction/src/train.py 
@@ -72,16 +60,6 @@ def inference(model_path, codecs_path, oov_word_path):
     sp.call(cmd.split())
 
 
-def evaluate_ws(data, model):
-    sp.call(
-        f"""
-        python ws_eval.py \
-          --data {data} \
-          --model {model}
-          --lower \
-    """.split()
-    )
-
 def evaluate_pos(ud_data_path, ud_vocab_embedding_path):
     cmd = f"""
         python pos_eval.py \
@@ -107,5 +85,31 @@ def train_demo():
     )
 
 
-def get_latest(dir_path):
+def get_latest_in_dir(dir_path):
     return max(dir_path.iterdir(), key=lambda x: x.stat().st_mtime)
+
+
+def prepare_codecs_path(ref_vec_path, result_path, n_min=3, n_max=30):
+    """
+    See https://github.com/losyer/compact_reconstruction/tree/master/src/preprocess
+    """
+    os.makedirs(result_path, exist_ok=True)
+    unsorted_codecs_path = os.path.join(result_path, f"codecs-min{n_min}max{n_max}.unsorted")
+    sorted_codecs_path = os.path.join(result_path, f"codecs-min{n_min}max{n_max}.sorted")
+
+    if not os.path.exists(unsorted_codecs_path):
+        from sasaki_codecs import main as make_codecs
+
+        make_codecs(dotdict(
+            ref_vec_path=ref_vec_path,
+            output=unsorted_codecs_path,
+            n_max=n_max,
+            n_min=n_min,
+            test=False,
+        ))
+
+    if not os.path.exists(sorted_codecs_path):
+        with open(sorted_codecs_path, 'w') as fout:
+            sp.run(f"sort -k 2,2 -n -r {unsorted_codecs_path}".split(), stdout=fout)
+
+    return sorted_codecs_path
