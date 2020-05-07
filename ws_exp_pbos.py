@@ -12,6 +12,7 @@ def exp(model_type, target_vectors):
             --model_path {model_path} \
             --model_type {model_type} \
             --target_vectors {target_vectors} \
+            --epochs 50 \
         ".split()
     with sp.Popen(['/usr/bin/tee', '-a', log_path], stdin=sp.PIPE) as tee:
         sp.call(cmd, stderr=tee.stdin)
