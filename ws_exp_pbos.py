@@ -11,7 +11,7 @@ for model_type in ['bos', 'pbos']:
         cmd = f"python pbos_demo.py \
             --model_path {model_path} \
             --model_type {model_type} \
-            --target_vectors {target_vectors}
+            --target_vectors {target_vectors} \
         ".split()
         with sp.Popen(['/usr/bin/tee', '-a', log_path], stdin=sp.PIPE) as tee:
             sp.call(cmd, stderr=tee.stdin)
