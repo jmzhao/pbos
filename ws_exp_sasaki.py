@@ -1,13 +1,3 @@
-"""
-Train Google News using the same parameter as table 6
-
-To be specific,
-    Method = KVQ-FH
-    F = 0.50M
-    H = 0.04M
-
-"""
-
 from pathlib import Path
 
 from datasets.google import prepare_google_paths
