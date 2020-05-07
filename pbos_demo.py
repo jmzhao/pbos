@@ -69,6 +69,10 @@ python pbos_train.py --target_vectors datasets/google_news/embedding.txt --model
 """
 
 if not os.path.exists(args.model_path):
+    if args.model_type.lower() == 'bos':
+        args.subword_min_len = 3
+        args.subword_max_len = 30
+        
     def build_subword(word_freq, txt_emb_path):
         subword_vocab_path = os.path.join(results_dir, "subword_vocab.jsonl")
         if not os.path.exists(subword_vocab_path):
