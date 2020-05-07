@@ -11,8 +11,8 @@ models = {
 }
 
 for model_name, model_path in models.items():
-    for dataset in ("rw", "wordsim353", "card660"):
+    for dataset in ("wordsim353", "rw", "card660"):
         data_path = Path(".") / "datasets" / dataset / f"{dataset}.txt"
-        result = eval_ws(model_path, data_path, lower=True)
-
+        # result = eval_ws(model_path, data_path, lower=True)
+        result = eval_ws(model_path, data_path, lower=True, oov_handling="zero")
         print(model_name, result)

@@ -44,8 +44,7 @@ def load_vectors(modelPath):
     fin.close()
     return vectors
 
-
-def eval_ws(modelPath, dataPath, lower):
+def eval_ws(modelPath, dataPath, lower, oov_handling="drop"):
     mysim = []
     gold = []
     drop = 0.0
@@ -58,6 +57,8 @@ def eval_ws(modelPath, dataPath, lower):
         tline = compat_splitting(line)
         word1 = tline[0]
         word2 = tline[1]
+        golden_score = float(tline[2])
+
         if lower:
             word1, word2 = word1.lower(), word2.lower()
         nwords = nwords + 1.0
@@ -66,16 +67,25 @@ def eval_ws(modelPath, dataPath, lower):
             v1 = vectors[word1]
             v2 = vectors[word2]
             d = similarity(v1, v2)
-            mysim.append(d)
-            gold.append(float(tline[2]))
         else:
-            # print("dropped", (word1, word2))
             drop = drop + 1.0
+            if oov_handling == "zero":
+                d = 0
+            else:
+                continue
+
+        mysim.append(d)
+        gold.append(golden_score)
     fin.close()
 
     corr = stats.spearmanr(mysim, gold)
     dataset = os.path.basename(dataPath)
-    return "{0:20s}: {1:2.0f}  (OOV: {2:2.0f}%)".format(dataset, corr[0] * 100, math.ceil(drop / nwords * 100.0))
+    return "{:20s}: {:2.0f}  (OOV: {:2.0f}%, {})".format(
+        dataset,
+        corr[0] * 100,
+        math.ceil(drop / nwords * 100.0),
+        oov_handling,
+    )
 
 
 if __name__ == "__main__":
@@ -100,6 +110,7 @@ if __name__ == "__main__":
     )
     parser.add_argument('--lower', action='store_true', default=True)
     parser.add_argument('--no_lower', dest='lower', action='store_false')
+    parser.add_argument('--oov_handling', default='drop', choices=['drop', 'zero'])
     args = parser.parse_args()
 
-    print(eval_ws(args.modelPath, args.dataPath, args.lower))
+    print(eval_ws(args.modelPath, args.dataPath, args.lower, args.oov_handling))
