@@ -21,7 +21,7 @@ def exp(lang):
     codecs_path = get_polyglot_codecs_path(lang)
     ud_data_path, ud_vocab_path = get_universal_dependencies_path(lang)
 
-    result_path = Path(".") / "results" / "compact_reconstruction" / "polyglot_KVQ_F" / lang
+    result_path = Path(".") / "results" / "sasaki" / "polyglot_KVQ_F" / lang
     train(emb_path, result_path, freq_path, codecs_path, epoch=epoch, H=40_000, F=500_000)
 
      
@@ -32,7 +32,8 @@ def exp(lang):
     ud_vocab_embedding_path = result_path / f"inference_embedding_epoch{epoch}" / "embedding.txt"
     score = evaluate_pos(ud_data_path, ud_vocab_embedding_path)
 
-    print(f"score for {lang} = {score}")
+    with open(result_path / "score.txt", "w") as f:
+        print(f"score for {lang} = {score}", file=f)
 
 if __name__ == "__main__":
     with mp.Pool() as pool:
