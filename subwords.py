@@ -69,7 +69,7 @@ def add_args(parser):
     parser.add_argument('--word_freq', required=True,
         help='word frequencies (.jsonl). '
         'Each line is a pair of word and its count.')
-    parser.add_argument('--output', default='subword.json',
+    parser.add_argument('--output', default='subword.jsonl',
         help='output file (.jsonl). '
         'Each line is a pair of word and count (build_vocab) '
         'or a pair of word and score (build_prob).')
