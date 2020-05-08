@@ -1,8 +1,6 @@
 #!/usr/bin/python3
 import argparse
 from collections import ChainMap
-import json
-import logging
 import os
 import subprocess as sp
 
@@ -67,10 +65,6 @@ python pbos_train.py --target_vectors datasets/google_news/embedding.txt --model
 
 
 if not os.path.exists(args.model_path): # model does not exist, need to train a model.
-    if args.model_type.lower() == 'bos':
-        args.subword_min_len = 3
-        args.subword_max_len = 6
-
     if args.target_vectors.lower() == "google_news":
         paths = prepare_google_paths()
     elif args.target_vectors.lower() == "polyglot":
