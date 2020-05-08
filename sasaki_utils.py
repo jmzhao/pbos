@@ -1,6 +1,9 @@
 import os
 import subprocess as sp
 from utils import dotdict
+from pathlib import Path
+import json
+
 
 
 def train(
@@ -113,3 +116,13 @@ def prepare_codecs_path(ref_vec_path, result_path, n_min=3, n_max=30):
             sp.run(f"sort -k 2,2 -n -r {unsorted_codecs_path}".split(), stdout=fout)
 
     return sorted_codecs_path
+
+
+def get_info_from_result_path(result_path):
+    result_path = get_latest_in_dir(result_path)
+    settings_path = result_path / "settings.json"
+    data = json.load(open(settings_path, "r"))
+    epoch = data['epoch']
+    data["model_path"] = result_path / f"model_epoch_{epoch}"
+    data["result_path"] = result_path
+    return data
