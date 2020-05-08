@@ -1,7 +1,6 @@
 import os
 import subprocess as sp
 from utils import dotdict
-from pathlib import Path
 import json
 
 
@@ -12,11 +11,13 @@ def train(
         freq_path=None,
         codecs_path=None,
         epoch=20,
-        embed_dim=64,
         H=100000,
         F=1000000,
         use_hash=True,
 ):
+    with open(emb_path) as f:
+        _,  embed_dim = f.readline().strip().split()
+
     cmd = f"""
         python compact_reconstruction/src/train.py 
             --gpu 0 

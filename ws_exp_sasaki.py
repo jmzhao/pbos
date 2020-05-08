@@ -10,7 +10,7 @@ from ws_eval import eval_ws
 epoch = 300
 
 
-def exp(ref_vec_path, ref_vec_name, embed_dim):
+def exp(ref_vec_path, ref_vec_name):
     result_path = Path(".") / "results" / f"ws_{ref_vec_name}_sasaki"
     codecs_path = prepare_codecs_path(ref_vec_path, result_path)
     train(
@@ -19,7 +19,6 @@ def exp(ref_vec_path, ref_vec_name, embed_dim):
         codecs_path=codecs_path,
         H=40_000,
         F=500_000,
-        embed_dim=embed_dim,
         epoch=epoch,
     )
 
@@ -39,11 +38,13 @@ def exp(ref_vec_path, ref_vec_name, embed_dim):
 
 
 with mp.Pool() as pool:
-    for ref_vec_name, ref_vec_path, embed_dim in [
-        ("polyglot", prepare_polyglot_emb_paths("en").w2v_path, 64),
-        ("google_news", prepare_google_paths().w2v_path, 300),
-    ]:
-        pool.apply_async(exp, (ref_vec_path, ref_vec_name, embed_dim,))
+    ref_vec = {
+        "polyglot": prepare_polyglot_emb_paths("en").w2v_path,
+        "google": prepare_google_paths().w2v_path,
+    }
 
-    pool.close()
-    pool.join()
+    results = [pool.apply_async(exp, (ref_vec_path, ref_vec_name,))
+               for ref_vec_name, ref_vec_path in ref_vec.items()]
+
+    for r in results:
+        r.get()
