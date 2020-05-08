@@ -19,9 +19,9 @@ def exp(model_type, target_vectors):
 
 
 with mp.Pool() as pool:
-    results = [pool.apply_async(exp, (model_type, target_vectors))
-               for model_type in ['bos', 'pbos']
-               for target_vectors in ["google_news", "polyglot"]]
+    for model_type in ['bos', 'pbos']:
+        for target_vectors in ["google_news", "polyglot"]:
+            pool.apply_async(exp, (model_type, target_vectors))
 
-    for r in results:
-        r.get()
+    pool.close()
+    pool.join()
