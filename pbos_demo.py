@@ -112,6 +112,6 @@ sp.call(f"""
 for bname in BENCHS:
     bench_paths = prepare_bench_paths(bname)
     for lower in (True, False):
-        result = eval_ws(bpred_path, bench_paths.txt_path, lower=lower)
+        result = eval_ws(bpred_path, bench_paths.txt_path, lower=lower, oov_handling='zero')
         with open(f"{results_dir}/ws_result.txt", "a+") as fout:
             print(result, file=fout)
