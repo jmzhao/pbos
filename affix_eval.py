@@ -35,11 +35,11 @@ Instance = namedtuple("Instance", "word affix")
 
 
 ## Load affix prediction data
-get_affix_path = getattr(
+prepare_affix_paths = getattr(
     importlib.import_module(f"datasets.{args.dataset}"),
     f"get_{args.dataset}_path",
 )
-affix_raw_path = get_affix_path().raw_path
+affix_raw_path = prepare_affix_paths().raw_path
 dataset = {"test": [], "train": []}
 with open(affix_raw_path) as fin:
     for line in islice(fin, 1, None): ## skip the title row

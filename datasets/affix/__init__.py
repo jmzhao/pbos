@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 
-def get_affix_path(
+def prepare_affix_paths(
     *,
     dir_path=dir_path,
 ):
@@ -54,4 +54,4 @@ def get_affix_path(
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
-    get_affix_path()
+    prepare_affix_paths()
