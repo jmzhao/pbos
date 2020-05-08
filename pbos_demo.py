@@ -64,47 +64,30 @@ python pbos_train.py --target_vectors datasets/google_news/embedding.txt --model
 """
 
 
-if not os.path.exists(args.model_path): # model does not exist, need to train a model.
+if not os.path.exists(args.model_path):  # model does not exist, need to train a model.
     if args.target_vectors.lower() == "google_news":
-        paths = prepare_google_paths()
+        target_vector_paths = prepare_google_paths()
     elif args.target_vectors.lower() == "polyglot":
-        paths = prepare_polyglot_emb_paths("en")
+        target_vector_paths = prepare_polyglot_emb_paths("en")
     else:
         raise NotImplementedError
 
-    def build_subword_vocab(word_freq, txt_emb_path):
-        subword_vocab_path = os.path.join(results_dir, "subword_vocab.jsonl")
-        if not os.path.exists(subword_vocab_path):
-            subword_vocab_args = dotdict(ChainMap(
-                dict(
-                    command="build_vocab",
-                    word_freq=word_freq,
-                    output=subword_vocab_path,
-                ),
-                args,
-            ))
-            subwords.build_subword_vocab_cli(subword_vocab_args)
-        args.subword_vocab = subword_vocab_path
-        args.target_vectors = txt_emb_path
-
-    build_subword_vocab(paths.word_freq_path, paths.txt_emb_path)
+    args.target_vectors = target_vector_paths.txt_emb_path
+    args.subword_vocab = subwords.build_subword_vocab_cli(dotdict(ChainMap(
+        dict(
+            command='build_vocab',
+            word_freq=target_vector_paths.word_freq_path
+        ), args,
+    )))
 
     if args.model_type.lower() == 'pbos':
-        unigram_freq_paths = prepare_unigram_freq_paths()
-
-        subword_prob_path = os.path.join(unigram_freq_paths.dir_path, "subword_prob.jsonl")
-        if not os.path.exists(subword_prob_path):
-            subword_prob_args = dotdict(ChainMap(
-                dict(
-                    command = "build_prob",
-                    word_freq = unigram_freq_paths.word_freq_path,
-                    output = subword_prob_path,
-                    subword_prob_take_root = False,
-                ),
-                args,
-            ))
-            subwords.build_subword_prob_cli(subword_prob_args)
-        args.subword_prob = subword_prob_path
+        unigram_freq_path = prepare_unigram_freq_paths().word_freq_path
+        args.subword_prob = subwords.build_subword_prob_cli(dotdict(ChainMap(
+            dict(
+                command='build_prob',
+                word_freq=unigram_freq_path
+            ), args,
+        )))
     elif args.model_type.lower() == 'bos':
         args.subword_prob = None
     else:
