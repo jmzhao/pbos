@@ -99,7 +99,7 @@ test_words = [
     "lowest",
     "boring",
     "technical",
-    "electronics",
+    "electronic",
 ]
 
 get_subword_prob=partial(
