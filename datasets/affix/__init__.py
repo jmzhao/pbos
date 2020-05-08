@@ -41,6 +41,8 @@ def get_affix_path(
                 ## row fmt: affix	stem	stemPOS	derived	derivedPOS	type	...
                 affix, stem, _, derived, _, split = line.split()[:6]
                 print(derived, file=fout)
+                if derived.lower() != derived:
+                    print(derived.lower(), file=fout)
 
     return dotdict(
         dir_path = dir_path,
@@ -51,5 +53,5 @@ def get_affix_path(
 
 
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.info)
+    logging.basicConfig(level=logging.INFO)
     get_affix_path()

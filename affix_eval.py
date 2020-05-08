@@ -21,6 +21,8 @@ parser.add_argument('--dataset', default="affix",
     help="path to affix prediction dataset")
 parser.add_argument('--embeddings',
     help="path to word embeddings")
+parser.add_argument('--lower', action='store_true', default=True)
+parser.add_argument('--no_lower', dest='lower', action='store_false')
 parser.add_argument('--random_seed', type=int, default=42,
     help="random seed for training the classifier")
 add_logging_args(parser)
@@ -43,6 +45,8 @@ with open(affix_raw_path) as fin:
     for line in islice(fin, 1, None): ## skip the title row
         ## row fmt: affix	stem	stemPOS	derived	derivedPOS	type	...
         affix, stem, _, derived, _, split = line.split()[:6]
+        if args.lower:
+            derived = derived.lower()
         dataset[split].append(Instance(word = derived, affix = affix))
 all_affixes = set(ins.affix for ins in dataset["train"])
 affixes_a2i = {a : i for i, a in enumerate(sorted(all_affixes))}
