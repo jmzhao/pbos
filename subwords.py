@@ -80,6 +80,7 @@ def add_args(parser):
     add_subword_prob_args(parser)
     return parser
 
+
 def add_word_args(parser):
     group = parser.add_argument_group('word arguments')
     group.add_argument('--word_boundary', '-wb', action='store_true',
@@ -87,6 +88,7 @@ def add_word_args(parser):
     group.add_argument('--no_word_boundary', '-Nwb',
         dest='word_boundary', action='store_false')
     return group
+
 
 def add_subword_args(parser):
     add_word_args(parser)

@@ -85,7 +85,7 @@ def main(args):
             "Things will get overwritten for directory {}".format(save_dir))
 
     with open(os.path.join(save_dir, 'args.json'), 'w') as fout :
-        json.dump(vars(args), fout)
+        json.dump(args if isinstance(args, dict) else vars(args), fout)
 
     logger.info(f'loading target vectors from `{args.target_vectors}`...')
     target_words, target_embs = \
