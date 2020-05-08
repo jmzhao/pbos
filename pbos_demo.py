@@ -65,12 +65,20 @@ RDIR=results/trials/pbos/unigram_freq/take_root; mkdir -p ${RDIR};
 python pbos_train.py --target_vectors datasets/google_news/embedding.txt --model_path ${RDIR}/model.pbos --subword_vocab datasets/google_news/subword_vocab.jsonl --subword_prob datasets/unigram_freq/subword_prob.jsonl --subword_prob_take_root 2> >(tee -a ${RDIR}/train.log);
 """
 
-if not os.path.exists(args.model_path):
+
+if not os.path.exists(args.model_path): # model does not exist, need to train a model.
     if args.model_type.lower() == 'bos':
         args.subword_min_len = 3
-        args.subword_max_len = 30
+        args.subword_max_len = 6
 
-    def build_subword(word_freq, txt_emb_path):
+    if args.target_vectors.lower() == "google_news":
+        paths = prepare_google_paths()
+    elif args.target_vectors.lower() == "polyglot":
+        paths = prepare_polyglot_emb_paths("en")
+    else:
+        raise NotImplementedError
+
+    def build_subword_vocab(word_freq, txt_emb_path):
         subword_vocab_path = os.path.join(results_dir, "subword_vocab.jsonl")
         if not os.path.exists(subword_vocab_path):
             subword_vocab_args = dotdict(ChainMap(
@@ -85,15 +93,7 @@ if not os.path.exists(args.model_path):
         args.subword_vocab = subword_vocab_path
         args.target_vectors = txt_emb_path
 
-    # model does not exist, need to train a model.
-    if args.target_vectors.lower() == "google_news": # default, use google vectors
-        paths = prepare_google_paths()
-        build_subword(paths.word_freq_path, paths.txt_emb_path)
-    elif args.target_vectors.lower() == "polyglot":
-        paths = prepare_polyglot_emb_paths("en")
-        build_subword(paths.word_freq_path, paths.txt_emb_path)
-    else:
-        raise NotImplementedError
+    build_subword_vocab(paths.word_freq_path, paths.txt_emb_path)
 
     if args.model_type.lower() == 'pbos':
         unigram_freq_paths = prepare_unigram_freq_paths()

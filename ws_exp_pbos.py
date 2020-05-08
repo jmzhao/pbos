@@ -13,9 +13,12 @@ def exp(model_type, target_vectors):
             --model_type {model_type} \
             --target_vectors {target_vectors} \
             --epochs 50 \
-        ".split()
+        "
+    if model_type == 'bos':
+        cmd += "--subword_min_len 3 " \
+               "--subword_max_len 6"
     with sp.Popen(['/usr/bin/tee', '-a', log_path], stdin=sp.PIPE) as tee:
-        sp.call(cmd, stderr=tee.stdin)
+        sp.call(cmd.split(), stderr=tee.stdin)
 
 
 with mp.Pool() as pool:
