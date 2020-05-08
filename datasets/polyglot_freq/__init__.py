@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 
-def get_polyglot_frequency_path(
+def prepare_polyglot_freq_paths(
     language_code,
     *,
     dir_path=dir_path,
@@ -62,4 +62,4 @@ languages = [
 
 if __name__ == '__main__':
     for language_code in languages:
-        get_polyglot_frequency_path(language_code)
+        prepare_polyglot_freq_paths(language_code)

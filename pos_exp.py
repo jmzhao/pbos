@@ -5,7 +5,7 @@ import subprocess as sp
 
 from datasets.polyglot_emb import prepare_polyglot_emb_paths
 from datasets.polyglot_emb import languages as all_language_codes
-from datasets.polyglot_freq import get_polyglot_frequency_path
+from datasets.polyglot_freq import prepare_polyglot_freq_paths
 from datasets.ud import prepare_ud_paths
 from utils.args import add_logging_args, set_logging_config
 from load import load_embedding
@@ -37,7 +37,7 @@ def evaluate_pbos(language_code, model_type):
 
     # Input files
     polyglot_embeddings_path = prepare_polyglot_emb_paths(language_code)
-    polyglot_frequency_path = get_polyglot_frequency_path(language_code)
+    polyglot_frequency_path = prepare_polyglot_freq_paths(language_code)
 
     # Output/result files
     result_path = os.path.join("results", "polyglot", language_code, model_type)
@@ -150,7 +150,7 @@ def main():
             # prepare raw data without multiprocessing,
             # otherwise trouble comes with race conditions of file write
             prepare_polyglot_emb_paths(language_code)
-            get_polyglot_frequency_path(language_code)
+            prepare_polyglot_freq_paths(language_code)
             prepare_ud_paths(language_code)
             apply(evaluate_pbos, (language_code, 'pbos',))
             apply(evaluate_pbos, (language_code, 'bos',))

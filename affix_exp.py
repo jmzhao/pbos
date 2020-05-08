@@ -4,9 +4,9 @@ import os
 
 from pathlib import Path
 
-from datasets.affix import get_affix_path
+from datasets.affix import prepare_affix_paths
 
-queries_path = get_affix_path().queries_path
+queries_path = prepare_affix_paths().queries_path
 
 
 def pred(model_type, result_path, ref_vec_name):
