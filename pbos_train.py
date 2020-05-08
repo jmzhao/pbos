@@ -18,7 +18,7 @@ from subwords import (
     subword_prob_post_process,
 )
 from utils import file_tqdm
-from utils.args import add_logging_args, logging_config
+from utils.args import add_logging_args, set_logging_config
 
 
 logger = logging.getLogger(__name__)
@@ -72,7 +72,7 @@ def add_model_args(parser):
 
 
 def main(args):
-    logging_config(args)
+    set_logging_config(args)
     logger.info(json.dumps(args if isinstance(args, dict) else vars(args), indent=2))
 
     save_path = args.model_path.format(

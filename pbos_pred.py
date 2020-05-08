@@ -6,7 +6,7 @@ from tqdm import tqdm
 
 from pbos import PBoS
 from subwords import add_word_args, bound_word
-from utils.args import add_logging_args, logging_config
+from utils.args import add_logging_args, set_logging_config
 
 
 logger = logging.getLogger(__name__)
@@ -24,7 +24,7 @@ add_logging_args(parser)
 add_word_args(parser)
 args = parser.parse_args()
 
-logging_config(args)
+set_logging_config(args)
 
 if args.pre_trained:
     from load import load_embedding

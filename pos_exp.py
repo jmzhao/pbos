@@ -7,7 +7,7 @@ from datasets.polyglot_emb import prepare_polyglot_emb_paths
 from datasets.polyglot_emb import languages as all_language_codes
 from datasets.polyglot_freq import get_polyglot_frequency_path
 from datasets.ud import prepare_ud_paths
-from utils.args import add_logging_args, logging_config
+from utils.args import add_logging_args, set_logging_config
 from load import load_embedding
 
 logger = logging.getLogger(__name__)
@@ -141,7 +141,7 @@ def main():
     add_logging_args(parser)
     args = parser.parse_args()
 
-    logging_config(args)
+    set_logging_config(args)
 
     language_codes = all_language_codes if "ALL" in args.languages else args.languages
     logger.debug(f"language_codes: {language_codes}")

@@ -15,7 +15,7 @@ import pbos_train
 import subwords
 from datasets.ws_bench import prepare_bench_paths, BENCHS, prepare_combined_query_path
 from utils import dotdict
-from utils.args import add_logging_args, logging_config
+from utils.args import add_logging_args, set_logging_config
 from ws_eval import eval_ws
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -47,7 +47,7 @@ for dest, value in demo_config.items():
 args = dotdict(vars(parser.parse_args()))
 
 
-logging_config(args)
+set_logging_config(args)
 logging.info(json.dumps(args, indent=2))
 
 results_dir, _ = os.path.split(args.model_path)

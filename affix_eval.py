@@ -12,7 +12,7 @@ import sklearn.metrics
 from tqdm import tqdm
 
 from load import load_embedding
-from utils.args import add_logging_args, logging_config
+from utils.args import add_logging_args, set_logging_config
 
 parser = argparse.ArgumentParser("Evaluate embedding on affix prediction.",
     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -26,7 +26,7 @@ parser.add_argument('--random_seed', type=int, default=42,
 add_logging_args(parser)
 args = parser.parse_args()
 
-logging_config(args)
+set_logging_config(args)
 
 
 Instance = namedtuple("Instance", "word affix")

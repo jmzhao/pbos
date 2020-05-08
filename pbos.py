@@ -5,7 +5,7 @@ import logging
 import numpy as np
 
 from utils import normalize_prob
-from utils.args import add_logging_args, logging_config
+from utils.args import add_logging_args, set_logging_config
 
 
 logger = logging.getLogger(__name__)
@@ -174,7 +174,7 @@ if __name__ == '__main__':
     from nshortest import nshortest
     from subwords import (
         add_subword_prob_args,
-        add_word_args, 
+        add_word_args,
         build_subword_counter,
         build_subword_prob,
     )
@@ -197,7 +197,7 @@ if __name__ == '__main__':
     add_logging_args(parser)
     args = parser.parse_args()
 
-    logging_config(args)
+    set_logging_config(args)
     logging.debug(json.dumps(vars(args)))
 
     logger.info(f"building subword vocab from `{args.word_freq}`...")

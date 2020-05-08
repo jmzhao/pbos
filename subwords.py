@@ -6,7 +6,7 @@ import logging
 from tqdm import tqdm
 
 from utils import file_tqdm, get_substrings, normalize_prob
-from utils.args import add_logging_args, logging_config
+from utils.args import add_logging_args, set_logging_config
 
 
 logger = logging.getLogger(__name__)
@@ -166,7 +166,7 @@ def build_subword_prob_cli(args):
 
 
 def main_cli(args):
-    logging_config(args)
+    set_logging_config(args)
     logger.info(json.dumps(args if isinstance(args, dict) else vars(args), indent=2))
     if args.command == 'build_vocab':
         build_subword_vocab_cli(args)

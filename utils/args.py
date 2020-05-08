@@ -6,7 +6,7 @@ def add_logging_args(parser):
         help='log level used by logging module')
     return group
 
-def logging_config(args):
+def set_logging_config(args):
     """Set log level using args.log_level"""
     numeric_level = getattr(logging, args.log_level.upper(), None)
     if not isinstance(numeric_level, int):
