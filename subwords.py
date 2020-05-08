@@ -6,8 +6,7 @@ import logging
 from tqdm import tqdm
 
 from utils import file_tqdm, get_substrings, normalize_prob
-from utils.args import add_logging_args, set_logging_config
-
+from utils.args import add_logging_args, set_logging_config, dump_args
 
 logger = logging.getLogger(__name__)
 
@@ -121,6 +120,7 @@ def add_subword_prob_args(parser):
 
 
 def build_subword_vocab_cli(args):
+    dump_args(args, logger)
     logger.info("loading...")
     with open(args.word_freq) as fin:
         word_count_iter = (json.loads(line) for line in file_tqdm(fin))
@@ -141,6 +141,7 @@ def build_subword_vocab_cli(args):
 
 
 def build_subword_prob_cli(args):
+    dump_args(args, logger)
     logger.info("loading...")
     with open(args.word_freq) as fin:
         word_count_iter = (json.loads(line) for line in file_tqdm(fin))
@@ -167,7 +168,6 @@ def build_subword_prob_cli(args):
 
 def main_cli(args):
     set_logging_config(args)
-    logger.info(json.dumps(args if isinstance(args, dict) else vars(args), indent=2))
     if args.command == 'build_vocab':
         build_subword_vocab_cli(args)
     elif args.command == 'build_prob':

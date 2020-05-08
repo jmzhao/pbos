@@ -18,8 +18,7 @@ from subwords import (
     subword_prob_post_process,
 )
 from utils import file_tqdm
-from utils.args import add_logging_args, set_logging_config
-
+from utils.args import add_logging_args, set_logging_config, dump_args
 
 logger = logging.getLogger(__name__)
 
@@ -73,7 +72,6 @@ def add_model_args(parser):
 
 def main(args):
     set_logging_config(args)
-    logger.info(json.dumps(args if isinstance(args, dict) else vars(args), indent=2))
 
     save_path = args.model_path.format(
         timestamp=datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S'))
@@ -84,8 +82,7 @@ def main(args):
         logger.warning(
             "Things will get overwritten for directory {}".format(save_dir))
 
-    with open(os.path.join(save_dir, 'args.json'), 'w') as fout :
-        json.dump(args if isinstance(args, dict) else vars(args), fout)
+    dump_args(args, logger, os.path.join(save_dir, 'args.json'))
 
     logger.info(f'loading target vectors from `{args.target_vectors}`...')
     target_words, target_embs = \

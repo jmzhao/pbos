@@ -5,8 +5,7 @@ import logging
 import numpy as np
 
 from utils import normalize_prob
-from utils.args import add_logging_args, set_logging_config
-
+from utils.args import add_logging_args, set_logging_config, dump_args
 
 logger = logging.getLogger(__name__)
 
@@ -198,7 +197,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     set_logging_config(args)
-    logging.debug(json.dumps(vars(args)))
+    dump_args(args)
 
     logger.info(f"building subword vocab from `{args.word_freq}`...")
 
