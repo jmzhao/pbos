@@ -23,6 +23,7 @@ def build_subword_counter(
     min_len=1,
     max_len=None,
     word_boundary=False,
+    uniq_factor=None,
 ):
     subword_counter = Counter()
     for word, count in iter(word_count_iter):
@@ -31,12 +32,17 @@ def build_subword_counter(
         for subword in get_substrings(word, min_len=min_len, max_len=max_len):
             subword_counter[subword] += count
 
+    if min_count:
+        subword_counter = Counter({k : v for k, v in subword_counter.items() if v >= min_count})
+    if uniq_factor is not None:
+        for sub in tqdm(list(subword_counter)):
+            for subsub in get_substrings(sub, min_len=min_len, max_len=max_len):
+                if subsub != sub and subsub in subword_counter and subword_counter[subsub] * uniq_factor <= subword_counter[sub]:
+                    del subword_counter[subsub]
     if max_size:
         subword_count_pairs = subword_counter.most_common(max_size)
     else:
         subword_count_pairs = subword_counter.items()
-    if min_count:
-        subword_counter = ((k, v) for k, v in subword_count_pairs if v >= min_count)
     return Counter(dict(subword_counter))
 
 
@@ -98,6 +104,8 @@ def add_subword_args(parser):
         help="subword min length for it to be included in vocab")
     group.add_argument('--subword_max_len', type=int,
         help="subword max length for it to be included in vocab")
+    group.add_argument('--subword_uniq_factor', '-suf', type=float,
+        help="subword uniqueness factor")
     return group
 
 
@@ -162,6 +170,7 @@ def build_subword_vocab_cli(args):
             min_len=args.subword_min_len,
             max_len=args.subword_max_len,
             word_boundary=args.word_boundary,
+            uniq_factor=args.subword_uniq_factor,
         )
     logger.info("processing...")
     subword_vocab = subword_counter
@@ -190,6 +199,7 @@ def build_subword_prob_cli(args):
             min_len=args.subword_min_len,
             max_len=args.subword_max_len,
             word_boundary=args.word_boundary,
+            uniq_factor=args.subword_uniq_factor,
         )
     logger.info("processing...")
     if args.subword_prob_take_root:

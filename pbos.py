@@ -10,7 +10,7 @@ from utils.args import add_logging_args, set_logging_config, dump_args
 logger = logging.getLogger(__name__)
 
 def get_subword_prob(sub, subword_prob, eps=None, take_root=False):
-    prob = subword_prob.get(sub, eps ** len(sub))
+    prob = subword_prob.get(sub, eps if len(sub) == 1 else 0)
     if take_root:
         prob = prob ** (1 / len(sub))
     return prob

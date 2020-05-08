@@ -54,6 +54,7 @@ with open(word_freq_path) as fin:
         min_len=args.subword_min_len,
         max_len=args.subword_max_len,
         word_boundary=args.word_boundary,
+        uniq_factor=args.subword_uniq_factor,
     )
 subword_prob = build_subword_prob(
     subword_counter,
@@ -82,6 +83,7 @@ else:
             min_len=args.subword_min_len,
             max_len=args.subword_max_len,
             word_boundary=args.word_boundary,
+            uniq_factor=args.subword_uniq_factor,
         )
     subword_vocab = set(subword_counter)
 subword_vocab -= set('<>')
@@ -120,7 +122,7 @@ def test_word(w):
     adjmat = [[None for __ in range(len(w) + 1)] for _ in range(len(w) + 1)]
     for i in range(len(w)):
         for j in range(i + 1, len(w) + 1):
-            adjmat[i][j] = - math.log(get_subword_prob(w[i:j]))
+            adjmat[i][j] = - math.log(max(1e-100, get_subword_prob(w[i:j])))
     segs = nshortest(adjmat, args.n_largest)
     for score, seg in segs:
         print("{:.5e} : {}".format(math.exp(-score), '/'.join(w[i:j] for i, j in zip(seg, seg[1:]))))
