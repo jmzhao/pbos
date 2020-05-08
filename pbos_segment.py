@@ -63,14 +63,14 @@ logger.info(f"subword prob size: {len(subword_prob)}")
 
 logger.info(f"building subword vocab from `{args.vocab_word_freq}`...")
 if args.vocab_word_freq is None:
-    subword_vocab = set(subword_prob) - set('<>')
+    subword_vocab = set(subword_prob)
 else:
     if args.vocab_word_freq.lower().startswith("google"):
         word_freq_path = import_module("datasets.google")\
             .prepare_google_paths().word_freq_path
     elif args.vocab_word_freq.lower().startswith("polyglot"):
-        word_freq_path = import_module("datasets.polyglot_freq")\
-            .prepare_polyglot_freq_paths('en').word_freq_path
+        word_freq_path = import_module("datasets.polyglot_emb")\
+            .prepare_polyglot_emb_paths('en').word_freq_path
     else:
         raise ValueError(f"args.vocab_word_freq=`{args.vocab_word_freq}` not supported.")
     with open(word_freq_path) as fin:
@@ -83,7 +83,8 @@ else:
             max_len=args.subword_max_len,
             word_boundary=args.word_boundary,
         )
-    subword_vocab = subword_counter
+    subword_vocab = set(subword_counter)
+subword_vocab -= set('<>')
 logger.info(f"subword vocab size: {len(subword_vocab)}")
 
 
