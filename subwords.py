@@ -12,7 +12,6 @@ from utils.args import add_logging_args, logging_config
 logger = logging.getLogger(__name__)
 
 
-
 def bound_word(word):
     return '<' + word + '>'
 
@@ -166,12 +165,13 @@ def build_subword_prob_cli(args):
 
 def main_cli(args):
     logging_config(args)
+    logger.info(json.dumps(args if isinstance(args, dict) else vars(args), indent=2))
     if args.command == 'build_vocab':
         build_subword_vocab_cli(args)
     elif args.command == 'build_prob':
         build_subword_prob_cli(args)
     else:
-        raise ValueError(f"Unkown comman `{args.command}`")
+        raise ValueError(f"Unknown command `{args.command}`")
 
 
 if __name__ == '__main__':
