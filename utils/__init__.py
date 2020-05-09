@@ -20,6 +20,8 @@ def normalize_prob(subword_count: Dict[str, int]) -> Dict[str, float]:
     :return: normalized probability {word: probability}, the length of word is also normalized
     """
     total = sum(subword_count.values())
+    if total == 0:
+        return {}
     return {k: (v / total) for k, v in subword_count.items()}
 
 
