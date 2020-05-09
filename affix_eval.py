@@ -37,7 +37,7 @@ Instance = namedtuple("Instance", "word affix")
 ## Load affix prediction data
 prepare_affix_paths = getattr(
     importlib.import_module(f"datasets.{args.dataset}"),
-    f"get_{args.dataset}_path",
+    f"prepare_{args.dataset}_paths",
 )
 affix_raw_path = prepare_affix_paths().raw_path
 dataset = {"test": [], "train": []}
