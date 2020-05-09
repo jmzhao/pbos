@@ -76,7 +76,8 @@ def add_args(parser):
     parser.add_argument('--word_freq', required=True,
         help='word frequencies (.jsonl). '
         'Each line is a pair of word and its count.')
-    parser.add_argument('--output', help='output file (.jsonl). '
+    parser.add_argument('--output',  default='subword.jsonl',
+        help='output file (.jsonl). '
         'Each line is a pair of word and count (build_vocab) '
         'or a pair of word and score (build_prob).')
     add_logging_args(parser)
@@ -127,38 +128,11 @@ def add_subword_prob_args(parser):
     return group
 
 
-def use_default_output_if_missing(args):
-    if (args if isinstance(args, dict) else vars(args)).get('output') is not None:
-        return
-
-    result_dir = f"results/{args.command.replace('build', 'subword')}/"
-    os.makedirs(result_dir, exist_ok=True)
-
-    filename = [
-        args.word_freq.split("/")[-2],
-        f"len={args.subword_min_len}-{args.subword_max_len or 'inf'}",
-        f"wb={'T' if args.word_boundary else 'F'}",
-        f"min_cnt={args.subword_min_count or '0'}",
-    ]
-
-    if args.command == "build_vocab":
-        if args.subword_vocab_max_size:
-            filename.append(f"max_size={args.subword_vocab_max_size}")
-    else:
-        filename.append(f"root={'T' if args.subword_prob_take_root else 'F'}")
-        if args.subword_prob_min_prob:
-            filename.append(f"min_prob={args.subword_vocab_max_size}")
-
-    args.output = result_dir + ",".join(filename) + ".jsonl"
-
-
 def build_subword_vocab_cli(args):
-    use_default_output_if_missing(args)
     dump_args(args, logger)
 
     if os.path.exists(args.output):
-        logger.warning(f"{args.output} already exists, skipping")
-        return args.output
+        logger.warning(f"{args.output} already exists!")
 
     logger.info("loading...")
     with open(args.word_freq) as fin:
@@ -179,16 +153,12 @@ def build_subword_vocab_cli(args):
         for (subword, count) in tqdm(subword_vocab.most_common()):
             print(json.dumps((subword, count)), file=fout)
 
-    return args.output
-
 
 def build_subword_prob_cli(args):
-    use_default_output_if_missing(args)
     dump_args(args, logger)
 
     if os.path.exists(args.output):
-        logger.warning(f"{args.output} already exists, skipping")
-        return args.output
+        logger.warning(f"{args.output} already exists!")
 
     logger.info("loading...")
     with open(args.word_freq) as fin:
@@ -213,8 +183,6 @@ def build_subword_prob_cli(args):
     with open(args.output, 'w') as fout:
         for (subword, prob) in tqdm(subword_prob.most_common()):
             print(json.dumps((subword, prob)), file=fout)
-
-    return args.output
 
 
 def main_cli(args):
