@@ -49,9 +49,7 @@ def evaluate(args):
     for bname in BENCHS:
         bench_paths = prepare_bench_paths(bname)
         for lower in (True, False):
-            result = eval_ws(pred_path, bench_paths.txt_path, lower=lower, oov_handling='zero')
-            with open(f"{args.results_dir}/ws_result.txt", "a+") as fout:
-                print(result, file=fout)
+            print(eval_ws(pred_path, bench_paths.txt_path, lower=lower, oov_handling='zero'))
 
 
 def get_default_args():
@@ -95,10 +93,10 @@ def exp(model_type, target_vector_name, subword_prob_min_prob, word_boundary):
 
     target_vector_paths = get_target_vector_paths(target_vector_name)
     args.target_vectors = target_vector_paths.txt_emb_path
+    args.model_type = model_type
     args.word_freq = target_vector_paths.word_freq_path  # will get overridden for prob
     args.subword_vocab = f"{args.results_dir}/subword_vocab.jsonl"
     args.subword_prob = f"{args.results_dir}/subword_prob.jsonl" if args.model_type == 'pbos' else None
-    args.model_type = model_type
     args.epochs = 50
     args.model_path = f"{args.results_dir}/model.pkl"
 
