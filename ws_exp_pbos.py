@@ -1,3 +1,4 @@
+import contextlib
 import os
 import subprocess as sp
 import multiprocessing as mp
@@ -100,8 +101,12 @@ def exp(model_type, target_vector_name):
 
     os.makedirs(args.results_dir, exist_ok=True)
 
-    train(args)
-    eval(args)
+    with contextlib.redirect_stdout(open(os.path.join(args.results_dir, 'train.out'), 'w+')), \
+         contextlib.redirect_stderr(open(os.path.join(args.results_dir, 'train.err'), 'w+')):
+        train(args)
+    with contextlib.redirect_stdout(open(os.path.join(args.results_dir, 'eval.out'), 'w+')), \
+         contextlib.redirect_stderr(open(os.path.join(args.results_dir, 'eval.err'), 'w+')):
+        eval(args)
 
 
 with mp.Pool() as pool:
