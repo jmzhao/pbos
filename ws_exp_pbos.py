@@ -74,24 +74,18 @@ def get_default_args():
 
 
 def get_target_vector_paths(target_vector_name):
-    if target_vector_name.lower() == "google_news":
+    if target_vector_name.lower() == "google":
         return prepare_google_paths()
     elif target_vector_name.lower() == "polyglot":
         return prepare_polyglot_emb_paths("en")
     raise NotImplementedError
 
 
-def exp(model_type, target_vector_name, subword_prob_min_prob, word_boundary):
-    args = get_default_args()
-
-    args.results_dir = f"results/ws_{target_vector_name}_{model_type}"
-
-    # additional args
-    args.results_dir += f"_minprob{subword_prob_min_prob}_wb{'T' if word_boundary else 'F'}"
-    args.subword_prob_min_prob = subword_prob_min_prob
-    args.word_boundary = word_boundary
-
+def exp(model_type, target_vector_name):
     target_vector_paths = get_target_vector_paths(target_vector_name)
+
+    args = get_default_args()
+    args.results_dir = f"results/ws_{target_vector_name}_{model_type}"
     args.target_vectors = target_vector_paths.txt_emb_path
     args.model_type = model_type
     args.word_freq = target_vector_paths.word_freq_path  # will get overridden for prob
@@ -99,6 +93,10 @@ def exp(model_type, target_vector_name, subword_prob_min_prob, word_boundary):
     args.subword_prob = f"{args.results_dir}/subword_prob.jsonl" if args.model_type == 'pbos' else None
     args.epochs = 50
     args.model_path = f"{args.results_dir}/model.pkl"
+
+    if model_type == 'bos':
+        args.subword_min_len = 3
+        args.subword_max_len = 6
 
     set_logging_config(args)
     dump_args(args)
@@ -113,17 +111,13 @@ def exp(model_type, target_vector_name, subword_prob_min_prob, word_boundary):
 
 
 with mp.Pool() as pool:
-    model_types = ('pbos',)
-    target_vector_names = ("polyglot",)
-    subword_prob_min_probs = (0, 1e-6)
-    wbs = (True, False)
+    model_types = ('pbos', 'bos')
+    target_vector_names = ("polyglot", "google")
 
     results = [
-        pool.apply_async(exp, (model_type, target_vector_name, subword_prob_min_prob, wb))
+        pool.apply_async(exp, (model_type, target_vector_name))
         for model_type in model_types
         for target_vector_name in target_vector_names
-        for subword_prob_min_prob in subword_prob_min_probs
-        for wb in wbs
     ]
 
     for r in results:
