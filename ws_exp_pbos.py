@@ -35,7 +35,7 @@ def train(args):
     pbos_train.main(args)
 
 
-def eval(args):
+def evaluate(args):
     query_path = prepare_combined_query_path()
     pred_path = f"{args.results_dir}/vectors.txt"
     sp.call(f"""
@@ -90,6 +90,7 @@ def exp(model_type, target_vector_name):
     target_vector_paths = get_target_vector_paths(target_vector_name)
     args.model_type = model_type
     args.results_dir = os.path.join("results", "test")
+    args.epochs = 50
     args.model_path = os.path.join(args.results_dir, "model.pbos")
     args.target_vectors = target_vector_paths.txt_emb_path
     args.word_freq = target_vector_paths.word_freq_path  # will get overridden for prob
@@ -106,7 +107,7 @@ def exp(model_type, target_vector_name):
         train(args)
     with contextlib.redirect_stdout(open(os.path.join(args.results_dir, 'eval.out'), 'w+')), \
          contextlib.redirect_stderr(open(os.path.join(args.results_dir, 'eval.err'), 'w+')):
-        eval(args)
+        evaluate(args)
 
 
 with mp.Pool() as pool:
