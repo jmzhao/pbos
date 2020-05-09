@@ -83,43 +83,49 @@ def get_target_vector_paths(target_vector_name):
     raise NotImplementedError
 
 
-def exp(model_type, target_vector_name):
+def exp(model_type, target_vector_name, subword_prob_min_prob, word_boundary):
     args = get_default_args()
 
-    # setup additional args
+    args.results_dir = f"results/ws_{target_vector_name}_{model_type}"
+
+    # additional args
+    args.results_dir += f"_minprob{subword_prob_min_prob}_wb{'T' if word_boundary else 'F'}"
+    args.subword_prob_min_prob = subword_prob_min_prob
+    args.word_boundary = word_boundary
+
     target_vector_paths = get_target_vector_paths(target_vector_name)
-    args.model_type = model_type
-    args.results_dir = os.path.join("results", "test")
-    args.epochs = 50
-    args.model_path = os.path.join(args.results_dir, "model.pbos")
     args.target_vectors = target_vector_paths.txt_emb_path
     args.word_freq = target_vector_paths.word_freq_path  # will get overridden for prob
-    args.subword_vocab = os.path.join(args.results_dir, 'subword_vocab.jsonl')
-    args.subword_prob = os.path.join(args.results_dir, 'subword_prob.jsonl') if args.model_type == 'pbos' else None
+    args.subword_vocab = f"{args.results_dir}/subword_vocab.jsonl"
+    args.subword_prob = f"{args.results_dir}/subword_prob.jsonl" if args.model_type == 'pbos' else None
+    args.model_type = model_type
+    args.epochs = 50
+    args.model_path = f"{args.results_dir}/model.pkl"
 
     set_logging_config(args)
     dump_args(args)
 
     os.makedirs(args.results_dir, exist_ok=True)
-
-    with contextlib.redirect_stdout(open(os.path.join(args.results_dir, 'train.out'), 'w+')), \
-         contextlib.redirect_stderr(open(os.path.join(args.results_dir, 'train.err'), 'w+')):
+    with contextlib.redirect_stdout(open(f"{args.results_dir}/train.out", 'w+')), \
+         contextlib.redirect_stderr(open(f"{args.results_dir}/train.err", 'w+')):
         train(args)
-    with contextlib.redirect_stdout(open(os.path.join(args.results_dir, 'eval.out'), 'w+')), \
-         contextlib.redirect_stderr(open(os.path.join(args.results_dir, 'eval.err'), 'w+')):
+    with contextlib.redirect_stdout(open(f"{args.results_dir}/train.out", 'w+')), \
+         contextlib.redirect_stderr(open(f"{args.results_dir}/train.err", 'w+')):
         evaluate(args)
 
 
 with mp.Pool() as pool:
     model_types = ('pbos',)
     target_vector_names = ("polyglot",)
-    subword_prob_min_probs = (0,)
-    wbs = (True,)
+    subword_prob_min_probs = (0, 1e-6)
+    wbs = (True, False)
 
     results = [
-        pool.apply_async(exp, (model_type, target_vector_name))
+        pool.apply_async(exp, (model_type, target_vector_name, subword_prob_min_prob, wb))
         for model_type in model_types
         for target_vector_name in target_vector_names
+        for subword_prob_min_prob in subword_prob_min_probs
+        for wb in wbs
     ]
 
     for r in results:
