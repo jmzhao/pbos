@@ -102,7 +102,7 @@ def exp(model_type, target_vector_name):
     os.makedirs(args.results_dir, exist_ok=True)
 
     logging.basicConfig(
-        level=logging.DEBUG,
+        level=logging.INFO,
         stream=open(f"{args.results_dir}/log.log", "w+")
     )
     dump_args(args)
