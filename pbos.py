@@ -160,4 +160,4 @@ class PBoS:
     def step(self, w, d):
         subword_weights = self._calc_subword_weights(w)
         for sub, w in subword_weights.items():
-            self.semb[sub] += w * d
+            self.semb[sub] += d

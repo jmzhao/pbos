@@ -1,4 +1,5 @@
 import contextlib
+import logging
 import os
 import subprocess as sp
 import multiprocessing as mp
@@ -98,15 +99,19 @@ def exp(model_type, target_vector_name):
         args.subword_min_len = 3
         args.subword_max_len = 6
 
-    set_logging_config(args)
+    os.makedirs(args.results_dir, exist_ok=True)
+
+    logging.basicConfig(
+        level=logging.DEBUG,
+        stream=open(f"{args.results_dir}/log.log", "w+")
+    )
     dump_args(args)
 
-    os.makedirs(args.results_dir, exist_ok=True)
     with contextlib.redirect_stdout(open(f"{args.results_dir}/train.out", 'w+')), \
          contextlib.redirect_stderr(open(f"{args.results_dir}/train.err", 'w+')):
         train(args)
-    with contextlib.redirect_stdout(open(f"{args.results_dir}/train.out", 'w+')), \
-         contextlib.redirect_stderr(open(f"{args.results_dir}/train.err", 'w+')):
+    with contextlib.redirect_stdout(open(f"{args.results_dir}/eval.out", 'w+')), \
+         contextlib.redirect_stderr(open(f"{args.results_dir}/eval.err", 'w+')):
         evaluate(args)
 
 
