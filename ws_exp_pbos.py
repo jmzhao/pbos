@@ -1,18 +1,19 @@
+import argparse
 import contextlib
 import logging
+import multiprocessing as mp
 import os
 import subprocess as sp
-import multiprocessing as mp
-import argparse
 from collections import ChainMap
+
+import pbos_train
+import subwords
 from datasets.google import prepare_google_paths
 from datasets.polyglot_emb import prepare_polyglot_emb_paths
 from datasets.unigram_freq import prepare_unigram_freq_paths
-import pbos_train
-import subwords
 from datasets.ws_bench import prepare_bench_paths, BENCHS, prepare_combined_query_path
 from utils import dotdict
-from utils.args import add_logging_args, set_logging_config, dump_args
+from utils.args import add_logging_args, dump_args
 from ws_eval import eval_ws
 
 
@@ -20,6 +21,7 @@ def train(args):
     subwords.build_subword_vocab_cli(dotdict(ChainMap(
         dict(
             command='build_vocab',
+            word_freq=args.subword_vocab_word_freq,
             output=args.subword_vocab
         ), args,
     )))
@@ -28,7 +30,7 @@ def train(args):
         subwords.build_subword_prob_cli(dotdict(ChainMap(
             dict(
                 command='build_prob',
-                word_freq=prepare_unigram_freq_paths().word_freq_path,
+                word_freq=args.subword_prob_word_freq,
                 output=args.subword_prob
             ), args,
         )))
@@ -82,47 +84,50 @@ def get_target_vector_paths(target_vector_name):
     raise NotImplementedError
 
 
-def exp(model_type, target_vector_name):
+def exp(model_type, target_vector_name, lr):
     target_vector_paths = get_target_vector_paths(target_vector_name)
 
     args = get_default_args()
-    args.results_dir = f"results/ws_{target_vector_name}_{model_type}"
-    args.target_vectors = target_vector_paths.txt_emb_path
     args.model_type = model_type
-    args.word_freq = target_vector_paths.word_freq_path  # will get overridden for prob
-    args.subword_vocab = f"{args.results_dir}/subword_vocab.jsonl"
-    args.subword_prob = f"{args.results_dir}/subword_prob.jsonl" if args.model_type == 'pbos' else None
     args.epochs = 50
-    args.model_path = f"{args.results_dir}/model.pkl"
+    args.lr = lr
 
     if model_type == 'bos':
         args.subword_min_len = 3
         args.subword_max_len = 6
 
+    args.results_dir = f"results/ws_{target_vector_name}_{model_type}_lr{lr}"
+    args.target_vectors = target_vector_paths.txt_emb_path
+    args.subword_vocab_word_freq = target_vector_paths.word_freq_path
+    args.subword_prob_word_freq = prepare_unigram_freq_paths().word_freq_path
+    args.subword_vocab = f"{args.results_dir}/subword_vocab.jsonl"
+    args.subword_prob = f"{args.results_dir}/subword_prob.jsonl" if args.model_type == 'pbos' else None
+    args.model_path = f"{args.results_dir}/model.pkl"
+
     os.makedirs(args.results_dir, exist_ok=True)
 
-    logging.basicConfig(
-        level=logging.INFO,
-        stream=open(f"{args.results_dir}/log.log", "w+")
-    )
+    log_file = open(f"{args.results_dir}/info.log", "w+")
+    logging.basicConfig(level=logging.INFO, stream=log_file)
     dump_args(args)
 
-    with contextlib.redirect_stdout(open(f"{args.results_dir}/train.out", 'w+')), \
-         contextlib.redirect_stderr(open(f"{args.results_dir}/train.err", 'w+')):
+    with contextlib.redirect_stdout(log_file), contextlib.redirect_stderr(log_file):
         train(args)
-    with contextlib.redirect_stdout(open(f"{args.results_dir}/eval.out", 'w+')), \
-         contextlib.redirect_stderr(open(f"{args.results_dir}/eval.err", 'w+')):
+
+    eval_file = open(f"{args.results_dir}/eval.log", "w+")
+    with contextlib.redirect_stdout(eval_file), contextlib.redirect_stderr(eval_file):
         evaluate(args)
 
 
 with mp.Pool() as pool:
     model_types = ('pbos', 'bos')
     target_vector_names = ("polyglot", "google")
+    lrs = (0.001, 0.01, 0.1, 1)
 
     results = [
-        pool.apply_async(exp, (model_type, target_vector_name))
+        pool.apply_async(exp, (model_type, target_vector_name, lr))
         for model_type in model_types
         for target_vector_name in target_vector_names
+        for lr in lrs
     ]
 
     for r in results:
