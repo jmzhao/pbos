@@ -19,32 +19,22 @@ from ws_eval import eval_ws
 
 def train(args):
     subwords.build_subword_vocab_cli(dotdict(ChainMap(
-        dict(
-            command='build_vocab',
-            word_freq=args.subword_vocab_word_freq,
-            output=args.subword_vocab
-        ), args,
+        dict(word_freq=args.subword_vocab_word_freq, output=args.subword_vocab), args,
     )))
 
     if args.subword_prob:
         subwords.build_subword_prob_cli(dotdict(ChainMap(
-            dict(
-                command='build_prob',
-                word_freq=args.subword_prob_word_freq,
-                output=args.subword_prob
-            ), args,
+            dict(word_freq=args.subword_prob_word_freq, output=args.subword_prob), args,
         )))
 
     pbos_train.main(args)
 
 
 def evaluate(args):
-    query_path = prepare_combined_query_path()
-    pred_path = f"{args.results_dir}/vectors.txt"
     sp.call(f"""
         python pbos_pred.py \
-          --queries {query_path} \
-          --save {pred_path} \
+          --queries {args.query_path} \
+          --save {args.pred_path} \
           --model {args.model_path} \
           {'--' if args.word_boundary else '--no_'}word_boundary \
     """.split())
@@ -52,7 +42,7 @@ def evaluate(args):
     for bname in BENCHS:
         bench_paths = prepare_bench_paths(bname)
         for lower in (True, False):
-            print(eval_ws(pred_path, bench_paths.txt_path, lower=lower, oov_handling='zero'))
+            print(eval_ws(args.pred_path, bench_paths.txt_path, lower=lower, oov_handling='zero'))
 
 
 def get_default_args():
@@ -79,23 +69,24 @@ def get_default_args():
 def get_target_vector_paths(target_vector_name):
     if target_vector_name.lower() == "google":
         return prepare_google_paths()
-    elif target_vector_name.lower() == "polyglot":
+    if target_vector_name.lower() == "polyglot":
         return prepare_polyglot_emb_paths("en")
     raise NotImplementedError
 
 
 def exp(model_type, target_vector_name, lr):
     target_vector_paths = get_target_vector_paths(target_vector_name)
-
     args = get_default_args()
+
+    # setup parameters
     args.model_type = model_type
     args.epochs = 50
     args.lr = lr
-
     if model_type == 'bos':
         args.subword_min_len = 3
         args.subword_max_len = 6
 
+    # setup paths
     args.results_dir = f"results/ws_{target_vector_name}_{model_type}_lr{lr}"
     args.target_vectors = target_vector_paths.txt_emb_path
     args.subword_vocab_word_freq = target_vector_paths.word_freq_path
@@ -103,9 +94,11 @@ def exp(model_type, target_vector_name, lr):
     args.subword_vocab = f"{args.results_dir}/subword_vocab.jsonl"
     args.subword_prob = f"{args.results_dir}/subword_prob.jsonl" if args.model_type == 'pbos' else None
     args.model_path = f"{args.results_dir}/model.pkl"
-
+    args.pred_path = f"{args.results_dir}/vectors.txt"
+    args.query_path = prepare_combined_query_path()
     os.makedirs(args.results_dir, exist_ok=True)
 
+    # redirect log output
     log_file = open(f"{args.results_dir}/info.log", "w+")
     logging.basicConfig(level=logging.INFO, stream=log_file)
     dump_args(args)
