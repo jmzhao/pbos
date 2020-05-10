@@ -129,8 +129,6 @@ def add_subword_prob_args(parser):
 
 
 def build_subword_vocab_cli(args):
-    dump_args(args, logger)
-
     if os.path.exists(args.output):
         logger.warning(f"{args.output} already exists!")
 
@@ -155,8 +153,6 @@ def build_subword_vocab_cli(args):
 
 
 def build_subword_prob_cli(args):
-    dump_args(args, logger)
-
     if os.path.exists(args.output):
         logger.warning(f"{args.output} already exists!")
 
