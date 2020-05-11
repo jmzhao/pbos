@@ -74,7 +74,7 @@ def get_target_vector_paths(target_vector_name):
     raise NotImplementedError
 
 
-def exp(model_type, target_vector_name, lr):
+def exp(model_type, target_vector_name):
     target_vector_paths = get_target_vector_paths(target_vector_name)
     args = get_default_args()
 
@@ -87,7 +87,7 @@ def exp(model_type, target_vector_name, lr):
         args.subword_max_len = 6
 
     # setup paths
-    args.results_dir = f"results/ws_{target_vector_name}_{model_type}_lr{lr}"
+    args.results_dir = f"results/ws_{target_vector_name}_{model_type}"
     args.target_vectors = target_vector_paths.txt_emb_path
     args.subword_vocab_word_freq = target_vector_paths.word_freq_path
     args.subword_prob_word_freq = prepare_unigram_freq_paths().word_freq_path
@@ -114,13 +114,11 @@ def exp(model_type, target_vector_name, lr):
 with mp.Pool() as pool:
     model_types = ('pbos', 'bos')
     target_vector_names = ("polyglot", "google")
-    lrs = (0.001, 0.01, 0.1, 1)
 
     results = [
-        pool.apply_async(exp, (model_type, target_vector_name, lr))
+        pool.apply_async(exp, (model_type, target_vector_name))
         for model_type in model_types
         for target_vector_name in target_vector_names
-        for lr in lrs
     ]
 
     for r in results:
