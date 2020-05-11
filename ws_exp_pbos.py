@@ -81,7 +81,6 @@ def exp(model_type, target_vector_name):
     # setup parameters
     args.model_type = model_type
     args.epochs = 50
-    args.lr = lr
     if model_type == 'bos':
         args.subword_min_len = 3
         args.subword_max_len = 6

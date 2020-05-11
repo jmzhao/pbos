@@ -65,6 +65,7 @@ def load_vectors(modelPath):
 def eval_ws(modelPath, dataPath, lower, oov_handling="drop"):
     mysim = []
     gold = []
+    # words =  []
     drop = 0.0
     nwords = 0.0
 
@@ -81,6 +82,8 @@ def eval_ws(modelPath, dataPath, lower, oov_handling="drop"):
         if lower:
             word1, word2 = word1.lower(), word2.lower()
         nwords = nwords + 1.0
+
+        # words.append((word1, word2))
 
         if modelPath == "EditSim":
             d = editsim(word1, word2)
@@ -99,7 +102,8 @@ def eval_ws(modelPath, dataPath, lower, oov_handling="drop"):
         mysim.append(d)
         gold.append(golden_score)
     fin.close()
-
+    # for _, g, m, (w1, w2) in sorted(zip(np.abs(stats.zscore(mysim) - stats.zscore(gold)), gold, mysim, words)):
+    #     print(f"{g:.2f} {m:.2f} {w1} {w2}")
     corr = stats.spearmanr(mysim, gold)
     dataset = os.path.basename(dataPath)
     return "{:20s}: {:2.0f}  (OOV: {:2.0f}%, {}, lower={})".format(
