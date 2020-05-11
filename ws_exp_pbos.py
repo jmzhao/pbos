@@ -98,14 +98,14 @@ def exp(model_type, target_vector_name):
     os.makedirs(args.results_dir, exist_ok=True)
 
     # redirect log output
-    log_file = open(f"{args.results_dir}/info.log", "w+")
+    log_file = open(f"{args.results_dir}/log.txt", "w+")
     logging.basicConfig(level=logging.INFO, stream=log_file)
     dump_args(args)
 
     with contextlib.redirect_stdout(log_file), contextlib.redirect_stderr(log_file):
         train(args)
 
-    eval_file = open(f"{args.results_dir}/eval.log", "w+")
+    eval_file = open(f"{args.results_dir}/result.txt", "w+")
     with contextlib.redirect_stdout(eval_file), contextlib.redirect_stderr(eval_file):
         evaluate(args)
 

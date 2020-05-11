@@ -9,10 +9,15 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
+
+import logging
+
 import numpy as np
 from scipy import stats
 import os
 import math
+
+logger = logging.getLogger(__name__)
 
 
 def compat_splitting(line):
@@ -65,7 +70,7 @@ def load_vectors(modelPath):
 def eval_ws(modelPath, dataPath, lower, oov_handling="drop"):
     mysim = []
     gold = []
-    # words =  []
+    words =  []
     drop = 0.0
     nwords = 0.0
 
@@ -83,7 +88,7 @@ def eval_ws(modelPath, dataPath, lower, oov_handling="drop"):
             word1, word2 = word1.lower(), word2.lower()
         nwords = nwords + 1.0
 
-        # words.append((word1, word2))
+        words.append((word1, word2))
 
         if modelPath == "EditSim":
             d = editsim(word1, word2)
@@ -102,10 +107,14 @@ def eval_ws(modelPath, dataPath, lower, oov_handling="drop"):
         mysim.append(d)
         gold.append(golden_score)
     fin.close()
-    # for _, g, m, (w1, w2) in sorted(zip(np.abs(stats.zscore(mysim) - stats.zscore(gold)), gold, mysim, words)):
-    #     print(f"{g:.2f} {m:.2f} {w1} {w2}")
+
     corr = stats.spearmanr(mysim, gold)
     dataset = os.path.basename(dataPath)
+
+    logger.info(f"eval info for: {dataset}")
+    for _, g, m, (w1, w2) in sorted(zip(stats.zscore(mysim) - stats.zscore(gold), gold, mysim, words)):
+        logger.info(f"{g:.2f} {m: .2f} {w1} {w2}")
+
     return "{:20s}: {:2.0f}  (OOV: {:2.0f}%, {}, lower={})".format(
         dataset,
         corr[0] * 100,
