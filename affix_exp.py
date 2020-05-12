@@ -53,7 +53,7 @@ with mp.Pool() as pool:
     results = [
         pool.apply_async(exp, (model_type, ref_vec_name,))
         for model_type in ['sasaki', 'bos', 'pbos']
-        for ref_vec_name in ["google_news", "polyglot"]
+        for ref_vec_name in ["google", "polyglot"]
     ]
 
     for r in results:
