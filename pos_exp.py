@@ -71,7 +71,7 @@ def evaluate_pbos(language_code, model_type):
                     --word_freq {polyglot_frequency_path.word_freq_path} \
                     --output {subword_prob_path} \
                     --word_boundary \
-                    --subword_prob_min_prob 1e-6 \
+                    --subword_prob_min_prob 1e-2 \
             """.split()
             sp.call(cmd)
         else:
