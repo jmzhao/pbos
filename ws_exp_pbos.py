@@ -49,7 +49,7 @@ def evaluate(args):
 
     sp.call(f"""
             python affix_eval.py \
-              --embeddings {args.eval_result_path} \
+              --embeddings {args.pred_path} \
         """.split(), stdout=result_file, stderr=result_file)
 
 
@@ -114,7 +114,7 @@ def exp(model_type, target_vector_name):
     dump_args(args)
 
     with contextlib.redirect_stdout(log_file), contextlib.redirect_stderr(log_file):
-        train(args)
+        # train(args)
         evaluate(args)
 
 
