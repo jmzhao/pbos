@@ -1,4 +1,3 @@
-import argparse
 import contextlib
 import logging
 import multiprocessing as mp
@@ -14,7 +13,7 @@ from datasets.unigram_freq import prepare_unigram_freq_paths
 from datasets.ws_bench import prepare_bench_paths, BENCHS
 from datasets import prepare_combined_query_path
 from utils import dotdict
-from utils.args import add_logging_args, dump_args
+from utils.args import dump_args
 from ws_eval import eval_ws
 
 
@@ -86,10 +85,10 @@ def exp(model_type, target_vector_name):
     args.subword_vocab = f"{args.results_dir}/subword_vocab.jsonl"
 
     # subword prob
+    args.subword_prob_take_root = False
     if model_type == 'bos':
         args.subword_prob = None
     elif model_type == 'pbos':
-        args.subword_prob_take_root = False
         args.subword_prob_min_prob = 0
         args.subword_prob_word_freq = prepare_unigram_freq_paths().word_freq_path
         args.subword_prob = f"{args.results_dir}/subword_prob.jsonl"
