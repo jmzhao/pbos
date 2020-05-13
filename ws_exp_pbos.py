@@ -40,11 +40,17 @@ def evaluate(args):
           {'--' if args.word_boundary else '--no_'}word_boundary \
     """.split())
 
+    result_file = open(args.eval_result_path, "w")
+
     for bname in BENCHS:
         bench_paths = prepare_bench_paths(bname)
         for lower in (True, False):
-            print(eval_ws(args.pred_path, bench_paths.txt_path, lower=lower, oov_handling='zero'))
+            print(eval_ws(args.pred_path, bench_paths.txt_path, lower=lower, oov_handling='zero'), file=result_file)
 
+    sp.call(f"""
+            python affix_eval.py \
+              --embeddings {args.eval_result_path} \
+        """.split(), stdout=result_file, stderr=result_file)
 
 
 def get_default_args():
@@ -99,6 +105,7 @@ def exp(model_type, target_vector_name):
     args.model_path = f"{args.results_dir}/model.pkl"
     args.pred_path = f"{args.results_dir}/vectors.txt"
     args.query_path = prepare_combined_query_path()
+    args.eval_result_path = f"{args.results_dir}/result.txt"
     os.makedirs(args.results_dir, exist_ok=True)
 
     # redirect log output
@@ -108,9 +115,6 @@ def exp(model_type, target_vector_name):
 
     with contextlib.redirect_stdout(log_file), contextlib.redirect_stderr(log_file):
         train(args)
-
-    eval_file = open(f"{args.results_dir}/result.txt", "w+")
-    with contextlib.redirect_stdout(eval_file), contextlib.redirect_stderr(eval_file):
         evaluate(args)
 
 
