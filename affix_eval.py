@@ -51,7 +51,7 @@ with open(affix_raw_path) as fin:
 all_affixes = set(ins.affix for ins in dataset["train"])
 affixes_a2i = {a : i for i, a in enumerate(sorted(all_affixes))}
 from collections import Counter
-print(Counter(ins.affix for ins in dataset["test"]))
+logging.info(Counter(ins.affix for ins in dataset["test"]))
 
 
 ## Load embeddings
