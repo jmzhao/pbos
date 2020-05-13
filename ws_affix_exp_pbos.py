@@ -49,31 +49,7 @@ def evaluate(args):
         for lower in (True, False):
             print(eval_ws(args.pred_path, bench_paths.txt_path, lower=lower, oov_handling='zero'), file=result_file)
 
-    sp.call(f"""
-            python affix_eval.py \
-              --embeddings {args.pred_path} \
-        """.split(), stdout=result_file)
-
-
-def get_default_args():
-    parser = argparse.ArgumentParser()
-    add_logging_args(parser)
-    pbos_train.add_training_args(parser)
-    pbos_train.add_model_args(parser)
-    subwords.add_subword_args(parser)
-    subwords.add_subword_prob_args(parser)
-    subwords.add_subword_vocab_args(parser)
-
-    parser_action_lookup = {
-        action.dest: action
-        for action in parser._actions
-        # the following test is needed, otherwise `--no_<flag>` option will
-        # overwrite `--<flag>` option.
-        if not any(s.startswith('--no_') for s in action.option_strings)
-    }
-    parser_action_lookup["subword_vocab"].required = False
-
-    return dotdict(vars(parser.parse_args()))
+    sp.call(f"python affix_eval.py --embeddings {args.pred_path}".split(), stdout=result_file)
 
 
 def get_target_vector_paths(target_vector_name):
@@ -86,27 +62,49 @@ def get_target_vector_paths(target_vector_name):
 
 def exp(model_type, target_vector_name):
     target_vector_paths = get_target_vector_paths(target_vector_name)
-    args = get_default_args()
+    args = dotdict()
 
-    # setup parameters
+    # misc
+    args.results_dir = f"results/best_ws_affix/{target_vector_name}_{model_type}"
     args.model_type = model_type
-    args.word_boundary = False
-    args.subword_prob_min_prob = 0
-    # args.subword_uniq_factor = 0.8
-    args.epochs = 50
+    args.log_level = "INFO"
 
+    # subword
+    args.word_boundary = False
+    args.subword_min_count = None
+    args.subword_uniq_factor = None  # or shall we ?
     if model_type == 'bos':
         args.subword_min_len = 3
         args.subword_max_len = 6
+    elif model_type == 'pbos':
+        args.subword_min_len = 1
+        args.subword_max_len = None
 
-    # setup paths
-    args.results_dir = f"results/best_ws_affix/{target_vector_name}_{model_type}"
-    args.target_vectors = target_vector_paths.txt_emb_path
+    # subword vocab
+    args.subword_vocab_max_size = None
     args.subword_vocab_word_freq = target_vector_paths.word_freq_path
-    args.subword_prob_word_freq = prepare_unigram_freq_paths().word_freq_path
     args.subword_vocab = f"{args.results_dir}/subword_vocab.jsonl"
-    args.subword_prob = f"{args.results_dir}/subword_prob.jsonl" if args.model_type == 'pbos' else None
+
+    # subword prob
+    if model_type == 'bos':
+        args.subword_prob = None
+    elif model_type == 'pbos':
+        args.subword_prob_take_root = False
+        args.subword_prob_min_prob = 0
+        args.subword_prob_word_freq = prepare_unigram_freq_paths().word_freq_path
+        args.subword_prob = f"{args.results_dir}/subword_prob.jsonl"
+
+    # training
+    args.target_vectors = target_vector_paths.txt_emb_path
     args.model_path = f"{args.results_dir}/model.pkl"
+    args.epochs = 50
+    args.lr = 1.0
+    args.lr_decay = True
+    args.random_seed = 42
+    args.subword_prob_eps = 0.01
+    args.subword_weight_threshold = None
+
+    # prediction & evaluation
     args.pred_path = f"{args.results_dir}/vectors.txt"
     args.query_path = prepare_combined_query_path()
     args.eval_result_path = f"{args.results_dir}/result.txt"
