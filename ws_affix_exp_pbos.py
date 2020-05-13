@@ -92,14 +92,15 @@ def exp(model_type, target_vector_name):
     args.model_type = model_type
     args.word_boundary = False
     args.subword_prob_min_prob = 0
+    # args.subword_uniq_factor = 0.8
     args.epochs = 50
-    args.subword_uniq_factor = 0.8
+
     if model_type == 'bos':
         args.subword_min_len = 3
         args.subword_max_len = 6
 
     # setup paths
-    args.results_dir = f"results/ws_{target_vector_name}_{model_type}"
+    args.results_dir = f"results/best_ws_affix/{target_vector_name}_{model_type}"
     args.target_vectors = target_vector_paths.txt_emb_path
     args.subword_vocab_word_freq = target_vector_paths.word_freq_path
     args.subword_prob_word_freq = prepare_unigram_freq_paths().word_freq_path
