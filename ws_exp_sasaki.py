@@ -3,7 +3,8 @@ import multiprocessing as mp
 
 from datasets.google import prepare_google_paths
 from datasets.polyglot_emb import prepare_polyglot_emb_paths
-from datasets.ws_bench import BENCHS, prepare_bench_paths, prepare_combined_query_path
+from datasets.ws_bench import BENCHS, prepare_bench_paths
+from datasets import prepare_combined_query_path
 from sasaki_utils import train, inference, get_latest_in_dir, prepare_codecs_path
 from ws_eval import eval_ws
 

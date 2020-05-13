@@ -11,7 +11,8 @@ from datasets.polyglot_emb import prepare_polyglot_emb_paths
 from datasets.unigram_freq import prepare_unigram_freq_paths
 import pbos_train
 import subwords
-from datasets.ws_bench import prepare_bench_paths, BENCHS, prepare_combined_query_path
+from datasets.ws_bench import prepare_bench_paths, BENCHS
+from datasets import prepare_combined_query_path
 from utils import dotdict
 from utils.args import add_logging_args, set_logging_config, dump_args
 from ws_eval import eval_ws

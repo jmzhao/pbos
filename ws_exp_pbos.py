@@ -11,7 +11,8 @@ import subwords
 from datasets.google import prepare_google_paths
 from datasets.polyglot_emb import prepare_polyglot_emb_paths
 from datasets.unigram_freq import prepare_unigram_freq_paths
-from datasets.ws_bench import prepare_bench_paths, BENCHS, prepare_combined_query_path
+from datasets.ws_bench import prepare_bench_paths, BENCHS
+from datasets import prepare_combined_query_path
 from utils import dotdict
 from utils.args import add_logging_args, dump_args
 from ws_eval import eval_ws
@@ -43,6 +44,7 @@ def evaluate(args):
         bench_paths = prepare_bench_paths(bname)
         for lower in (True, False):
             print(eval_ws(args.pred_path, bench_paths.txt_path, lower=lower, oov_handling='zero'))
+
 
 
 def get_default_args():

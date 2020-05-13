@@ -1,0 +1,36 @@
+import os
+
+from datasets.ws_bench import BENCHS, prepare_bench_paths
+from datasets.affix import prepare_affix_paths
+
+dir_path = os.path.dirname(os.path.realpath(__file__))
+
+
+def prepare_combined_query_path(
+    *,
+    dir_path=dir_path,
+):
+    """
+    Prepare the combined query path for word similarity datasets & affix dataset
+    """
+
+    combined_query_path = f"{dir_path}/combined_query.txt"
+
+    if not os.path.exists(combined_query_path):
+        all_words = set()
+        for bname in BENCHS:
+            bench_paths = prepare_bench_paths(bname)
+            with open(bench_paths.query_path) as fin:
+                for line in fin:
+                    all_words.add(line.strip())
+                    all_words.add(line.strip().lower())
+        affix_paths = prepare_affix_paths()
+        with open(affix_paths.queries_path) as fin:
+            for line in fin:
+                all_words.add(line.strip())
+                all_words.add(line.strip().lower())
+        with open(combined_query_path, 'w') as fout:
+            for w in all_words:
+                print(w, file=fout)
+
+    return combined_query_path
