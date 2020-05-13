@@ -91,6 +91,7 @@ def exp(model_type, target_vector_name):
     # setup parameters
     args.model_type = model_type
     args.word_boundary = False
+    args.subword_prob_min_prob = 0
     args.epochs = 50
     args.subword_uniq_factor = 0.8
     if model_type == 'bos':
