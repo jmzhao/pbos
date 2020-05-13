@@ -83,6 +83,7 @@ def evaluate_pbos(language_code, model_type):
               --target_vectors {polyglot_embeddings_path.pkl_path} \
               --model_path {subword_embedding_model_path} \
               --subword_vocab {subword_vocab_path} \
+              --subword_prob_eps 0.01 \
         """
         if model_type == 'pbos':
             cmd += f" --subword_prob {subword_prob_path}"
