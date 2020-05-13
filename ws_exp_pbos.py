@@ -31,7 +31,7 @@ def train(args):
     pbos_train.main(args)
 
 
-def evaluate(args):
+def predict(args):
     sp.call(f"""
         python pbos_pred.py \
           --queries {args.query_path} \
@@ -40,6 +40,8 @@ def evaluate(args):
           {'--' if args.word_boundary else '--no_'}word_boundary \
     """.split())
 
+
+def evaluate(args):
     result_file = open(args.eval_result_path, "w")
 
     for bname in BENCHS:
@@ -50,7 +52,7 @@ def evaluate(args):
     sp.call(f"""
             python affix_eval.py \
               --embeddings {args.pred_path} \
-        """.split(), stdout=result_file, stderr=result_file)
+        """.split(), stdout=result_file)
 
 
 def get_default_args():
@@ -114,7 +116,8 @@ def exp(model_type, target_vector_name):
     dump_args(args)
 
     with contextlib.redirect_stdout(log_file), contextlib.redirect_stderr(log_file):
-        # train(args)
+        train(args)
+        predict(args)
         evaluate(args)
 
 
