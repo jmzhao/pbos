@@ -151,10 +151,20 @@ class PBoS:
         bos.semb = semb
         return bos
 
+    @staticmethod
+    def _semb_contrib(w, emb):
+        # return w * emb
+        ## [20200519] trial: normalize semb
+        norm = np.linarg.norm(emb)
+        return w * emb / norm if norm > 1e-4 else 0
+
     def embed(self, w):
         subword_weights = self._calc_subword_weights(w)
         logger.debug(Counter(subword_weights).most_common())
-        wemb = sum(w * self.semb[sub] for sub, w in subword_weights.items())
+        wemb = sum(
+            self._semb_contrib(w, self.semb[sub])
+            for sub, w in subword_weights.items()
+        )
         return wemb if isinstance(wemb, np.ndarray) else self._zero_emb
 
     def step(self, w, d):
