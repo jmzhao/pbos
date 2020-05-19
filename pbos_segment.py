@@ -56,8 +56,15 @@ with open(word_freq_path) as fin:
         word_boundary=args.word_boundary,
         uniq_factor=args.subword_uniq_factor,
     )
+def revised_normalize(subword_counter):
+    with open(word_freq_path) as fin:
+        word_count_iter = (json.loads(line) for line in fin)
+        total_word_count = sum(count for word, count in word_count_iter)
+        return {k : v / total_word_count for k, v in subword_counter.items()}
 subword_prob = build_subword_prob(
     subword_counter,
+    # normalize_prob=normalize_prob,
+    normalize_prob=revised_normalize, ## trial
     min_prob=args.subword_prob_min_prob,
 )
 logger.info(f"subword prob size: {len(subword_prob)}")
@@ -100,6 +107,8 @@ test_words = [
     "boring",
     "technical",
     "electronic",
+    "synchronic",
+    "synchronized",
 ]
 
 get_subword_prob=partial(

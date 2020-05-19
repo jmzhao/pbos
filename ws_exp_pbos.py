@@ -74,19 +74,25 @@ def get_target_vector_paths(target_vector_name):
     raise NotImplementedError
 
 
-def exp(model_type, target_vector_name):
+def exp(model_type, target_vector_name, word_boundary):
     target_vector_paths = get_target_vector_paths(target_vector_name)
     args = get_default_args()
 
     # setup parameters
     args.model_type = model_type
+    args.word_boundary = word_boundary
     args.epochs = 50
     if model_type == 'bos':
         args.subword_min_len = 3
         args.subword_max_len = 6
+    else:
+        args.subword_min_len = 3
+    args.subword_uniq_factor = 0.8
 
     # setup paths
-    args.results_dir = f"results/ws_{target_vector_name}_{model_type}"
+    args.results_dir = f"results/trials/revised_normalize/" \
+        f"subword_min_len{args.subword_min_len}_subword_uniq_factor{args.subword_uniq_factor}/" \
+        f"ws_{target_vector_name}_{model_type}_{'' if word_boundary else 'N'}wb"
     args.target_vectors = target_vector_paths.txt_emb_path
     args.subword_vocab_word_freq = target_vector_paths.word_freq_path
     args.subword_prob_word_freq = prepare_unigram_freq_paths().word_freq_path
@@ -111,13 +117,15 @@ def exp(model_type, target_vector_name):
 
 
 with mp.Pool() as pool:
-    model_types = ('pbos', 'bos')
+    model_types = ('pbos', )#'bos')
     target_vector_names = ("polyglot", "google")
+    word_boundaries = (False, True)
 
     results = [
-        pool.apply_async(exp, (model_type, target_vector_name))
+        pool.apply_async(exp, (model_type, target_vector_name, word_boundary))
         for model_type in model_types
         for target_vector_name in target_vector_names
+        for word_boundary in word_boundaries
     ]
 
     for r in results:
