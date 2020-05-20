@@ -76,25 +76,3 @@ def prepare_bench_paths(name):
         query_path=query_path,
         query_lower_path=query_lower_path
     )
-
-
-def prepare_combined_query_path():
-    combined_query_path = f"{datasets_dir}/combined_query.txt"
-
-    if not os.path.exists(combined_query_path):
-        all_words = set()
-        for bname in BENCHS:
-            bench_paths = prepare_bench_paths(bname)
-            with open(bench_paths.query_path) as fin:
-                for line in fin:
-                    all_words.add(line.strip())
-                    all_words.add(line.strip().lower())
-        with open(combined_query_path, 'w') as fout:
-            for w in all_words:
-                print(w, file=fout)
-
-    return combined_query_path
-
-
-if __name__ == '__main__':
-    prepare_combined_query_path()
