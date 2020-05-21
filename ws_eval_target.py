@@ -1,5 +1,4 @@
-from pathlib import Path
-
+from datasets.glove import prepare_glove_paths
 from datasets.ws_bench import BENCHS, prepare_bench_paths
 from ws_eval import eval_ws
 
@@ -10,6 +9,7 @@ models = {
     "EditSim": "EditSim",
     "ployglot": prepare_polyglot_emb_paths("en").txt_emb_path,
     "google": prepare_google_paths().txt_emb_path,
+    "glove": prepare_glove_paths().txt_emb_path,
 }
 
 for model_name, model_path in models.items():
