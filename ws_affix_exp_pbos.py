@@ -10,6 +10,7 @@ import subwords
 from datasets.google import prepare_google_paths
 from datasets.polyglot_emb import prepare_polyglot_emb_paths
 from datasets.unigram_freq import prepare_unigram_freq_paths
+from datasets.glove import prepare_glove_paths
 from datasets.ws_bench import prepare_bench_paths, BENCHS
 from datasets import prepare_combined_query_path
 from utils import dotdict
@@ -56,6 +57,8 @@ def get_target_vector_paths(target_vector_name):
         return prepare_google_paths()
     if target_vector_name.lower() == "polyglot":
         return prepare_polyglot_emb_paths("en")
+    if target_vector_name.lower() == "glove":
+        return prepare_glove_paths()
     raise NotImplementedError
 
 
@@ -64,7 +67,7 @@ def exp(model_type, target_vector_name):
     args = dotdict()
 
     # misc
-    args.results_dir = f"results/best_ws_affix/{target_vector_name}_{model_type}"
+    args.results_dir = f"results/ws_affix/{target_vector_name}_{model_type}"
     args.model_type = model_type
     args.log_level = "INFO"
 
@@ -122,7 +125,8 @@ def exp(model_type, target_vector_name):
 
 with mp.Pool() as pool:
     model_types = ('pbos', 'bos')
-    target_vector_names = ("polyglot", "google")
+    target_vector_names = ("polyglot", "google", "glove")
+    # target_vector_names = ("glove", )
 
     results = [
         pool.apply_async(exp, (model_type, target_vector_name))
