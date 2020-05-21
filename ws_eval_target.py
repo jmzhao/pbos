@@ -15,5 +15,5 @@ models = {
 for model_name, model_path in models.items():
     for dataset in BENCHS:
         data_path = prepare_bench_paths(dataset).txt_path
-        result = eval_ws(model_path, data_path, lower=False, oov_handling="zero")
+        result = eval_ws(model_path, data_path, lower=True, oov_handling="zero")
         print(model_name, result)
