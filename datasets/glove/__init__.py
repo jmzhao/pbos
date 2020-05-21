@@ -1,5 +1,6 @@
 import json
 import logging
+import unicodedata
 import zipfile
 import subprocess as sp
 import os
@@ -50,8 +51,13 @@ def prepare_glove_paths(
                     logging.critical(f'line "{line[:30]}"... might include word with space, skipped')
                     continue
 
-                vocab_len += 1
-                fout.write(line)
+                w = ss[0]
+
+                # copied from `datasets/google/converter.py`
+                aw = unicodedata.normalize("NFKD", w).encode("ASCII", "ignore")
+                if 20 > len(aw) > 1 and not any(c in w for c in " _./") and aw.islower():
+                    vocab_len += 1
+                    fout.write(line)
 
     if not os.path.exists(w2v_path):
         logger.info("generating w2v emb file...")
