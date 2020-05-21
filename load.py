@@ -26,7 +26,7 @@ def load_embedding(filename: str, show_progress=False) -> (List[str], np.ndarray
                     emb.append([float(x) for x in ss[1:]])
                 except ValueError:
                     # glove has words with space...
-                    logging.critical(f"line {line[:20]}... failed to parse.")
+                    logging.critical(f"line {line[:50]}... failed to parse.")
         emb = np.array(emb)
     elif ext in (".pickle", ".pkl"):
         import pickle
