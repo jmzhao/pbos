@@ -20,9 +20,13 @@ def load_embedding(filename: str, show_progress=False) -> (List[str], np.ndarray
         vocab, emb = [], []
         with open(filename, "r") as fin:
             for line in file_tqdm(fin):
-                ss = line.split()
-                vocab.append(ss[0])
-                emb.append([float(x) for x in ss[1:]])
+                try:
+                    ss = line.split()
+                    vocab.append(ss[0])
+                    emb.append([float(x) for x in ss[1:]])
+                except ValueError:
+                    # glove has words with space...
+                    logging.critical(f"line {line[:20]}... failed to parse.")
         emb = np.array(emb)
     elif ext in (".pickle", ".pkl"):
         import pickle
