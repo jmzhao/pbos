@@ -39,8 +39,6 @@ def prepare_glove_paths(
         with zipfile.ZipFile(zip_path, "r") as zip_ref:
             zip_ref.extractall(dir_path)
 
-    # glove includes ~20 words with space which is hard to handle in current codebase
-    # need to clean them from `raw_emb`
     if not os.path.exists(txt_emb_path):
         logger.info("generating txt emb file...")
         with open(raw_emb_path, "r") as fin, open(txt_emb_path, "w") as fout:
