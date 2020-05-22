@@ -41,7 +41,7 @@ def predict(args):
     """.split())
 
 
-def evaluate(args):
+def evaluate_ws_affix(args):
     result_file = open(args.eval_result_path, "w")
 
     for bname in BENCHS:
@@ -120,19 +120,20 @@ def exp(model_type, target_vector_name):
     with contextlib.redirect_stdout(log_file), contextlib.redirect_stderr(log_file):
         train(args)
         predict(args)
-        evaluate(args)
+        evaluate_ws_affix(args)
 
 
-with mp.Pool() as pool:
-    model_types = ('pbos', 'bos')
-    target_vector_names = ("polyglot", "google", "glove")
-    # target_vector_names = ("glove", )
+if __name__ == '__main__':
+    with mp.Pool() as pool:
+        model_types = ('pbos', 'bos')
+        target_vector_names = ("polyglot", "google", "glove")
+        # target_vector_names = ("glove", )
 
-    results = [
-        pool.apply_async(exp, (model_type, target_vector_name))
-        for model_type in model_types
-        for target_vector_name in target_vector_names
-    ]
+        results = [
+            pool.apply_async(exp, (model_type, target_vector_name))
+            for model_type in model_types
+            for target_vector_name in target_vector_names
+        ]
 
-    for r in results:
-        r.get()
+        for r in results:
+            r.get()
