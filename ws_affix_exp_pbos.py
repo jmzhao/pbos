@@ -7,12 +7,9 @@ from collections import ChainMap
 
 import pbos_train
 import subwords
-from datasets.google import prepare_google_paths
-from datasets.polyglot_emb import prepare_polyglot_emb_paths
 from datasets.unigram_freq import prepare_unigram_freq_paths
-from datasets.glove import prepare_glove_paths
 from datasets.ws_bench import prepare_bench_paths, BENCHS
-from datasets import prepare_combined_query_path
+from datasets import prepare_combined_query_path, prepare_en_target_vector_paths
 from utils import dotdict
 from utils.args import dump_args
 from ws_eval import eval_ws
@@ -41,29 +38,18 @@ def predict(args):
     """.split())
 
 
-def evaluate(args):
-    result_file = open(args.eval_result_path, "w")
+def evaluate_ws_affix(args):
+    with open(args.eval_result_path, "w") as fout:
+        for bname in BENCHS:
+            bench_path = prepare_bench_paths(bname).txt_path
+            for lower in (True, False):
+                print(eval_ws(args.pred_path, bench_path, lower=lower, oov_handling='zero'), file=fout)
 
-    for bname in BENCHS:
-        bench_paths = prepare_bench_paths(bname)
-        for lower in (True, False):
-            print(eval_ws(args.pred_path, bench_paths.txt_path, lower=lower, oov_handling='zero'), file=result_file)
-
-    sp.call(f"python affix_eval.py --embeddings {args.pred_path}".split(), stdout=result_file)
-
-
-def get_target_vector_paths(target_vector_name):
-    if target_vector_name.lower() == "google":
-        return prepare_google_paths()
-    if target_vector_name.lower() == "polyglot":
-        return prepare_polyglot_emb_paths("en")
-    if target_vector_name.lower() == "glove":
-        return prepare_glove_paths()
-    raise NotImplementedError
+        sp.call(f"python affix_eval.py --embeddings {args.pred_path}".split(), stdout=fout)
 
 
 def exp(model_type, target_vector_name):
-    target_vector_paths = get_target_vector_paths(target_vector_name)
+    target_vector_paths = prepare_en_target_vector_paths(target_vector_name)
     args = dotdict()
 
     # misc
@@ -120,19 +106,20 @@ def exp(model_type, target_vector_name):
     with contextlib.redirect_stdout(log_file), contextlib.redirect_stderr(log_file):
         train(args)
         predict(args)
-        evaluate(args)
+        evaluate_ws_affix(args)
 
 
-with mp.Pool() as pool:
-    model_types = ('pbos', 'bos')
-    target_vector_names = ("polyglot", "google", "glove")
-    # target_vector_names = ("glove", )
+if __name__ == '__main__':
+    with mp.Pool() as pool:
+        model_types = ('pbos', 'bos')
+        target_vector_names = ("polyglot", "google", "glove")
+        # target_vector_names = ("glove", )
 
-    results = [
-        pool.apply_async(exp, (model_type, target_vector_name))
-        for model_type in model_types
-        for target_vector_name in target_vector_names
-    ]
+        results = [
+            pool.apply_async(exp, (model_type, target_vector_name))
+            for model_type in model_types
+            for target_vector_name in target_vector_names
+        ]
 
-    for r in results:
-        r.get()
+        for r in results:
+            r.get()
