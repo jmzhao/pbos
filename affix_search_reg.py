@@ -2,12 +2,15 @@
 Script used to tune regression C for affix
 """
 import argparse
+import os
 import subprocess as sp
 
 
 def main(args):
-    for C in [0.1, 0.2, 0.5, 1, 2, 5, 10, 15, 20]:
-        with open(f"results/affix/affix_C={C}", "w+") as f:
+    results_dir = "results/affix"
+    os.makedirs(results_dir, exist_ok=True)
+    for C in [500, 600, 700, 800, 1000, 2000, 3000, 4000, 5000]:
+        with open(f"{results_dir}/affix_C={C}", "w+") as f:
             sp.call(f"python affix_eval.py --embeddings {args.embeddings} --C {C}".split(), stdout=f)
 
 
