@@ -7,12 +7,9 @@ from collections import ChainMap
 
 import pbos_train
 import subwords
-from datasets.google import prepare_google_paths
-from datasets.polyglot_emb import prepare_polyglot_emb_paths
 from datasets.unigram_freq import prepare_unigram_freq_paths
-from datasets.glove import prepare_glove_paths
 from datasets.ws_bench import prepare_bench_paths, BENCHS
-from datasets import prepare_combined_query_path
+from datasets import prepare_combined_query_path, prepare_en_target_vector_paths
 from utils import dotdict
 from utils.args import dump_args
 from ws_eval import eval_ws
@@ -52,18 +49,8 @@ def evaluate_ws_affix(args):
     sp.call(f"python affix_eval.py --embeddings {args.pred_path}".split(), stdout=result_file)
 
 
-def get_target_vector_paths(target_vector_name):
-    if target_vector_name.lower() == "google":
-        return prepare_google_paths()
-    if target_vector_name.lower() == "polyglot":
-        return prepare_polyglot_emb_paths("en")
-    if target_vector_name.lower() == "glove":
-        return prepare_glove_paths()
-    raise NotImplementedError
-
-
 def exp(model_type, target_vector_name):
-    target_vector_paths = get_target_vector_paths(target_vector_name)
+    target_vector_paths = prepare_en_target_vector_paths(target_vector_name)
     args = dotdict()
 
     # misc
