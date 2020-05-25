@@ -53,7 +53,7 @@ def exp(model_type, target_vector_name):
     args = dotdict()
 
     # misc
-    args.results_dir = f"results/ws_affix/{target_vector_name}_{model_type}"
+    args.results_dir = f"results/ws_affix_hash/{target_vector_name}_{model_type}"
     args.model_type = model_type
     args.log_level = "INFO"
 
