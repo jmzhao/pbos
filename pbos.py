@@ -158,6 +158,7 @@ class PBoS:
         return w * emb / norm if norm > 1e-4 else 0
 
     def _get_sub_idx(self, sub):
+        # for some reason fnv32 works better than Python's native hash
         bucket_size = 20_000
         prime = 0x01000193
         hval = 0x811c9dc5
