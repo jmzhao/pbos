@@ -157,18 +157,27 @@ class PBoS:
         norm = np.linalg.norm(emb)
         return w * emb / norm if norm > 1e-4 else 0
 
+    def _get_sub_idx(self, sub):
+        bucket_size = 20_000
+        prime = 0x01000193
+        hval = 0x811c9dc5
+        for s in sub:
+            hval = hval ^ ord(s)
+            hval = (hval * prime) % bucket_size
+        return hval
+
     def embed(self, w):
         subword_weights = self._calc_subword_weights(w)
         logger.debug(Counter(subword_weights).most_common())
         # Will we have performance issue if we put the if check inside sum?
         if self.config['normalize_semb']:
             wemb = sum(
-                self._semb_normalized_contrib(w, self.semb[sub])
+                self._semb_normalized_contrib(w, self.semb[self._get_sub_idx(sub)])
                 for sub, w in subword_weights.items()
             )
         else:
             wemb = sum(
-                w * self.semb[sub]
+                w * self.semb[self._get_sub_idx(sub)]
                 for sub, w in subword_weights.items()
             )
         return wemb if isinstance(wemb, np.ndarray) else self._zero_emb
@@ -176,4 +185,4 @@ class PBoS:
     def step(self, w, d):
         subword_weights = self._calc_subword_weights(w)
         for sub, weight in subword_weights.items():
-            self.semb[sub] += weight * d
+            self.semb[self._get_sub_idx(sub)] += weight * d
