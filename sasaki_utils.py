@@ -64,11 +64,12 @@ def inference(model_path, codecs_path, oov_word_path):
     sp.call(cmd.split())
 
 
-def evaluate_pos(ud_data_path, ud_vocab_embedding_path):
+def evaluate_pos(ud_data_path, ud_vocab_embedding_path, C):
     cmd = f"""
         python pos_eval.py \
         --dataset {ud_data_path} \
         --embeddings {ud_vocab_embedding_path} \
+        --C {C} \
     """.split()
     output = sp.check_output(cmd)
     return output.decode('utf-8')
