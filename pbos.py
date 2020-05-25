@@ -157,15 +157,19 @@ class PBoS:
         norm = np.linalg.norm(emb)
         return w * emb / norm if norm > 1e-4 else 0
 
-    def _get_sub_idx(self, sub):
+    @staticmethod
+    def _hash(sub, prime, hval):
         # for some reason fnv32 works better than Python's native hash
-        bucket_size = 20_000
-        prime = 0x01000193
-        hval = 0x811c9dc5
         for s in sub:
             hval = hval ^ ord(s)
-            hval = (hval * prime) % bucket_size
+            hval = (hval * prime)
         return hval
+
+    def _get_sub_indices(self, sub):
+        bucket_size = 20_000
+        idx1 = self._hash(sub, prime=0x01000193, hval=0x811c9dc5) % bucket_size
+        idx2 = self._hash(sub, prime=0x010001a1, hval=0x11c9d8c5) % bucket_size
+        return idx1, idx2
 
     def embed(self, w):
         subword_weights = self._calc_subword_weights(w)
@@ -173,17 +177,20 @@ class PBoS:
         # Will we have performance issue if we put the if check inside sum?
         if self.config['normalize_semb']:
             wemb = sum(
-                self._semb_normalized_contrib(w, self.semb[self._get_sub_idx(sub)])
+                self._semb_normalized_contrib(w, self.semb[idx])
                 for sub, w in subword_weights.items()
+                for idx in self._get_sub_indices(sub)
             )
         else:
             wemb = sum(
-                w * self.semb[self._get_sub_idx(sub)]
+                w * self.semb[idx]
                 for sub, w in subword_weights.items()
+                for idx in self._get_sub_indices(sub)
             )
         return wemb if isinstance(wemb, np.ndarray) else self._zero_emb
 
     def step(self, w, d):
         subword_weights = self._calc_subword_weights(w)
         for sub, weight in subword_weights.items():
-            self.semb[self._get_sub_idx(sub)] += weight * d
+            for idx in self._get_sub_indices(sub):
+                self.semb[idx] += weight * d
