@@ -1,4 +1,8 @@
 gensim==3.8
 pattern==3.6
 tqdm>=4.29
-numpy
+numpy~=1.18.1
+progressbar~=2.5
+scipy~=1.4.1
+scikit-learn~=0.22.1
+chainer~=7.2.0

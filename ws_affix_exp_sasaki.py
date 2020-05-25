@@ -1,18 +1,26 @@
+import logging
 from pathlib import Path
 import multiprocessing as mp
 
 from datasets.google import prepare_google_paths
 from datasets.polyglot_emb import prepare_polyglot_emb_paths
-from datasets.ws_bench import BENCHS, prepare_bench_paths, prepare_combined_query_path
-from sasaki_utils import train, inference, get_latest_in_dir, prepare_codecs_path
-from ws_eval import eval_ws
+from datasets import prepare_combined_query_path
+from sasaki_utils import inference, get_latest_in_dir, prepare_codecs_path, train
+from utils import dotdict
+from ws_affix_exp_pbos import evaluate_ws_affix
 
 epoch = 300
 
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.DEBUG)
+
 
 def exp(ref_vec_path, ref_vec_name):
-    result_path = Path(".") / "results" / f"ws_{ref_vec_name}_sasaki"
+    logger.info("Starting...")
+    result_path = Path(".") / "results" / "ws_affix" / f"{ref_vec_name}_sasaki"
     codecs_path = prepare_codecs_path(ref_vec_path, result_path)
+
+    logger.info("Training...")
     train(
         ref_vec_path,
         result_path,
@@ -22,19 +30,17 @@ def exp(ref_vec_path, ref_vec_name):
         epoch=epoch,
     )
 
+    logger.info("Evaluating...")
     result_path = get_latest_in_dir(result_path / "sep_kvq")
     model_path = result_path / f"model_epoch_{epoch}"
-
     combined_query_path = prepare_combined_query_path()
     inference(model_path, codecs_path, combined_query_path)
     result_emb_path = result_path / f"inference_embedding_epoch{epoch}" / "embedding.txt"
 
-    for name in BENCHS:
-        bench_paths = prepare_bench_paths(name)
-        for lower in (True, False):
-            result = eval_ws(result_emb_path, bench_paths.txt_path, lower=lower)
-            with open(result_path / "ws_result.txt", "a+") as fout:
-                print(result, file=fout)
+    evaluate_ws_affix(dotdict(
+        eval_result_path=result_path / "result.txt",
+        pred_path=result_emb_path
+    ))
 
 
 with mp.Pool() as pool:

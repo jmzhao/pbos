@@ -3,7 +3,7 @@ import importlib
 from itertools import islice
 import logging
 import pickle
-from collections import namedtuple
+from collections import namedtuple, Counter
 from itertools import chain, repeat
 
 import numpy as np
@@ -21,6 +21,7 @@ parser.add_argument('--dataset', default="affix",
     help="path to affix prediction dataset")
 parser.add_argument('--embeddings',
     help="path to word embeddings")
+parser.add_argument('--C', type=float, default=1.0, help="Inverse of regularization strength")
 parser.add_argument('--lower', action='store_true', default=True)
 parser.add_argument('--no_lower', dest='lower', action='store_false')
 parser.add_argument('--random_seed', type=int, default=42,
@@ -50,8 +51,7 @@ with open(affix_raw_path) as fin:
         dataset[split].append(Instance(word = derived, affix = affix))
 all_affixes = set(ins.affix for ins in dataset["train"])
 affixes_a2i = {a : i for i, a in enumerate(sorted(all_affixes))}
-from collections import Counter
-print(Counter(ins.affix for ins in dataset["test"]))
+logging.info(Counter(ins.affix for ins in dataset["test"]))
 
 
 ## Load embeddings
@@ -80,7 +80,7 @@ test_X,  test_y  = make_X_y(dataset["test"])
 
 ## Train a logistic regression classifier and report scores
 logging.info("training...")
-clsfr = LogisticRegression(random_state=args.random_seed, verbose=False)
+clsfr = LogisticRegression(random_state=args.random_seed, verbose=False, C=args.C)
 clsfr.fit(train_X, train_y)
 # print("Train acc: {}".format(clsfr.score(train_X, train_y)))
 print("Test acc:  {}".format(clsfr.score( test_X,  test_y)))
