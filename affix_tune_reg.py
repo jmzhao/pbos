@@ -7,6 +7,8 @@ import subprocess as sp
 import multiprocessing as mp
 from itertools import product
 
+C_interval = sorted(x * 10 ** b for x, b in product(range(1, 10), range(-1, 4)))
+
 
 def evaluate(results_dir, embeddings, C):
     with open(f"{results_dir}/{C}", "w+") as f:
@@ -18,7 +20,7 @@ def main(results_dir, embeddings):
     with mp.Pool() as pool:
         results = [
             pool.apply_async(evaluate, (results_dir, embeddings, C,))
-            for C in sorted(x * 10 ** b for x, b in product(range(1, 10), range(-1, 4)))
+            for C in C_interval
         ]
 
         for r in results:
