@@ -2,7 +2,7 @@ import multiprocessing as mp
 from pathlib import Path
 
 from datasets.polyglot_emb import get_polyglot_codecs_path, prepare_polyglot_emb_paths, languages
-from datasets.polyglot_freq import get_polyglot_frequency_path
+from datasets.polyglot_freq import prepare_polyglot_freq_paths
 from datasets.ud import prepare_ud_paths
 from sasaki_utils import inference, train, get_latest_in_dir, evaluate_pos
 
@@ -11,7 +11,7 @@ def exp(lang):
     epoch = 300
 
     emb_path = prepare_polyglot_emb_paths(lang).w2v_path
-    freq_path = get_polyglot_frequency_path(lang).raw_count_path
+    freq_path = prepare_polyglot_freq_paths(lang).raw_count_path
     codecs_path = get_polyglot_codecs_path(lang)
     ud_data_path, ud_vocab_path = prepare_ud_paths(lang)
 
