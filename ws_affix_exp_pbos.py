@@ -112,14 +112,10 @@ def exp(model_type, target_vector_name):
 
 if __name__ == '__main__':
     with mp.Pool() as pool:
-        model_types = ('pbos', 'bos')
-        target_vector_names = ("polyglot", "google", "glove")
-        # target_vector_names = ("glove", )
-
         results = [
             pool.apply_async(exp, (model_type, target_vector_name))
-            for model_type in model_types
-            for target_vector_name in target_vector_names
+            for model_type in ('pbos', 'bos', )
+            for target_vector_name in ("polyglot", "google", )  # "glove")
         ]
 
         for r in results:
