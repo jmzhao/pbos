@@ -60,12 +60,12 @@ def exp(model_type, target_vector_name):
     # subword
     args.word_boundary = False
     args.subword_min_count = None
-    args.subword_uniq_factor = None  # or shall we ?
+    args.subword_uniq_factor = None  # TODO: investigate if we need to set this to 0.8
     if model_type == 'bos':
         args.subword_min_len = 3
         args.subword_max_len = 6
     elif model_type == 'pbos':
-        args.subword_min_len = 1
+        args.subword_min_len = 1    # TODO: investigate if we need to set this to 3
         args.subword_max_len = None
 
     # subword vocab

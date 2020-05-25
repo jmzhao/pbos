@@ -63,8 +63,8 @@ def revised_normalize(subword_counter):
         return {k : v / total_word_count for k, v in subword_counter.items()}
 subword_prob = build_subword_prob(
     subword_counter,
-    # normalize_prob=normalize_prob,
-    normalize_prob=revised_normalize, ## trial
+    normalize_prob=normalize_prob,
+    # normalize_prob=revised_normalize, ## trial
     min_prob=args.subword_prob_min_prob,
 )
 logger.info(f"subword prob size: {len(subword_prob)}")
