@@ -71,6 +71,7 @@ class PBoS:
         weight_threshold=None,
         eps=1e-2,
         take_root=False,
+        normalize_semb=False,
     ):
         """
         Params:
@@ -125,6 +126,7 @@ class PBoS:
             take_root=take_root,
             subword_vocab=subword_vocab,
             subword_prob=subword_prob,
+            normalize_semb=normalize_semb,
         )
         self._zero_emb = np.zeros(self.config['embedding_dim'])
 
@@ -152,19 +154,24 @@ class PBoS:
         return bos
 
     @staticmethod
-    def _semb_contrib(w, emb):
-        # return w * emb
-        ## [20200519] trial: normalize semb
+    def _semb_normalized_contrib(w, emb):
         norm = np.linarg.norm(emb)
         return w * emb / norm if norm > 1e-4 else 0
 
     def embed(self, w):
         subword_weights = self._calc_subword_weights(w)
         logger.debug(Counter(subword_weights).most_common())
-        wemb = sum(
-            self._semb_contrib(w, self.semb[sub])
-            for sub, w in subword_weights.items()
-        )
+        # Will we have performance issue if we put the if check inside sum?
+        if self.config['normalize_semb']:
+            wemb = sum(
+                self._semb_normalized_contrib(w, self.semb[sub])
+                for sub, w in subword_weights.items()
+            )
+        else:
+            wemb = sum(
+                w * self.semb[sub]
+                for sub, w in subword_weights.items()
+            )
         return wemb if isinstance(wemb, np.ndarray) else self._zero_emb
 
     def step(self, w, d):
