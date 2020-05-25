@@ -91,6 +91,7 @@ def exp(model_type, target_vector_name):
     args.random_seed = 42
     args.subword_prob_eps = 0.01
     args.subword_weight_threshold = None
+    args.subword_prob_normalize_emb = False  # TODO: investigate if we need to toogle this
 
     # prediction & evaluation
     args.pred_path = f"{args.results_dir}/vectors.txt"
