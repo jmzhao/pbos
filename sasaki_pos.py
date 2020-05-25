@@ -23,7 +23,7 @@ def exp(lang):
     inference(model_path, codecs_path, ud_vocab_path)
 
     ud_vocab_embedding_path = result_path / f"inference_embedding_epoch{epoch}" / "embedding.txt"
-    score = evaluate_pos(ud_data_path, ud_vocab_embedding_path)
+    score = evaluate_pos(ud_data_path, ud_vocab_embedding_path, C=70)
 
     with open(result_path / "score.txt", "w") as f:
         print(f"score for {lang} = {score}", file=f)
