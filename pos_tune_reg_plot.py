@@ -1,5 +1,5 @@
 """
-Script used to plot C vs score
+Script used to plot C vs score for POS results
 """
 import argparse
 from pathlib import Path
