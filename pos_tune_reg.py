@@ -7,7 +7,7 @@ import subprocess as sp
 import multiprocessing as mp
 from itertools import product
 
-C_interval = sorted(x * 10 ** b for x, b in product(range(1, 10), range(-1, 4)))
+C_interval = sorted(x * 10 ** b for x, b in product(range(1, 10), range(-1, 5)))
 
 
 def evaluate(results_dir, embeddings, dataset, C):
