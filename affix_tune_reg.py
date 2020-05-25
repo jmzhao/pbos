@@ -9,7 +9,7 @@ from itertools import product
 
 
 def evaluate(results_dir, embeddings, C):
-    with open(f"{results_dir}/C={C}", "w+") as f:
+    with open(f"{results_dir}/{C}", "w+") as f:
         sp.call(f"python affix_eval.py --embeddings {embeddings} --C {C}".split(), stdout=f)
 
 
