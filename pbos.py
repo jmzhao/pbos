@@ -5,7 +5,6 @@ import logging
 import numpy as np
 
 from utils import normalize_prob
-from utils.args import add_logging_args, set_logging_config, dump_args
 
 logger = logging.getLogger(__name__)
 
@@ -155,7 +154,7 @@ class PBoS:
 
     @staticmethod
     def _semb_normalized_contrib(w, emb):
-        norm = np.linarg.norm(emb)
+        norm = np.linalg.norm(emb)
         return w * emb / norm if norm > 1e-4 else 0
 
     def embed(self, w):
