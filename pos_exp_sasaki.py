@@ -16,11 +16,11 @@ def exp(lang):
     ud_data_path, ud_vocab_path = prepare_ud_paths(lang)
 
     result_path = Path(".") / "results" / "sasaki" / "polyglot_KVQ_F" / lang
-    train(emb_path, result_path, freq_path, codecs_path, epoch=epoch, H=40_000, F=500_000)
+    # train(emb_path, result_path, freq_path, codecs_path, epoch=epoch, H=40_000, F=500_000)
 
     result_path = get_latest_in_dir(result_path / "sep_kvq")
     model_path = result_path / f"model_epoch_{epoch}"
-    inference(model_path, codecs_path, ud_vocab_path)
+    # inference(model_path, codecs_path, ud_vocab_path)
 
     ud_vocab_embedding_path = result_path / f"inference_embedding_epoch{epoch}" / "embedding.txt"
     score = evaluate_pos(ud_data_path, ud_vocab_embedding_path, C=70)
