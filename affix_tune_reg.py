@@ -9,7 +9,7 @@ from itertools import product
 
 
 def evaluate(results_dir, embeddings, C):
-    with open(f"{results_dir}/affix_C={C}", "w+") as f:
+    with open(f"{results_dir}/C={C}", "w+") as f:
         sp.call(f"python affix_eval.py --embeddings {embeddings} --C {C}".split(), stdout=f)
 
 
@@ -27,7 +27,7 @@ def main(results_dir, embeddings):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--embeddings', help="path to word embeddings")
+    parser.add_argument('--embeddings', required=True, help="path to word embeddings")
     parser.add_argument('--results_dir', help="path to the results directory", default="results/affix_search")
     args = parser.parse_args()
     main(args.results_dir, args.embeddings)
