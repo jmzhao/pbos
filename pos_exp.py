@@ -58,6 +58,7 @@ def evaluate_pbos(language_code, model_type):
             python subwords.py build_vocab \
                 --word_freq {polyglot_embeddings_path.word_freq_path} \
                 --output {subword_vocab_path} \
+                --word_boundary \
         """.split()
         sp.call(cmd)
 
@@ -69,6 +70,7 @@ def evaluate_pbos(language_code, model_type):
                 python subwords.py build_prob \
                     --word_freq {polyglot_frequency_path.word_freq_path} \
                     --output {subword_prob_path} \
+                    --word_boundary \
             """.split()
             sp.call(cmd)
         else:
@@ -83,6 +85,8 @@ def evaluate_pbos(language_code, model_type):
               --target_vectors {polyglot_embeddings_path.pkl_path} \
               --model_path {subword_embedding_model_path} \
               --subword_vocab {subword_vocab_path} \
+              --word_boundary \
+              --subword_prob_normalize_emb \
         """
         if model_type == 'pbos':
             cmd += f" --subword_prob {subword_prob_path}"
@@ -107,6 +111,7 @@ def evaluate_pbos(language_code, model_type):
             --queries {ud_vocab_path} \
             --save {ud_vocab_embedding_path} \
             --model {subword_embedding_model_path} \
+            --word_boundary \
         """.split()
             # --pre_trained {polyglot_embeddings_path.pkl_path} \
         sp.call(cmd)
