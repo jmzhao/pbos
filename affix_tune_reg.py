@@ -7,9 +7,11 @@ import subprocess as sp
 import multiprocessing as mp
 from itertools import product
 
+C_interval = sorted(x * 10 ** b for x, b in product(range(1, 10), range(-1, 4)))
+
 
 def evaluate(results_dir, embeddings, C):
-    with open(f"{results_dir}/affix_C={C}", "w+") as f:
+    with open(f"{results_dir}/{C}", "w+") as f:
         sp.call(f"python affix_eval.py --embeddings {embeddings} --C {C}".split(), stdout=f)
 
 
@@ -18,7 +20,7 @@ def main(results_dir, embeddings):
     with mp.Pool() as pool:
         results = [
             pool.apply_async(evaluate, (results_dir, embeddings, C,))
-            for C in sorted(x * 10 ** b for x, b in product(range(1, 10), range(-1, 4)))
+            for C in C_interval
         ]
 
         for r in results:
@@ -27,7 +29,7 @@ def main(results_dir, embeddings):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--embeddings', help="path to word embeddings")
+    parser.add_argument('--embeddings', required=True, help="path to word embeddings")
     parser.add_argument('--results_dir', help="path to the results directory", default="results/affix_search")
     args = parser.parse_args()
     main(args.results_dir, args.embeddings)
