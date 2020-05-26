@@ -166,7 +166,7 @@ class PBoS:
         return hval
 
     def _get_sub_indices(self, sub):
-        bucket_size = 20_000
+        bucket_size = 200_000
         idx1 = self._hash(sub, prime=0x01000193, hval=0x811c9dc5) % bucket_size
         idx2 = self._hash(sub, prime=0x010001a1, hval=0x11c9d8c5) % bucket_size
         return idx1, idx2
