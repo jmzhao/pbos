@@ -114,7 +114,7 @@ if __name__ == '__main__':
     with mp.Pool() as pool:
         results = [
             pool.apply_async(exp, (model_type, target_vector_name))
-            for model_type in ('pbos', 'bos', )
+            for model_type in ('pbos', )  # 'bos',)
             for target_vector_name in ("polyglot", "google", )  # "glove")
         ]
 
