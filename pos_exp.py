@@ -58,7 +58,6 @@ def evaluate_pbos(language_code, model_type):
             python subwords.py build_vocab \
                 --word_freq {polyglot_embeddings_path.word_freq_path} \
                 --output {subword_vocab_path} \
-                --word_boundary \
         """
         if model_type == 'pbosn':
             cmd += f" --word_boundary"
@@ -75,7 +74,6 @@ def evaluate_pbos(language_code, model_type):
                 python subwords.py build_prob \
                     --word_freq {polyglot_frequency_path.word_freq_path} \
                     --output {subword_prob_path} \
-                    --word_boundary \
             """
             # TODO: should we add --subword_prob_min_prob 1e-2 ?
             if model_type == 'pbosn':
