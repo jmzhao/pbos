@@ -155,7 +155,7 @@ class PBoS:
     def _semb_contrib(w, emb):
         # return w * emb
         ## [20200519] trial: normalize semb
-        norm = np.linarg.norm(emb)
+        norm = np.linalg.norm(emb)
         return w * emb / norm if norm > 1e-4 else 0
 
     def embed(self, w):
