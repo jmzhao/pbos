@@ -59,10 +59,15 @@ def evaluate_pbos(language_code, model_type):
                 --word_freq {polyglot_embeddings_path.word_freq_path} \
                 --output {subword_vocab_path} \
                 --word_boundary \
-        """.split()
-        sp.call(cmd)
+        """
+        if model_type == 'pbosn':
+            cmd += f" --word_boundary"
+        elif model_type == 'bos':
+            cmd += f" --subword_min_len 3"
+            cmd += f" --subword_max_len 6"
+        sp.call(cmd.split())
 
-        if model_type == 'pbos':
+        if model_type in ('pbos', 'pbosn'):
             # build subword prob from word freqs
             logger.info(f"[evaluate_pbos({language_code}, model_type={model_type})]"
                 f" building subword prob...")
@@ -71,9 +76,11 @@ def evaluate_pbos(language_code, model_type):
                     --word_freq {polyglot_frequency_path.word_freq_path} \
                     --output {subword_prob_path} \
                     --word_boundary \
-                    --subword_prob_min_prob 1e-6 \
-            """.split()
-            sp.call(cmd)
+            """
+            # TODO: should we add --subword_prob_min_prob 1e-2 ?
+            if model_type == 'pbosn':
+                cmd += f" --word_boundary"
+            sp.call(cmd.split())
         else:
             logger.info(f"[evaluate_pbos({language_code}, model_type={model_type})]"
                 f" skipped building subword prob.")
@@ -86,11 +93,12 @@ def evaluate_pbos(language_code, model_type):
               --target_vectors {polyglot_embeddings_path.pkl_path} \
               --model_path {subword_embedding_model_path} \
               --subword_vocab {subword_vocab_path} \
-              --word_boundary \
-              --subword_prob_normalize_emb \
         """
-        if model_type == 'pbos':
+        if model_type in ('pbos', 'pbosn'):
             cmd += f" --subword_prob {subword_prob_path}"
+        if model_type == 'pbosn':
+            cmd += f" --word_boundary"
+            cmd += f" --subword_prob_normalize_emb"
         cmd = cmd.split()
         # with open(training_log_path, "w+") as log:
         #     sp.call(cmd, stdout=log, stderr=log)
@@ -112,10 +120,11 @@ def evaluate_pbos(language_code, model_type):
             --queries {ud_vocab_path} \
             --save {ud_vocab_embedding_path} \
             --model {subword_embedding_model_path} \
-            --word_boundary \
-        """.split()
+        """
             # --pre_trained {polyglot_embeddings_path.pkl_path} \
-        sp.call(cmd)
+        if model_type == 'pbosn':
+            cmd += f" --word_boundary"
+        sp.call(cmd.split())
     else:
         logger.info(f"[evaluate_pbos({language_code}, model_type={model_type})]"
             f" skipped predicting word embeddings.")
@@ -154,7 +163,8 @@ def main():
             prepare_polyglot_freq_paths(language_code)
             prepare_ud_paths(language_code)
             apply(evaluate_pbos, (language_code, 'pbos',))
-            # apply(evaluate_pbos, (language_code, 'bos',))
+            apply(evaluate_pbos, (language_code, 'pbosn',))
+            apply(evaluate_pbos, (language_code, 'bos',))
     if args.num_processes == 1:
         def apply(func, args):
             return func(*args)
