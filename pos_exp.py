@@ -29,7 +29,7 @@ def pos_eval(ud_data_path, ud_vocab_embedding_path, result_path):
     with \
         tee_open(ud_log_path) as log_tee, \
         tee_open(ud_out_path) as out_tee:
-        sp.call(cmd, stdout=out_tee.stdin, stderr = log_tee.stdin)
+        sp.call(cmd, stdout=out_tee.stdin, stderr=log_tee.stdin)
 
 
 def evaluate_pbos(language_code, model_type):
@@ -96,12 +96,12 @@ def evaluate_pbos(language_code, model_type):
             cmd += f" --subword_prob {subword_prob_path}"
         if model_type == 'pbosn':
             cmd += f" --word_boundary"
-            cmd += f" --subword_prob_normalize_emb"
+            cmd += f" --normalize_semb"
         cmd = cmd.split()
-        # with open(training_log_path, "w+") as log:
-        #     sp.call(cmd, stdout=log, stderr=log)
-        with tee_open(training_log_path) as log_tee:
-            sp.call(cmd, stdout=log_tee.stdin, stderr=log_tee.stdin)
+        with open(training_log_path, "w+") as log:
+            sp.call(cmd, stdout=log, stderr=log)
+        # with tee_open(training_log_path) as log_tee:
+            # sp.call(cmd, stdout=log_tee.stdin, stderr=log_tee.stdin)
     else:
         logger.info(f"[evaluate_pbos({language_code}, model_type={model_type})]"
             f" skipped training subword model.")
