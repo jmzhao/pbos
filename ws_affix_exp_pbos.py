@@ -58,7 +58,7 @@ def exp(model_type, target_vector_name):
     args.log_level = "INFO"
 
     # subword
-    args.word_boundary = False
+    args.word_boundary = True
     args.subword_min_count = None
     args.subword_uniq_factor = None  # TODO: investigate if we need to set this to 0.8
     if model_type == 'bos':
@@ -91,7 +91,7 @@ def exp(model_type, target_vector_name):
     args.random_seed = 42
     args.subword_prob_eps = 0.01
     args.subword_weight_threshold = None
-    args.subword_prob_normalize_emb = False  # TODO: investigate if we need to toogle this
+    args.subword_prob_normalize_emb = True  # TODO: investigate if we need to toogle this
 
     # prediction & evaluation
     args.pred_path = f"{args.results_dir}/vectors.txt"
@@ -115,7 +115,7 @@ if __name__ == '__main__':
         results = [
             pool.apply_async(exp, (model_type, target_vector_name))
             for model_type in ('pbos', )  # 'bos',)
-            for target_vector_name in ("polyglot", "google", )  # "glove")
+            for target_vector_name in ("polyglot", ) # "google", )  # "glove")
         ]
 
         for r in results:
