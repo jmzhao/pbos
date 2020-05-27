@@ -153,7 +153,7 @@ def main():
             prepare_polyglot_freq_paths(language_code)
             prepare_ud_paths(language_code)
             apply(evaluate_pbos, (language_code, 'pbos',))
-            apply(evaluate_pbos, (language_code, 'bos',))
+            # apply(evaluate_pbos, (language_code, 'bos',))
     if args.num_processes == 1:
         def apply(func, args):
             return func(*args)
