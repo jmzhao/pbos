@@ -29,7 +29,7 @@ def pos_eval(ud_data_path, ud_vocab_embedding_path, result_path):
     with \
         tee_open(ud_log_path) as log_tee, \
         tee_open(ud_out_path) as out_tee:
-        sp.call(cmd, stdout=out_tee.stdin, stderr = log_tee.stdin)
+        sp.call(cmd, stdout=out_tee.stdin, stderr=log_tee.stdin)
 
 
 def evaluate_pbos(language_code, model_type):
@@ -58,10 +58,17 @@ def evaluate_pbos(language_code, model_type):
             python subwords.py build_vocab \
                 --word_freq {polyglot_embeddings_path.word_freq_path} \
                 --output {subword_vocab_path} \
-        """.split()
-        sp.call(cmd)
+        """
+        if model_type == 'pbosn':
+            cmd += f" --word_boundary"
+        elif model_type == 'bos_nominmax':
+            pass
+        elif model_type == 'bos_minmax':
+            cmd += f" --subword_min_len 3"
+            cmd += f" --subword_max_len 6"
+        sp.call(cmd.split())
 
-        if model_type == 'pbos':
+        if model_type in ('pbos', 'pbosn'):
             # build subword prob from word freqs
             logger.info(f"[evaluate_pbos({language_code}, model_type={model_type})]"
                 f" building subword prob...")
@@ -69,8 +76,10 @@ def evaluate_pbos(language_code, model_type):
                 python subwords.py build_prob \
                     --word_freq {polyglot_frequency_path.word_freq_path} \
                     --output {subword_prob_path} \
-            """.split()
-            sp.call(cmd)
+            """
+            if model_type == 'pbosn':
+                cmd += f" --word_boundary"
+            sp.call(cmd.split())
         else:
             logger.info(f"[evaluate_pbos({language_code}, model_type={model_type})]"
                 f" skipped building subword prob.")
@@ -84,13 +93,16 @@ def evaluate_pbos(language_code, model_type):
               --model_path {subword_embedding_model_path} \
               --subword_vocab {subword_vocab_path} \
         """
-        if model_type == 'pbos':
+        if model_type in ('pbos', 'pbosn'):
             cmd += f" --subword_prob {subword_prob_path}"
+        if model_type == 'pbosn':
+            cmd += f" --word_boundary"
+            cmd += f" --normalize_semb"
         cmd = cmd.split()
-        # with open(training_log_path, "w+") as log:
-        #     sp.call(cmd, stdout=log, stderr=log)
-        with tee_open(training_log_path) as log_tee:
-            sp.call(cmd, stdout=log_tee.stdin, stderr=log_tee.stdin)
+        with open(training_log_path, "w+") as log:
+            sp.call(cmd, stdout=log, stderr=log)
+        # with tee_open(training_log_path) as log_tee:
+            # sp.call(cmd, stdout=log_tee.stdin, stderr=log_tee.stdin)
     else:
         logger.info(f"[evaluate_pbos({language_code}, model_type={model_type})]"
             f" skipped training subword model.")
@@ -107,9 +119,11 @@ def evaluate_pbos(language_code, model_type):
             --queries {ud_vocab_path} \
             --save {ud_vocab_embedding_path} \
             --model {subword_embedding_model_path} \
-        """.split()
+        """
             # --pre_trained {polyglot_embeddings_path.pkl_path} \
-        sp.call(cmd)
+        if model_type == 'pbosn':
+            cmd += f" --word_boundary"
+        sp.call(cmd.split())
     else:
         logger.info(f"[evaluate_pbos({language_code}, model_type={model_type})]"
             f" skipped predicting word embeddings.")
@@ -123,6 +137,7 @@ def evaluate_pbos(language_code, model_type):
 
 
 
+model_types = ("bos_nominmax", "pbos", "pbosn", ) # "bos_minmax")
 def main():
     import argparse
 
@@ -147,8 +162,8 @@ def main():
             prepare_polyglot_emb_paths(language_code)
             prepare_polyglot_freq_paths(language_code)
             prepare_ud_paths(language_code)
-            apply(evaluate_pbos, (language_code, 'pbos',))
-            apply(evaluate_pbos, (language_code, 'bos',))
+            for model_type in model_types:
+                apply(evaluate_pbos, (language_code, model_type,))
     if args.num_processes == 1:
         def apply(func, args):
             return func(*args)

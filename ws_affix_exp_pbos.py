@@ -95,9 +95,9 @@ def exp(model_type, target_vector_name):
     args.subword_prob_eps = 0.01
     args.subword_weight_threshold = None
     if args.model_type == 'pbosn':
-        args.subword_prob_normalize_emb = True
+        args.normalize_semb = True
     else:
-        args.subword_prob_normalize_emb = False
+        args.normalize_semb = False
 
     # prediction & evaluation
     args.pred_path = f"{args.results_dir}/vectors.txt"

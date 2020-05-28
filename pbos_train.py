@@ -68,7 +68,7 @@ def add_model_args(parser):
         help="default likelihood of a subword if it is not present in "
         "the given `subword_prob`")
     group.add_argument(
-        '--subword_prob_normalize_emb',
+        '--normalize_semb',
         action='store_true', default=False,
         help='if set, normalize subword embeddings during training'
     )
@@ -127,7 +127,7 @@ def main(args):
         weight_threshold=args.subword_weight_threshold,
         eps=args.subword_prob_eps,
         take_root=args.subword_prob_take_root,
-        normalize_semb=args.subword_prob_normalize_emb,
+        normalize_semb=args.normalize_semb,
     )
     start_time = time()
     for i_epoch in range(args.epochs) :
