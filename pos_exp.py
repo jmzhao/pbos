@@ -61,7 +61,9 @@ def evaluate_pbos(language_code, model_type):
         """
         if model_type == 'pbosn':
             cmd += f" --word_boundary"
-        elif model_type == 'bos':
+        elif model_type == 'bos_nominmax':
+            pass
+        elif model_type == 'bos_minmax':
             cmd += f" --subword_min_len 3"
             cmd += f" --subword_max_len 6"
         sp.call(cmd.split())
@@ -136,6 +138,7 @@ def evaluate_pbos(language_code, model_type):
 
 
 
+model_types = ("bos_nominmax", "pbos", "pbosn", ) # "bos_minmax")
 def main():
     import argparse
 
@@ -160,9 +163,8 @@ def main():
             prepare_polyglot_emb_paths(language_code)
             prepare_polyglot_freq_paths(language_code)
             prepare_ud_paths(language_code)
-            apply(evaluate_pbos, (language_code, 'pbos',))
-            apply(evaluate_pbos, (language_code, 'pbosn',))
-            apply(evaluate_pbos, (language_code, 'bos',))
+            for model_type in model_types:
+                apply(evaluate_pbos, (language_code, model_type,))
     if args.num_processes == 1:
         def apply(func, args):
             return func(*args)
