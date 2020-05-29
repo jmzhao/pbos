@@ -1,17 +1,19 @@
+import json
 import os
 import subprocess as sp
+
 from utils import dotdict
-import json
+
 
 def train(
-        emb_path,
-        result_path,
-        freq_path=None,
-        codecs_path=None,
-        epoch=20,
-        H=100000,
-        F=1000000,
-        use_hash=True,
+    emb_path,
+    result_path,
+    epoch,
+    H,
+    F,
+    freq_path=None,
+    codecs_path=None,
+    use_hash=True,
 ):
     with open(emb_path) as f:
         _,  embed_dim = f.readline().strip().split()
