@@ -28,7 +28,7 @@ def exp(language):
 
     result_emb_path = inference(model_info, ud_vocab_path)
 
-    with open(result_path / "ud.out", "w") as fout, open(result_path / "ud.out", "w") as ferr:
+    with open(result_path / "ud.out", "w") as fout, open(result_path / "ud.log", "w") as ferr:
         cmd = f"""
             python pos_eval.py \
             --dataset {ud_data_path} \
