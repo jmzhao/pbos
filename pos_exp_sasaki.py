@@ -9,7 +9,7 @@ from sasaki_utils import inference, train, prepare_codecs_path
 
 
 def exp(language):
-    result_path = Path("results") / "pos" / "sasaki" / language
+    result_path = Path("results") / "pos" / language / "sasaki"
 
     emb_path = prepare_polyglot_emb_paths(language).w2v_path
     freq_path = prepare_polyglot_freq_paths(language).raw_count_path
@@ -28,14 +28,14 @@ def exp(language):
 
     result_emb_path = inference(model_info, ud_vocab_path)
 
-    with open(result_path / "score.txt", "w") as f:
+    with open(result_path / "ud.out", "w") as fout, open(result_path / "ud.out", "w") as ferr:
         cmd = f"""
             python pos_eval.py \
             --dataset {ud_data_path} \
             --embeddings {result_emb_path} \
             --C {70} \
         """.split()
-        sp.call(cmd, stdout=f)
+        sp.call(cmd, stdout=fout, stderr=ferr)
 
 
 if __name__ == "__main__":
