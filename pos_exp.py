@@ -40,7 +40,7 @@ def evaluate_pbos(language_code, model_type):
     polyglot_frequency_path = prepare_polyglot_freq_paths(language_code)
 
     # Output/result files
-    result_path = os.path.join("results", "polyglot", language_code, model_type)
+    result_path = os.path.join("results", "pos", language_code, model_type)
     os.makedirs(result_path, exist_ok=True)
     subword_vocab_path = os.path.join(result_path, "subword_vocab.jsonl")
     subword_prob_path = os.path.join(result_path, "subword_prob.jsonl")
