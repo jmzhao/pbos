@@ -8,14 +8,15 @@ from utils import dotdict
 from ws_affix_exp_pbos import evaluate_ws_affix
 
 logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.DEBUG)
 
 
 def exp(ref_vec_name):
-    logger.info("Starting...")
     result_path = Path("results") / "ws_affix" / f"{ref_vec_name}_sasaki"
     ref_vec_path = prepare_en_target_vector_paths(ref_vec_name).w2v_path
     codecs_path = prepare_codecs_path(ref_vec_path, result_path)
+
+    log_file = open(result_path / "log.txt", "w+")
+    logging.basicConfig(level=logging.DEBUG, stream=log_file)
 
     logger.info("Training...")
     model_info = train(
