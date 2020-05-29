@@ -8,13 +8,13 @@ from datasets.ud import prepare_ud_paths
 from sasaki_utils import inference, train, prepare_codecs_path
 
 
-def exp(lang):
-    result_path = Path("results") / "pos" / "sasaki" / lang
+def exp(language):
+    result_path = Path("results") / "pos" / "sasaki" / language
 
-    emb_path = prepare_polyglot_emb_paths(lang).w2v_path
-    freq_path = prepare_polyglot_freq_paths(lang).raw_count_path
+    emb_path = prepare_polyglot_emb_paths(language).w2v_path
+    freq_path = prepare_polyglot_freq_paths(language).raw_count_path
     codecs_path = prepare_codecs_path(emb_path, result_path)
-    ud_data_path, ud_vocab_path = prepare_ud_paths(lang)
+    ud_data_path, ud_vocab_path = prepare_ud_paths(language)
 
     model_info = train(
         emb_path,
