@@ -1,6 +1,7 @@
 import json
 import os
 import subprocess as sp
+from pathlib import Path
 
 from utils import dotdict
 
@@ -13,10 +14,12 @@ def train(
     F,
     freq_path=None,
     codecs_path=None,
-    use_hash=True,
 ):
+    """
+    :return: a model info object
+    """
     with open(emb_path) as f:
-        _,  embed_dim = f.readline().strip().split()
+        _, embed_dim = f.readline().strip().split()
 
     cmd = f"""
         python compact_reconstruction/src/train.py 
@@ -30,6 +33,10 @@ def train(
             --unique_false 
             --epoch {epoch}
             --snapshot_interval 10
+            --subword_type 4
+            --multi_hash two
+            --hashed_idx
+            --bucket_size {H} 
         """
 
     if freq_path:
@@ -38,30 +45,32 @@ def train(
     if codecs_path:
         cmd += f" --codecs_path {codecs_path} "
 
-    if use_hash:
-        cmd += f"""
-            --subword_type 4
-            --multi_hash two
-            --hashed_idx
-            --bucket_size {H} 
-        """
-    else:
-        cmd += " --subword_type 0 "
-
     sp.call(
         cmd.split(), env={**os.environ, "CUDA_PATH": "/usr/local/cuda-10.2"},
     )
 
+    return get_info_from_result_path(result_path / "sep_kvq")
 
-def inference(model_path, codecs_path, oov_word_path):
+
+def inference(model_info, query_path):
+    """
+    :return: resulting embedding path
+    """
+    result_path = Path(model_info["result_path"])
+    model_path = model_info["model_path"]
+    codecs_path = model_info["codecs_path"]
+    epoch = model_info["epoch"]
+
     cmd = f"""
         python compact_reconstruction/src/inference.py 
             --gpu 0 
             --model_path {model_path} 
             --codecs_path {codecs_path} 
-            --oov_word_path {oov_word_path} 
+            --oov_word_path {query_path} 
         """
     sp.call(cmd.split())
+
+    return result_path / f"inference_embedding_epoch{epoch}" / "embedding.txt"
 
 
 def evaluate_pos(ud_data_path, ud_vocab_embedding_path, C):
@@ -73,10 +82,6 @@ def evaluate_pos(ud_data_path, ud_vocab_embedding_path, C):
     """.split()
     output = sp.check_output(cmd)
     return output.decode('utf-8')
-
-
-def get_latest_in_dir(dir_path):
-    return max(dir_path.iterdir(), key=lambda x: x.stat().st_mtime)
 
 
 def prepare_codecs_path(ref_vec_path, result_path, n_min=3, n_max=30):
@@ -105,8 +110,12 @@ def prepare_codecs_path(ref_vec_path, result_path, n_min=3, n_max=30):
     return sorted_codecs_path
 
 
+def _get_latest_in_dir(dir_path):
+    return max(dir_path.iterdir(), key=lambda x: x.stat().st_mtime)
+
+
 def get_info_from_result_path(result_path):
-    result_path = get_latest_in_dir(result_path)
+    result_path = _get_latest_in_dir(result_path)
     settings_path = result_path / "settings.json"
     data = json.load(open(settings_path, "r"))
     epoch = data['epoch']
