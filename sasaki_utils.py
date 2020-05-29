@@ -45,9 +45,7 @@ def train(
     if codecs_path:
         cmd += f" --codecs_path {codecs_path} "
 
-    sp.call(
-        cmd.split(), env={**os.environ, "CUDA_PATH": "/usr/local/cuda-10.2"},
-    )
+    sp.call(cmd.split())
 
     return get_info_from_result_path(result_path / "sep_kvq")
 
