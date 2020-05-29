@@ -1,7 +1,8 @@
-tqdm>=4.29
-numpy~=1.18.1
-progressbar~=2.5
+tqdm
+numpy
+progressbar
 scipy~=1.4.1
 scikit-learn~=0.22.1
 chainer~=7.2.0
 gensim==3.8.3
+cupy-cuda102 # or other version of cuda
