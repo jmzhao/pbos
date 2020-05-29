@@ -9,7 +9,8 @@ for language in languages:
     polyglot_vocab = set(polyglot_vocab)
 
     _, ud_vocab_path = prepare_ud_paths(language)
-    ud_vocab = [l.strip() for l in open(ud_vocab_path)]
+    with open(ud_vocab_path) as f:
+        ud_vocab = [w.strip() for w in f]
 
     inv = sum(w in polyglot_vocab for w in ud_vocab) / len(ud_vocab)
     print(language, inv)

@@ -58,13 +58,16 @@ def exp(model_type, target_vector_name):
     args.log_level = "INFO"
 
     # subword
-    args.word_boundary = False
+    if args.model_type == 'pbosn':
+        args.word_boundary = True
+    else:
+        args.word_boundary = False
     args.subword_min_count = None
     args.subword_uniq_factor = None  # TODO: investigate if we need to set this to 0.8
     if model_type == 'bos':
         args.subword_min_len = 3
         args.subword_max_len = 6
-    elif model_type == 'pbos':
+    elif model_type in ('pbos', 'pbosn'):
         args.subword_min_len = 1    # TODO: investigate if we need to set this to 3
         args.subword_max_len = None
 
@@ -77,7 +80,7 @@ def exp(model_type, target_vector_name):
     args.subword_prob_take_root = False
     if model_type == 'bos':
         args.subword_prob = None
-    elif model_type == 'pbos':
+    elif model_type in ('pbos', 'pbosn'):
         args.subword_prob_min_prob = 0
         args.subword_prob_word_freq = prepare_unigram_freq_paths().word_freq_path
         args.subword_prob = f"{args.results_dir}/subword_prob.jsonl"
@@ -91,7 +94,10 @@ def exp(model_type, target_vector_name):
     args.random_seed = 42
     args.subword_prob_eps = 0.01
     args.subword_weight_threshold = None
-    args.subword_prob_normalize_emb = False  # TODO: investigate if we need to toogle this
+    if args.model_type == 'pbosn':
+        args.normalize_semb = True
+    else:
+        args.normalize_semb = False
 
     # prediction & evaluation
     args.pred_path = f"{args.results_dir}/vectors.txt"
@@ -111,11 +117,17 @@ def exp(model_type, target_vector_name):
 
 
 if __name__ == '__main__':
+    model_types = ('pbosn', 'pbos', 'bos', )
+    target_vector_names = ("polyglot", "google", )  # "glove")
+    
+    for target_vector_name in target_vector_names:  # avoid race condition 
+        prepare_en_target_vector_paths(target_vector_name)
+
     with mp.Pool() as pool:
         results = [
             pool.apply_async(exp, (model_type, target_vector_name))
-            for model_type in ('pbos', ) # 'bos', )
-            for target_vector_name in ("polyglot", "google", )  # "glove")
+            for model_type in model_types
+            for target_vector_name in target_vector_names
         ]
 
         for r in results:
