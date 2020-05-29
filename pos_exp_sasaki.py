@@ -1,10 +1,11 @@
 import multiprocessing as mp
+import subprocess as sp
 from pathlib import Path
 
 from datasets.polyglot_emb import prepare_polyglot_emb_paths, languages
 from datasets.polyglot_freq import prepare_polyglot_freq_paths
 from datasets.ud import prepare_ud_paths
-from sasaki_utils import inference, train, evaluate_pos, prepare_codecs_path
+from sasaki_utils import inference, train, prepare_codecs_path
 
 
 def exp(lang):
@@ -26,10 +27,15 @@ def exp(lang):
     )
 
     result_emb_path = inference(model_info, ud_vocab_path)
-    score = evaluate_pos(ud_data_path, result_emb_path, C=70)
 
     with open(result_path / "score.txt", "w") as f:
-        print(f"score for {lang} = {score}", file=f)
+        cmd = f"""
+            python pos_eval.py \
+            --dataset {ud_data_path} \
+            --embeddings {result_emb_path} \
+            --C {70} \
+        """.split()
+        sp.call(cmd, stdout=f)
 
 
 if __name__ == "__main__":

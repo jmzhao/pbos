@@ -73,17 +73,6 @@ def inference(model_info, query_path):
     return result_path / f"inference_embedding_epoch{epoch}" / "embedding.txt"
 
 
-def evaluate_pos(ud_data_path, ud_vocab_embedding_path, C):
-    cmd = f"""
-        python pos_eval.py \
-        --dataset {ud_data_path} \
-        --embeddings {ud_vocab_embedding_path} \
-        --C {C} \
-    """.split()
-    output = sp.check_output(cmd)
-    return output.decode('utf-8')
-
-
 def prepare_codecs_path(ref_vec_path, result_path, n_min=3, n_max=30):
     """
     See https://github.com/losyer/compact_reconstruction/tree/master/src/preprocess
