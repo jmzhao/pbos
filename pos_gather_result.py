@@ -5,7 +5,7 @@ A simple script to gather the result for POS
 from pathlib import Path
 from pos_exp import model_types
 
-pos_result_dir = Path("results") / "polyglot"
+pos_result_dir = Path("results") / "pos"
 
 
 def get_acc(lang, model_type):
