@@ -18,6 +18,7 @@ def get_acc(lang, model_type):
         _, acc = last_line.split(":")
         return acc.strip()
 
+
 if __name__ == "__main__":
     print("lang", *model_types, sep="\t")
     for lang in sorted(pos_result_dir.iterdir()):

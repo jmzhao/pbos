@@ -3,8 +3,6 @@ import subprocess as sp
 from utils import dotdict
 import json
 
-
-
 def train(
         emb_path,
         result_path,
@@ -73,21 +71,6 @@ def evaluate_pos(ud_data_path, ud_vocab_embedding_path, C):
     """.split()
     output = sp.check_output(cmd)
     return output.decode('utf-8')
-
-
-def train_demo():
-    emb_path = "./compact_reconstruction/resources/crawl-300d-2M-subword.vec"
-    freq_path = "./compact_reconstruction/resources/freq_count.crawl-300d-2M-subword.vec"
-    codecs_path = "./compact_reconstruction/resources/ngram_dic.max30.min3"
-    result_path = f"results/compact_reconstruction/example"
-    train(
-        emb_path,
-        result_path,
-        freq_path=freq_path,
-        codecs_path=codecs_path,
-        embed_dim=300,
-        use_hash=False,
-    )
 
 
 def get_latest_in_dir(dir_path):
