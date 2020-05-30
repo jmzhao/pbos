@@ -48,23 +48,23 @@ def evaluate_ws_affix(args):
         sp.call(f"python affix_eval.py --embeddings {args.pred_path}".split(), stdout=fout)
 
 
-def exp(model_type, target_vector_name):
+def exp(model_type, target_vector_name, wb, minmax):
     target_vector_paths = prepare_en_target_vector_paths(target_vector_name)
     args = dotdict()
 
     # misc
-    args.results_dir = f"results/ws_affix/{target_vector_name}_{model_type}"
+    args.results_dir = f"results/ws_affix_trial/{target_vector_name}_{model_type}_wb{wb}_minmax{minmax}"
     args.model_type = model_type
     args.log_level = "INFO"
 
     # subword
-    if args.model_type == 'pbosn':
-        args.word_boundary = True
-    else:
-        args.word_boundary = False
+    # if args.model_type == 'pbosn':
+    #     args.word_boundary = True
+    # else:
+    args.word_boundary = wb
     args.subword_min_count = None
     args.subword_uniq_factor = None  # TODO: investigate if we need to set this to 0.8
-    if model_type == 'bos':
+    if model_type == 'bos' or minmax:
         args.subword_min_len = 3
         args.subword_max_len = 6
     elif model_type in ('pbos', 'pbosn'):
@@ -117,7 +117,7 @@ def exp(model_type, target_vector_name):
 
 
 if __name__ == '__main__':
-    model_types = ('pbosn', 'pbos', 'bos', )
+    model_types = ('pbos', )  # 'pbos', 'bos', )
     target_vector_names = ("polyglot", "google", )  # "glove")
 
     for target_vector_name in target_vector_names:  # avoid race condition
@@ -125,9 +125,11 @@ if __name__ == '__main__':
 
     with mp.Pool() as pool:
         results = [
-            pool.apply_async(exp, (model_type, target_vector_name))
+            pool.apply_async(exp, (model_type, target_vector_name, wb, minmax))
             for model_type in model_types
             for target_vector_name in target_vector_names
+            for wb in (True, False)
+            for minmax in (True, False)
         ]
 
         for r in results:
