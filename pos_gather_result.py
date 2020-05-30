@@ -3,7 +3,6 @@ A simple script to gather the result for POS
 """
 
 from pathlib import Path
-from pos_exp import model_types
 
 pos_result_dir = Path("results") / "pos"
 
@@ -20,6 +19,8 @@ def get_acc(lang, model_type):
 
 
 if __name__ == "__main__":
+    model_types = ("sasaki", "bos", "pbos", "pbosn", )
+
     print("lang", *model_types, sep="\t")
     for lang in sorted(pos_result_dir.iterdir()):
         print(lang.name, *(get_acc(lang, m) for m in model_types), sep="\t")
