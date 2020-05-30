@@ -1,13 +1,12 @@
 import gzip
-import json
 import logging
+import os
 import shutil
 import subprocess as sp
-import os
 
-from utils import dotdict
+from datasets.utils import save_emb, save_words
 from load import load_embedding
-
+from utils import dotdict
 
 logger = logging.getLogger(__name__)
 
@@ -46,35 +45,17 @@ def prepare_google_paths(
             f"python {dir_path}/converter.py --input {bin_emb_path} --output {txt_emb_path}".split()
         )
 
-    if not os.path.exists(w2v_path):
-        vocab, emb = load_embedding(txt_emb_path)
-        with open(w2v_path, "w") as fout:
-            print(len(vocab), len(emb[0]), file=fout)
-            for v, e in zip(vocab, emb):
-                print(v, *e, file=fout)
-
-    if not os.path.exists(word_list_path):
-        with open(txt_emb_path) as fin, open(word_list_path, "w") as fout:
-            for line in fin:
-                print(line.split()[0], file=fout)
-
-    if not os.path.exists(word_freq_path):
-        with open(txt_emb_path) as fin, open(word_freq_path, "w") as fout:
-            for line in fin:
-                print(json.dumps((line.split()[0], 1)), file=fout)
-
-    if not os.path.exists(raw_count_path):
-            with open(txt_emb_path) as fin, open(raw_count_path, "w") as fout:
-                for line in fin:
-                    print(line.split()[0], 1, file=fout, sep='\t')
+    vocab, emb = load_embedding(txt_emb_path)
+    save_emb(vocab, emb, w2v_emb_path=w2v_path)
+    save_words(vocab, word_list_path=word_list_path, word_freq_path=word_freq_path, raw_count_path=raw_count_path)
 
     return dotdict(
         dir_path=dir_path,
-        gz_path = gz_path,
-        bin_emb_path = bin_emb_path,
-        txt_emb_path = txt_emb_path,
-        word_list_path = word_list_path,
-        word_freq_path = word_freq_path,
-        w2v_path = w2v_path,
-        raw_count_path = raw_count_path,
+        gz_path=gz_path,
+        bin_emb_path=bin_emb_path,
+        txt_emb_path=txt_emb_path,
+        word_list_path=word_list_path,
+        word_freq_path=word_freq_path,
+        w2v_path=w2v_path,
+        raw_count_path=raw_count_path,
     )
