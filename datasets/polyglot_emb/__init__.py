@@ -62,7 +62,7 @@ def _prepare_polyglot_normalized_en_paths(dir_path=dir_path):
     raw_vocab, raw_emb = load_embedding(raw_en_emb_paths.pkl_path)
     vocab, emb = [], []
 
-    for w, e in (raw_vocab, raw_emb):
+    for w, e in zip(raw_vocab, raw_emb):
         if is_normal(w):
             vocab.append(w)
             emb.append(e)
@@ -87,6 +87,7 @@ languages = [
 ]
 
 if __name__ == '__main__':
+    logging.basicConfig(level=logging.INFO)
     for language_code in languages:
         prepare_polyglot_emb_paths(language_code)
 

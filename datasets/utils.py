@@ -23,7 +23,7 @@ def save_emb(vocab, emb, w2v_emb_path=None, txt_emb_path=None, pkl_emb_path=None
 
     if pkl_emb_path and not os.path.exists(pkl_emb_path):
         logger.info("generating pkl emb file...")
-        with open(pkl_emb_path, "w") as fout:
+        with open(pkl_emb_path, "bw") as fout:
             pickle.dump((vocab, emb), fout)
 
 
