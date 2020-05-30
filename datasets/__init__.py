@@ -43,8 +43,8 @@ def prepare_en_target_vector_paths(target_vector_name):
     if target_vector_name.lower() == "google":
         return prepare_google_paths()
     if target_vector_name.lower() == "polyglot":
-        return _prepare_polyglot_normalized_en_paths()
-        # return prepare_polyglot_emb_paths("en")  # uncomment this if want to use the raw emb
+        # return _prepare_polyglot_normalized_en_paths()
+        return prepare_polyglot_emb_paths("en")
     if target_vector_name.lower() == "glove":
         return prepare_glove_paths()
     raise NotImplementedError
