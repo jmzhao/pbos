@@ -20,7 +20,6 @@ word_freq_path = f"{dir_path}/word_freq.jsonl"
 raw_count_path = f"{dir_path}/word_freq.txt"
 
 
-
 def prepare_google_paths(
     dir_path = dir_path,
     gz_path = gz_path,
