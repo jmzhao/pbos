@@ -11,11 +11,11 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import logging
+import math
+import os
 
 import numpy as np
 from scipy import stats
-import os
-import math
 
 logger = logging.getLogger(__name__)
 
@@ -120,7 +120,7 @@ def eval_ws(modelPath, dataPath, lower, oov_handling="drop"):
         corr[0] * 100,
         math.ceil(drop / nwords * 100.0),
         oov_handling,
-        lower
+        "T" if lower else "F"
     )
 
 
