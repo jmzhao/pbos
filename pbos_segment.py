@@ -33,6 +33,8 @@ parser.add_argument('--subword_weight_threshold', '-swt', type=float,
                     help="the minimum weight of a subword to be considered")
 parser.add_argument('--interactive', '-i', action='store_true',
                     help="interactive mode")
+parser.add_argument('--latex', action='store_true',
+                    help="output latex")
 add_subword_args(parser)
 add_subword_prob_args(parser)
 add_subword_vocab_args(parser)
@@ -113,37 +115,64 @@ get_subword_prob=partial(
     eps=args.subword_prob_eps,
 )
 
+
 def test_word(w):
     if args.word_boundary:
         w = '<' + w + '>'
 
     p_prefix = calc_prefix_prob(w, get_subword_prob)
-    logging.info("p_prefix: " + '\t'.join(f"{x:.5e}" for x in p_prefix))
     p_suffix = calc_prefix_prob(w[::-1], get_subword_prob)[::-1]
-    logging.info("p_suffix: " + '\t'.join(f"{x:.5e}" for x in p_suffix))
 
-    print("top segmentations:")
     adjmat = [[None for __ in range(len(w) + 1)] for _ in range(len(w) + 1)]
     for i in range(len(w)):
         for j in range(i + 1, len(w) + 1):
             adjmat[i][j] = - math.log(max(1e-100, get_subword_prob(w[i:j])))
     segs = nshortest(adjmat, args.n_largest)
-    for score, seg in segs:
-        print("{:.5e} : {}".format(math.exp(-score), '/'.join(w[i:j] for i, j in zip(seg, seg[1:]))))
+    seg_score_dict = {
+        '/'.join(w[i:j] for i, j in zip(seg, seg[1:])) : score
+        for score, seg in segs
+    }
 
-    print("top subword weights:")
     subword_weights = calc_subword_weights(
         w,
         subword_vocab=subword_vocab,
         get_subword_prob=get_subword_prob,
         weight_threshold=args.subword_weight_threshold,
     )
-    for sub, weight in islice(sorted(subword_weights.items(), key=lambda t: t[1], reverse=True), args.n_largest):
-        print("{:.5e} : {}".format(weight, sub))
+
+    sub_weight_dict = {
+        sub : weight
+        for sub, weight in islice(sorted(subword_weights.items(), key=lambda t: t[1], reverse=True), args.n_largest)
+    }
+
+    return p_prefix, p_suffix, seg_score_dict, sub_weight_dict
+
 
 for w in test_words:
-    print("Word:", w)
-    test_word(w)
+    p_prefix, p_suffix, seg_score_dict, sub_weight_dict = test_word(w)
+
+    if args.latex:
+        top_seg_str = ", ".join(f"{seg} ({score:.3f})" for seg, score in seg_score_dict.items())
+        sub_weight_str = ", ".join(f"{sub} ({weight:.3f})" for sub, weight in sub_weight_dict.items())
+        print(f"{w} & {top_seg_str} & {sub_weight_str} \\\\")
+
+    else:
+
+        print("Word:", w)
+
+        logging.info("p_prefix: " + '\t'.join(f"{x:.5e}" for x in p_prefix))
+        logging.info("p_suffix: " + '\t'.join(f"{x:.5e}" for x in p_suffix))
+
+        print("top segmentations:")
+        for seg, score in seg_score_dict.items():
+            print("{:.5e} : {}".format(math.exp(-score), seg))
+
+        print("top subword weights:")
+        for sub, weight in sub_weight_dict.items():
+            print("{:.5e} : {}".format(weight, sub))
+
+
+
 
 if args.interactive:
     while True:
