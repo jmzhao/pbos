@@ -1,9 +1,10 @@
 import argparse
-from importlib import import_module
-from itertools import islice
 import json
 import math
+from importlib import import_module
+from itertools import islice
 
+from datasets import prepare_en_target_vector_paths
 from nshortest import nshortest
 from pbos import *
 from subwords import (
@@ -14,6 +15,7 @@ from subwords import (
     build_subword_prob,
 )
 from utils import file_tqdm, normalize_prob
+from utils.args import add_logging_args, set_logging_config, dump_args
 
 parser = argparse.ArgumentParser("PboS segmenter and subword weigher.",
     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -73,14 +75,7 @@ logger.info(f"building subword vocab from `{args.vocab_word_freq}`...")
 if args.vocab_word_freq is None:
     subword_vocab = set(subword_prob)
 else:
-    if args.vocab_word_freq.lower().startswith("google"):
-        word_freq_path = import_module("datasets.google")\
-            .prepare_google_paths().word_freq_path
-    elif args.vocab_word_freq.lower().startswith("polyglot"):
-        word_freq_path = import_module("datasets.polyglot_emb")\
-            .prepare_polyglot_emb_paths('en').word_freq_path
-    else:
-        raise ValueError(f"args.vocab_word_freq=`{args.vocab_word_freq}` not supported.")
+    word_freq_path = prepare_en_target_vector_paths(args.vocab_word_freq).word_freq_path
     with open(word_freq_path) as fin:
         word_count_iter = (json.loads(line) for line in file_tqdm(fin))
         subword_counter = build_subword_counter(
