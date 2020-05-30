@@ -4,7 +4,7 @@ import math
 from importlib import import_module
 from itertools import islice
 
-from datasets import prepare_en_target_vector_paths
+from datasets import prepare_en_target_vector_paths, target_vector_names
 from nshortest import nshortest
 from pbos import *
 from subwords import (
@@ -23,7 +23,7 @@ parser.add_argument('--prob_word_freq', default="unigram_freq",
                     choices=["unigram_freq"],
                     help="list of words to create subword prob")
 parser.add_argument('--vocab_word_freq',
-                    choices=["google", "polyglot"],
+                    choices=target_vector_names,
                     help="list of words to create subword vocab")
 parser.add_argument('--n_largest', '-n', type=int, default=20,
                     help="the number of segmentations to show")
