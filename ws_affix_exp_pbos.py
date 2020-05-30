@@ -53,7 +53,7 @@ def exp(model_type, target_vector_name, wb, minmax):
     args = dotdict()
 
     # misc
-    args.results_dir = f"results/ws_affix_trial/{target_vector_name}_{model_type}_wb{wb}_minmax{minmax}"
+    args.results_dir = f"results/ws_affix_new_poly/{target_vector_name}_{model_type}_wb{wb}_minmax{minmax}"
     args.model_type = model_type
     args.log_level = "INFO"
 
