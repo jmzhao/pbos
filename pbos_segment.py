@@ -115,6 +115,7 @@ get_subword_prob=partial(
     eps=args.subword_prob_eps,
 )
 
+
 def test_word(w):
     if args.word_boundary:
         w = '<' + w + '>'
@@ -146,21 +147,29 @@ def test_word(w):
 
     return p_prefix, p_suffix, seg_score_dict, sub_weight_dict
 
+
 for w in test_words:
     p_prefix, p_suffix, seg_score_dict, sub_weight_dict = test_word(w)
 
-    print("Word:", w)
+    if args.latex:
+        top_seg_str = ", ".join(f"{seg} ({score:.3f})" for seg, score in seg_score_dict.items())
+        sub_weight_str = ", ".join(f"{sub} ({weight:.3f})" for sub, weight in sub_weight_dict.items())
+        print(f"{w} & {top_seg_str} & {sub_weight_str} \\\\")
 
-    logging.info("p_prefix: " + '\t'.join(f"{x:.5e}" for x in p_prefix))
-    logging.info("p_suffix: " + '\t'.join(f"{x:.5e}" for x in p_suffix))
+    else:
 
-    print("top segmentations:")
-    for seg, score in seg_score_dict.items():
-        print("{:.5e} : {}".format(math.exp(-score), seg))
+        print("Word:", w)
 
-    print("top subword weights:")
-    for sub, weight in sub_weight_dict.items():
-        print("{:.5e} : {}".format(weight, sub))
+        logging.info("p_prefix: " + '\t'.join(f"{x:.5e}" for x in p_prefix))
+        logging.info("p_suffix: " + '\t'.join(f"{x:.5e}" for x in p_suffix))
+
+        print("top segmentations:")
+        for seg, score in seg_score_dict.items():
+            print("{:.5e} : {}".format(math.exp(-score), seg))
+
+        print("top subword weights:")
+        for sub, weight in sub_weight_dict.items():
+            print("{:.5e} : {}".format(weight, sub))
 
 
 
