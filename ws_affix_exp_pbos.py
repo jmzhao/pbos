@@ -119,8 +119,8 @@ def exp(model_type, target_vector_name):
 if __name__ == '__main__':
     model_types = ('pbosn', 'pbos', 'bos', )
     target_vector_names = ("polyglot", "google", )  # "glove")
-    
-    for target_vector_name in target_vector_names:  # avoid race condition 
+
+    for target_vector_name in target_vector_names:  # avoid race condition
         prepare_en_target_vector_paths(target_vector_name)
 
     with mp.Pool() as pool:
