@@ -3,10 +3,14 @@ import logging
 import os
 import pickle
 
+import numpy as np
+
 logger = logging.getLogger(__name__)
 
 
 def save_emb(vocab, emb, w2v_emb_path=None, txt_emb_path=None, pkl_emb_path=None):
+    emb = emb if isinstance(emb, np.ndarray) else np.array(emb)
+
     if w2v_emb_path and not os.path.exists(w2v_emb_path):
         logger.info("generating w2v emb file...")
         with open(w2v_emb_path, "w") as fout:
