@@ -42,7 +42,7 @@ def prepare_google_paths(
             shutil.copyfileobj(fin, fout)
 
     if not os.path.exists(pkl_emb_path):
-        logging.info("loading pre-trained google news vectors...")
+        logger.info("loading pre-trained google news vectors...")
         model = gensim.models.KeyedVectors.load_word2vec_format(bin_emb_path, binary=True)
         vocab, emb = clean_target_emb(raw_vocab=list(model.vocab), raw_emb=model.vectors)
         save_target_dataset(vocab, emb, pkl_emb_path=pkl_emb_path)

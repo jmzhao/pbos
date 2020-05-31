@@ -110,7 +110,7 @@ def exp(model_type, target_vector_name, wb):
     os.makedirs(args.results_dir, exist_ok=True)
 
     # redirect log output
-    log_file = open(f"{args.results_dir}/log.txt", "w+")
+    log_file = open(f"{args.results_dir}/info.log", "w+")
     logging.basicConfig(level=logging.INFO, stream=log_file)
     dump_args(args)
 
