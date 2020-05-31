@@ -121,8 +121,8 @@ def exp(model_type, target_vector_name, wb):
 
 
 if __name__ == '__main__':
-    model_types = ('bos', 'pbos', )
-    target_vector_names = ("polyglot_clean", "polyglot") 
+    model_types = ('pbos', "bos")
+    target_vector_names = ("polyglot_clean", "google")
 
     for target_vector_name in target_vector_names:  # avoid race condition
         prepare_en_target_vector_paths(target_vector_name)

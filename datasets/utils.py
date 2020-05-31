@@ -88,7 +88,7 @@ def save_target_dataset(
 
 
 def _is_word(w):
-    return w.isalpha() and w.isascii() and w.islower()
+    return w.isalpha() and w.isascii() # and w.islower()
 
 
 def clean_target_emb(raw_vocab, raw_emb):
