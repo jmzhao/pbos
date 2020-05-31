@@ -29,6 +29,8 @@ parser.add_argument('--n_largest', '-n', type=int, default=20,
                     help="the number of segmentations to show")
 parser.add_argument('--subword_prob_eps', '-spe', type=float, default=1e-2,
                     help="the infinitesimal prob for unseen subwords")
+parser.add_argument('--subword_weight_normalize', '-swn', action='store_true',
+                    help="normalze all final subword weights (a_{s|w})")
 parser.add_argument('--subword_weight_threshold', '-swt', type=float,
                     help="the minimum weight of a subword to be considered")
 parser.add_argument('--interactive', '-i', action='store_true',
@@ -70,6 +72,7 @@ subword_prob = build_subword_prob(
     normalize_prob=normalize_prob,
     # normalize_prob=revised_normalize, ## trial
     min_prob=args.subword_prob_min_prob,
+    take_root=args.subword_prob_take_root,
 )
 logger.info(f"subword prob size: {len(subword_prob)}")
 
@@ -121,7 +124,7 @@ def test_word(w):
         w = '<' + w + '>'
 
     p_prefix = calc_prefix_prob(w, get_subword_prob)
-    p_suffix = calc_prefix_prob(w[::-1], get_subword_prob)[::-1]
+    p_suffix = calc_prefix_prob(w, get_subword_prob, backward=True)
 
     adjmat = [[None for __ in range(len(w) + 1)] for _ in range(len(w) + 1)]
     for i in range(len(w)):
@@ -138,6 +141,7 @@ def test_word(w):
         subword_vocab=subword_vocab,
         get_subword_prob=get_subword_prob,
         weight_threshold=args.subword_weight_threshold,
+        normalize=args.subword_weight_normalize,
     )
 
     sub_weight_dict = {

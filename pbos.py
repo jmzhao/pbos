@@ -29,6 +29,7 @@ def calc_subword_weights(
     subword_vocab,
     get_subword_prob=None,
     weight_threshold=None,
+    normalize=True,
 ):
     subword_weights = {}
     if get_subword_prob:
@@ -41,6 +42,13 @@ def calc_subword_weights(
                     p_sub = get_subword_prob(sub) * p_prefix[i] * p_suffix[j]
                     subword_weights.setdefault(sub, 0)
                     subword_weights[sub] += p_sub
+        if normalize:
+            subword_weights = normalize_prob(subword_weights)
+        else:
+            for k in subword_weights:
+                 subword_weights[k] /= p_prefix[-1]
+        if weight_threshold:
+            subword_weights = {k : v for k, v in subword_weights.items() if v > weight_threshold}
     else:
         for j in range(1, len(w) + 1):
             for i in range(j):
@@ -48,13 +56,11 @@ def calc_subword_weights(
                 if sub in subword_vocab:
                     subword_weights.setdefault(sub, 0)
                     subword_weights[sub] += 1
+        subword_weights = normalize_prob(subword_weights)
 
     if len(subword_weights) == 0:
         logger.warning(f"no qualified subwords for '{w}'")
         return {}
-    subword_weights = normalize_prob(subword_weights)
-    if get_subword_prob and weight_threshold:
-        subword_weights = {k : v for k, v in subword_weights.items() if v > weight_threshold}
 
     return subword_weights
 
