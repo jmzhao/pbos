@@ -4,7 +4,9 @@ import os
 import shutil
 import subprocess as sp
 
-from datasets.utils import save_emb, save_words
+import gensim
+
+from datasets.utils import save_emb, save_words, is_word
 from load import load_embedding
 from utils import dotdict
 
@@ -21,16 +23,15 @@ raw_count_path = f"{dir_path}/word_freq.txt"
 
 
 def prepare_google_paths(
-    dir_path = dir_path,
-    gz_path = gz_path,
-    bin_emb_path = bin_emb_path,
-    txt_emb_path = txt_emb_path,
-    word_list_path = word_list_path,
-    word_freq_path = word_freq_path,
-    w2v_path = w2v_path,
-    raw_count_path = raw_count_path,
+    dir_path=dir_path,
+    gz_path=gz_path,
+    bin_emb_path=bin_emb_path,
+    txt_emb_path=txt_emb_path,
+    word_list_path=word_list_path,
+    word_freq_path=word_freq_path,
+    w2v_path=w2v_path,
+    raw_count_path=raw_count_path,
 ):
-
     if not os.path.exists(gz_path):
         url = "https://s3.amazonaws.com/dl4j-distribution/GoogleNews-vectors-negative300.bin.gz"
         sp.run(f"wget -O {gz_path} {url}".split())
@@ -40,9 +41,16 @@ def prepare_google_paths(
             shutil.copyfileobj(fin, fout)
 
     if not os.path.exists(txt_emb_path):
-        sp.run(
-            f"python {dir_path}/converter.py --input {bin_emb_path} --output {txt_emb_path}".split()
-        )
+        # Load Google's pre-trained Word2Vec model.
+        logging.info("loading...")
+        model = gensim.models.KeyedVectors.load_word2vec_format(bin_emb_path, binary=True)
+
+        logging.info("normalizing...")
+        vocab, emb = [], []
+        for w in model.vocab:
+            if is_word(w):
+                vocab.append(w)
+                emb.append(model[w])
 
     vocab, emb = load_embedding(txt_emb_path)
     save_emb(vocab, emb, w2v_emb_path=w2v_path)
@@ -58,3 +66,8 @@ def prepare_google_paths(
         w2v_path=w2v_path,
         raw_count_path=raw_count_path,
     )
+
+
+if __name__ == '__main__':
+    logging.basicConfig(level=logging.INFO)
+    prepare_google_paths()
