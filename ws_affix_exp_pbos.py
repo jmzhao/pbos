@@ -53,7 +53,7 @@ def exp(model_type, target_vector_name):
     args = dotdict()
 
     # misc
-    args.results_dir = f"results/ws_affix/{target_vector_name}_{model_type}"
+    args.results_dir = f"results/ws_affix_weight_norm_F/{target_vector_name}_{model_type}"
     args.model_type = model_type
     args.log_level = "INFO"
 
@@ -98,7 +98,7 @@ def exp(model_type, target_vector_name):
         args.normalize_semb = True
     else:
         args.normalize_semb = False
-    args.subword_weight_normalize = True
+    args.subword_weight_normalize = False
 
     # prediction & evaluation
     args.pred_path = f"{args.results_dir}/vectors.txt"
