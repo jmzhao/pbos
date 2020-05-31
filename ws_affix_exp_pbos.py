@@ -45,7 +45,7 @@ def evaluate_ws_affix(args):
             for lower in (True, False):
                 print(eval_ws(args.pred_path, bench_path, lower=lower, oov_handling='zero'), file=fout)
 
-        sp.call(f"python affix_eval.py --embeddings {args.pred_path}".split(), stdout=fout)
+        # sp.call(f"python affix_eval.py --embeddings {args.pred_path} --lower".split(), stdout=fout)
 
 
 def exp(model_type, target_vector_name):
@@ -89,7 +89,7 @@ def exp(model_type, target_vector_name):
     args.target_vectors = target_vector_paths.txt_emb_path
     args.model_path = f"{args.results_dir}/model.pkl"
     args.epochs = 50
-    args.lr = 0.001
+    args.lr = 0.1
     args.lr_decay = True
     args.random_seed = 42
     args.subword_prob_eps = 0.01
@@ -118,8 +118,8 @@ def exp(model_type, target_vector_name):
 
 
 if __name__ == '__main__':
-    model_types = ('pbos',)
-    target_vector_names = ("polyglot", ) # "google",)  # "glove")
+    model_types = ('bos',)
+    target_vector_names = ("polyglot_normalized", ) # "google",)  # "glove")
 
     for target_vector_name in target_vector_names:  # avoid race condition
         prepare_en_target_vector_paths(target_vector_name)

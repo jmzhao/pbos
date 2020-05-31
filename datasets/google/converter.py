@@ -21,7 +21,7 @@ logging.info("normalizing...")
 _words = []
 for w in tqdm(model.vocab):
     aw = unicodedata.normalize("NFKD", w).encode("ASCII", "ignore")
-    if 20 > len(aw) > 1 and not any(c in w for c in " _./") and aw.islower():
+    if 20 > len(aw) > 1 and not any(c in w for c in " _./\\#:,") and aw.islower():
         _words.append((aw, w))
 
 embeddings = [model[w] for aw, w in _words]
