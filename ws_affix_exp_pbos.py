@@ -87,7 +87,10 @@ def exp(model_type, target_vector_name):
     args.model_path = f"{args.results_dir}/model.pkl"
     args.subword_weight_threshold = None
     args.normalize_semb = args.model_type in ('pbosn',)
-    args.subword_weight_normalize = False
+    if model_types in ("pbos", ):
+        args.subword_weight_normalize = False
+    else:
+        args.subword_weight_normalize = True
     args.random_seed = 42
     args.subword_prob_eps = 0.01
     args.epochs = 50
