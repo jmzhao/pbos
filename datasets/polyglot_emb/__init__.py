@@ -4,8 +4,7 @@ import shutil
 import subprocess as sp
 import tarfile
 
-from datasets.utils import save_emb, save_words, clean_target_emb
-
+from datasets.utils import save_target_dataset, clean_target_emb, convert_target_dataset
 from load import load_embedding
 from utils import dotdict
 
@@ -35,18 +34,24 @@ def prepare_polyglot_emb_paths(language_code, *, dir_path=dir_path):
             src_file = tar.extractfile("./words_embeddings_32.pkl")
             shutil.copyfileobj(src_file, dst_file)
 
-    vocab, emb = load_embedding(pkl_emb_path)
-    save_emb(vocab, emb, w2v_emb_path=w2v_emb_path, txt_emb_path=txt_emb_path)
-    save_words(vocab, word_freq_path=word_freq_path)
+    convert_target_dataset(
+        input_emb_path=pkl_emb_path,
+
+        txt_emb_path=txt_emb_path,
+        w2v_emb_path=w2v_emb_path,
+
+        word_freq_path=word_freq_path,
+    )
 
     return dotdict(
         dir_path=dir_path,
         language_dir_path=language_dir_path,
         tar_path=tar_path,
+
         pkl_emb_path=pkl_emb_path,
-        word_freq_path=word_freq_path,
         w2v_emb_path=w2v_emb_path,
-        txt_emb_path=txt_emb_path
+        txt_emb_path=txt_emb_path,
+        word_freq_path=word_freq_path,
     )
 
 
@@ -59,18 +64,27 @@ def prepare_polyglot_clear_en_paths(dir_path=dir_path):
     txt_emb_path = os.path.join(language_dir_path, "embeddings.clear.txt")
     word_freq_path = os.path.join(language_dir_path, "word_freq.clear.jsonl")
 
-    raw_vocab, raw_emb = load_embedding(raw_en_emb_paths.pkl_emb_path)
-    vocab, emb = clean_target_emb(raw_vocab, raw_emb)
-    save_emb(vocab, emb, w2v_emb_path=w2v_emb_path, txt_emb_path=txt_emb_path, pkl_emb_path=pkl_emb_path)
-    save_words(vocab, word_freq_path=word_freq_path)
+    if not os.path.exists(pkl_emb_path):
+        raw_vocab, raw_emb = load_embedding(raw_en_emb_paths.pkl_emb_path)
+        vocab, emb = clean_target_emb(raw_vocab, raw_emb)
+        save_target_dataset(vocab, emb, pkl_emb_path=pkl_emb_path)
+
+    convert_target_dataset(
+        input_emb_path=pkl_emb_path,
+
+        txt_emb_path=txt_emb_path,
+        w2v_emb_path=w2v_emb_path,
+
+        word_freq_path=word_freq_path,
+    )
 
     return dotdict(
         dir_path=dir_path,
         language_dir_path=language_dir_path,
         pkl_emb_path=pkl_emb_path,
-        word_freq_path=word_freq_path,
         w2v_emb_path=w2v_emb_path,
-        txt_emb_path=txt_emb_path
+        txt_emb_path=txt_emb_path,
+        word_freq_path=word_freq_path,
     )
 
 

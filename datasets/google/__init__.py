@@ -5,9 +5,8 @@ import shutil
 import subprocess as sp
 
 import gensim
-from datasets.utils import save_emb, clean_target_emb
 
-from datasets.convert import convert_target_dataset
+from datasets.utils import save_target_dataset, clean_target_emb, convert_target_dataset
 from utils import dotdict
 
 logger = logging.getLogger(__name__)
@@ -46,7 +45,7 @@ def prepare_google_paths(
         logging.info("loading pre-trained google news vectors...")
         model = gensim.models.KeyedVectors.load_word2vec_format(bin_emb_path, binary=True)
         vocab, emb = clean_target_emb(raw_vocab=list(model.vocab), raw_emb=model.vectors)
-        save_emb(vocab, emb, pkl_emb_path=pkl_emb_path)
+        save_target_dataset(vocab, emb, pkl_emb_path=pkl_emb_path)
 
     convert_target_dataset(
         input_emb_path=pkl_emb_path,
