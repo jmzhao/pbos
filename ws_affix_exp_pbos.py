@@ -48,17 +48,17 @@ def evaluate_ws_affix(args):
         # sp.call(f"python affix_eval.py --embeddings {args.pred_path} --lower".split(), stdout=fout)
 
 
-def exp(model_type, target_vector_name):
+def exp(model_type, target_vector_name, wb):
     target_vector_paths = prepare_en_target_vector_paths(target_vector_name)
     args = dotdict()
 
     # misc
-    args.results_dir = f"results/ws_affix_trial/{target_vector_name}_{model_type}"
+    args.results_dir = f"results/ws_affix_trial/{target_vector_name}_{model_type}_wb{'T' if wb else 'F'}"
     args.model_type = model_type
     args.log_level = "INFO"
 
     # subword
-    args.word_boundary = args.model_type in ('pbosn',)
+    args.word_boundary = wb or args.model_type in ('pbosn',)
     args.subword_min_count = None
     args.subword_uniq_factor = None  # TODO: investigate if we need to set this to 0.8
     if model_type == 'bos':
@@ -94,7 +94,7 @@ def exp(model_type, target_vector_name):
     args.random_seed = 42
     args.subword_prob_eps = 0.01
     args.epochs = 50
-    if target_vector_name == "polyglot_clean":
+    if model_types in ("pbos", ):
         args.lr = 0.1
     else:
         args.lr = 1
@@ -119,16 +119,17 @@ def exp(model_type, target_vector_name):
 
 if __name__ == '__main__':
     model_types = ('bos', 'pbos', )
-    target_vector_names = ("polyglot_clean", "polyglot")  # "google",)  # "glove")
+    target_vector_names = ("polyglot_clean", "polyglot") 
 
     for target_vector_name in target_vector_names:  # avoid race condition
         prepare_en_target_vector_paths(target_vector_name)
 
     with mp.Pool() as pool:
         results = [
-            pool.apply_async(exp, (model_type, target_vector_name))
+            pool.apply_async(exp, (model_type, target_vector_name, wb))
             for model_type in model_types
             for target_vector_name in target_vector_names
+            for wb in (True, False)
         ]
 
         for r in results:
