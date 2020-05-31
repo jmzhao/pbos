@@ -53,7 +53,7 @@ def exp(model_type, target_vector_name):
     args = dotdict()
 
     # misc
-    args.results_dir = f"results/ws_affix/{target_vector_name}_{model_type}"
+    args.results_dir = f"results/ws_affix_trial/{target_vector_name}_{model_type}"
     args.model_type = model_type
     args.log_level = "INFO"
 
@@ -118,8 +118,8 @@ def exp(model_type, target_vector_name):
 
 
 if __name__ == '__main__':
-    model_types = ('bos', 'pbos')
-    target_vector_names = ("polyglot_clean",)  # "google",)  # "glove")
+    model_types = ('bos', 'pbos', 'sasaki')
+    target_vector_names = ("polyglot_clean", "polyglot")  # "google",)  # "glove")
 
     for target_vector_name in target_vector_names:  # avoid race condition
         prepare_en_target_vector_paths(target_vector_name)
