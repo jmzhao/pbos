@@ -1,9 +1,9 @@
 import json
 import logging
+import os
+import subprocess as sp
 import unicodedata
 import zipfile
-import subprocess as sp
-import os
 
 from utils import dotdict, file_tqdm
 
@@ -13,7 +13,7 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 zip_path = f"{dir_path}/glove.840B.300d.zip"
 raw_emb_path = f"{dir_path}/glove.840B.300d.txt"
 txt_emb_path = f"{dir_path}/glove.840B.300d.processed.txt"
-w2v_path = f"{dir_path}/glove.840B.300d.processed.w2v"
+w2v_emb_path = f"{dir_path}/glove.840B.300d.processed.w2v"
 word_freq_path = f"{dir_path}/word_freq.jsonl"
 raw_count_path = f"{dir_path}/word_freq.txt"
 
@@ -26,7 +26,7 @@ def prepare_glove_paths(
     raw_emb_path=raw_emb_path,
     txt_emb_path=txt_emb_path,
     word_freq_path=word_freq_path,
-    w2v_path=w2v_path,
+    w2v_emb_path=w2v_emb_path,
     raw_count_path=raw_count_path,
 ):
     if not os.path.exists(zip_path):
@@ -57,9 +57,9 @@ def prepare_glove_paths(
                     vocab_len += 1
                     fout.write(line)
 
-    if not os.path.exists(w2v_path):
+    if not os.path.exists(w2v_emb_path):
         logger.info("generating w2v emb file...")
-        with open(txt_emb_path) as fin, open(w2v_path, "w") as fout:
+        with open(txt_emb_path) as fin, open(w2v_emb_path, "w") as fout:
             print(vocab_len, emb_dim, file=fout)
             for line in file_tqdm(fin):
                 fout.write(line)
@@ -80,7 +80,7 @@ def prepare_glove_paths(
         dir_path=dir_path,
         raw_emb_path=raw_emb_path,
         txt_emb_path=txt_emb_path,
-        w2v_path=w2v_path,
+        w2v_emb_path=w2v_emb_path,
         word_freq_path=word_freq_path,
         raw_count_path=raw_count_path,
     )

@@ -3,12 +3,11 @@ import multiprocessing as mp
 import os
 import subprocess as sp
 
-from datasets.polyglot_emb import prepare_polyglot_emb_paths
 from datasets.polyglot_emb import languages as all_language_codes
+from datasets.polyglot_emb import prepare_polyglot_emb_paths
 from datasets.polyglot_freq import prepare_polyglot_freq_paths
 from datasets.ud import prepare_ud_paths
 from utils.args import add_logging_args, set_logging_config
-from load import load_embedding
 
 logger = logging.getLogger(__name__)
 
@@ -89,7 +88,7 @@ def evaluate_pbos(language_code, model_type):
             f" training subword model...")
         cmd = f"""
             python pbos_train.py \
-              --target_vectors {polyglot_embeddings_path.pkl_path} \
+              --target_vectors {polyglot_embeddings_path.pkl_emb_path} \
               --model_path {subword_embedding_model_path} \
               --subword_vocab {subword_vocab_path} \
         """
@@ -120,7 +119,7 @@ def evaluate_pbos(language_code, model_type):
             --save {ud_vocab_embedding_path} \
             --model {subword_embedding_model_path} \
         """
-            # --pre_trained {polyglot_embeddings_path.pkl_path} \
+        # --pre_trained {polyglot_embeddings_path.pkl_emb_path} \
         if model_type == 'pbosn':
             cmd += f" --word_boundary"
         sp.call(cmd.split())

@@ -11,7 +11,7 @@ from sasaki_utils import inference, train, prepare_codecs_path
 def exp(language):
     result_path = Path("results") / "pos" / language / "sasaki"
 
-    emb_path = prepare_polyglot_emb_paths(language).w2v_path
+    emb_path = prepare_polyglot_emb_paths(language).w2v_emb_path
     freq_path = prepare_polyglot_freq_paths(language).raw_count_path
     codecs_path = prepare_codecs_path(emb_path, result_path)
     ud_data_path, ud_vocab_path = prepare_ud_paths(language)
