@@ -53,8 +53,8 @@ def save_target_dataset(
         logger.info("generating w2v emb file...")
         with open(w2v_emb_path, "w") as fout:
             print(len(vocab), len(emb[0]), file=fout)
-            for v1, e1 in zip(vocab, emb):
-                print(v1, *e1, file=fout)
+            for v, e in zip(vocab, emb):
+                print(v, *e, file=fout)
 
     if txt_emb_path and not os.path.exists(txt_emb_path):
         logger.info("generating txt emb file...")
