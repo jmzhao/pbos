@@ -2,7 +2,6 @@ import json
 import logging
 import os
 import pickle
-import unicodedata
 
 logger = logging.getLogger(__name__)
 
@@ -47,11 +46,5 @@ def save_words(vocab, word_list_path=None, word_freq_path=None, raw_count_path=N
                 print(word, 1, file=fout, sep='\t')
 
 
-def is_normal(w):
-    """
-    copied from `datasets/google/converter.py`
-    :param w: word
-    :return: if the word is normal
-    """
-    aw = unicodedata.normalize("NFKD", w).encode("ASCII", "ignore")
-    return 20 > len(aw) > 1 and not any(c in w for c in " _./") and aw.islower()
+def is_word(w):
+    return w.isalpha() and w.isascii() and w.islower()

@@ -119,7 +119,7 @@ def exp(model_type, target_vector_name):
 
 if __name__ == '__main__':
     model_types = ('bos',)
-    target_vector_names = ("polyglot_normalized", ) # "google",)  # "glove")
+    target_vector_names = ("polyglot_clear",)  # "google",)  # "glove")
 
     for target_vector_name in target_vector_names:  # avoid race condition
         prepare_en_target_vector_paths(target_vector_name)

@@ -51,7 +51,7 @@ def prepare_polyglot_emb_paths(language_code, *, dir_path=dir_path):
     )
 
 
-def _prepare_polyglot_normalized_en_paths(dir_path=dir_path):
+def prepare_polyglot_clear_en_paths(dir_path=dir_path):
     language_dir_path = os.path.join(dir_path, "en")
     raw_en_emb_paths = prepare_polyglot_emb_paths("en", dir_path=dir_path)
     pkl_path = os.path.join(language_dir_path, "normalized_embeddings.pkl")
@@ -91,4 +91,4 @@ if __name__ == '__main__':
     for language_code in languages:
         prepare_polyglot_emb_paths(language_code)
 
-    _prepare_polyglot_normalized_en_paths()
+    prepare_polyglot_clear_en_paths()
