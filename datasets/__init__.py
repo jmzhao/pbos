@@ -48,7 +48,7 @@ def prepare_en_target_vector_paths(target_vector_name):
     if target_vector_name.lower() == "polyglot":
         return prepare_polyglot_emb_paths("en")
     if target_vector_name.lower() == "polyglot_clean":
-        return prepare_polyglot_clear_en_paths()
+        return prepare_polyglot_clean_en_paths()
     if target_vector_name.lower() == "glove":
         return prepare_glove_paths()
     raise NotImplementedError
