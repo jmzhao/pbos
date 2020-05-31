@@ -58,10 +58,7 @@ def exp(model_type, target_vector_name):
     args.log_level = "INFO"
 
     # subword
-    if args.model_type == 'pbosn':
-        args.word_boundary = True
-    else:
-        args.word_boundary = False
+    args.word_boundary = args.model_type in ('pbosn',)
     args.subword_min_count = None
     args.subword_uniq_factor = None  # TODO: investigate if we need to set this to 0.8
     if model_type == 'bos':
@@ -88,17 +85,17 @@ def exp(model_type, target_vector_name):
     # training
     args.target_vectors = target_vector_paths.txt_emb_path
     args.model_path = f"{args.results_dir}/model.pkl"
-    args.epochs = 50
-    args.lr = 0.1
-    args.lr_decay = True
+    args.subword_weight_threshold = None
+    args.normalize_semb = args.model_type in ('pbosn',)
+    args.subword_weight_normalize = False
     args.random_seed = 42
     args.subword_prob_eps = 0.01
-    args.subword_weight_threshold = None
-    if args.model_type == 'pbosn':
-        args.normalize_semb = True
+    args.epochs = 50
+    if target_vector_name == "polyglot_clear":
+        args.lr = 0.1
     else:
-        args.normalize_semb = False
-    args.subword_weight_normalize = False
+        args.lr = 1
+    args.lr_decay = True
 
     # prediction & evaluation
     args.pred_path = f"{args.results_dir}/vectors.txt"
@@ -118,7 +115,7 @@ def exp(model_type, target_vector_name):
 
 
 if __name__ == '__main__':
-    model_types = ('bos',)
+    model_types = ('bos', 'pbos')
     target_vector_names = ("polyglot_clear",)  # "google",)  # "glove")
 
     for target_vector_name in target_vector_names:  # avoid race condition
