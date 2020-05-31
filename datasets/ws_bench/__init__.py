@@ -29,7 +29,6 @@ def prepare_bench_paths(name):
     raw_txt_path = f"{datasets_dir}/{name}/{binfo['raw_txt_rel_path']}"
     txt_path = f"{datasets_dir}/{name}/{name}.txt"
     query_path = f"{datasets_dir}/{name}/queries.txt"
-    query_lower_path = f"{datasets_dir}/{name}/queries.lower.txt"
 
     if not os.path.exists(raw_txt_path):
         sp.call(
@@ -54,25 +53,19 @@ def prepare_bench_paths(name):
                 # but predicted words remain as they are.
                 print(line, end="", file=fout)
 
-    if not os.path.exists(query_path) or not os.path.exists(query_lower_path):
-        def process(query_path, lower):
-            words = set()
-            with open(txt_path) as f:
-                for line in f:
-                    if lower:
-                        line = line.lower()
-                    w1, w2 = line.split()[:2]
-                    words.add(w1)
-                    words.add(w2)
-            with open(query_path, "w") as fout:
-                for w in words:
-                    print(w, file=fout)
+    if not os.path.exists(query_path):
+        words = set()
+        with open(txt_path) as f:
+            for line in f:
+                w1, w2 = line.split()[:2]
+                words.add(w1)
+                words.add(w2)
+        with open(query_path, "w") as fout:
+            for w in words:
+                print(w, file=fout)
 
-        process(query_path, lower=False)
-        process(query_lower_path, lower=True)
 
     return dotdict(
         txt_path=txt_path,
         query_path=query_path,
-        query_lower_path=query_lower_path
     )
