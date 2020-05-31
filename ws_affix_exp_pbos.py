@@ -85,20 +85,23 @@ def exp(model_type, target_vector_name, wb):
     # training
     args.target_vectors = target_vector_paths.pkl_emb_path
     args.model_path = f"{args.results_dir}/model.pkl"
-    args.subword_weight_threshold = None
-    args.normalize_semb = args.model_type in ('pbosn',)
-    if model_types in ("pbos", ):
-        args.subword_weight_normalize = False
-    else:
-        args.subword_weight_normalize = True
-    args.random_seed = 42
-    args.subword_prob_eps = 0.01
     args.epochs = 50
     if model_types in ("pbos", ):
         args.lr = 0.1
     else:
         args.lr = 1
     args.lr_decay = True
+    args.random_seed = 42
+    args.subword_prob_eps = 0.01
+    args.subword_weight_threshold = None
+    args.normalize_semb = args.model_type in ('pbosn',)
+    if model_types in ("pbos", ):
+        args.subword_weight_normalize = False
+    else:
+        args.subword_weight_normalize = True
+   
+    
+    
 
     # prediction & evaluation
     args.pred_path = f"{args.results_dir}/vectors.txt"
