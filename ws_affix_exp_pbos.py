@@ -91,7 +91,7 @@ def exp(model_type, target_vector_name):
     args.random_seed = 42
     args.subword_prob_eps = 0.01
     args.epochs = 50
-    if target_vector_name == "polyglot_clear":
+    if target_vector_name == "polyglot_clean":
         args.lr = 0.1
     else:
         args.lr = 1
@@ -116,7 +116,7 @@ def exp(model_type, target_vector_name):
 
 if __name__ == '__main__':
     model_types = ('bos', 'pbos')
-    target_vector_names = ("polyglot_clear",)  # "google",)  # "glove")
+    target_vector_names = ("polyglot_clean",)  # "google",)  # "glove")
 
     for target_vector_name in target_vector_names:  # avoid race condition
         prepare_en_target_vector_paths(target_vector_name)

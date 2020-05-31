@@ -3,7 +3,7 @@ import os
 from datasets.affix import prepare_affix_paths
 from datasets.glove import prepare_glove_paths
 from datasets.google import prepare_google_paths
-from datasets.polyglot_emb import prepare_polyglot_emb_paths, prepare_polyglot_clear_en_paths
+from datasets.polyglot_emb import prepare_polyglot_emb_paths, prepare_polyglot_clean_en_paths
 from datasets.ws_bench import BENCHS, prepare_bench_paths
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -39,7 +39,7 @@ def prepare_combined_query_path(
     return combined_query_path
 
 
-target_vector_names = ("google", "polyglot", "polyglot_clear", "glove")
+target_vector_names = ("google", "polyglot", "polyglot_clean", "glove")
 
 
 def prepare_en_target_vector_paths(target_vector_name):
@@ -47,7 +47,7 @@ def prepare_en_target_vector_paths(target_vector_name):
         return prepare_google_paths()
     if target_vector_name.lower() == "polyglot":
         return prepare_polyglot_emb_paths("en")
-    if target_vector_name.lower() == "polyglot_clear":
+    if target_vector_name.lower() == "polyglot_clean":
         return prepare_polyglot_clear_en_paths()
     if target_vector_name.lower() == "glove":
         return prepare_glove_paths()
