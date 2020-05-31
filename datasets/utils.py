@@ -51,34 +51,34 @@ def save_target_dataset(
 ):
     if w2v_emb_path and not os.path.exists(w2v_emb_path):
         logger.info("generating w2v emb file...")
-        with open(w2v_emb_path, "w") as fout5:
-            print(len(vocab), len(emb[0]), file=fout5)
+        with open(w2v_emb_path, "w") as fout:
+            print(len(vocab), len(emb[0]), file=fout)
             for v1, e1 in zip(vocab, emb):
-                print(v1, *e1, file=fout5)
+                print(v1, *e1, file=fout)
 
     if txt_emb_path and not os.path.exists(txt_emb_path):
         logger.info("generating txt emb file...")
-        with open(txt_emb_path, "w") as fout4:
+        with open(txt_emb_path, "w") as fout:
             for v, e in zip(vocab, emb):
-                print(v, *e, file=fout4)
+                print(v, *e, file=fout)
 
     if pkl_emb_path and not os.path.exists(pkl_emb_path):
         logger.info("generating pkl emb file...")
         emb = emb if isinstance(emb, np.ndarray) else np.array(emb)
-        with open(pkl_emb_path, "bw") as fout3:
-            pickle.dump((vocab, emb), fout3)
+        with open(pkl_emb_path, "bw") as fout:
+            pickle.dump((vocab, emb), fout)
 
     if word_list_path and not os.path.exists(word_list_path):
         logger.info("generating word list file...")
-        with open(word_list_path, "w") as fout2:
-            for word2 in vocab:
-                print(word2, file=fout2)
+        with open(word_list_path, "w") as fout:
+            for word in vocab:
+                print(word, file=fout)
 
     if word_freq_path and not os.path.exists(word_freq_path):
         logger.info("generating word freq jsonl file...")
-        with open(word_freq_path, "w") as fout1:
-            for word1 in vocab:
-                print(json.dumps((word1, 1)), file=fout1)
+        with open(word_freq_path, "w") as fout:
+            for word in vocab:
+                print(json.dumps((word, 1)), file=fout)
 
     if raw_count_path and not os.path.exists(raw_count_path):
         logger.info("generating word freq txt file...")
