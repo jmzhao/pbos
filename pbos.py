@@ -1,6 +1,6 @@
+import logging
 from collections import Counter, defaultdict
 from functools import lru_cache, partial
-import logging
 
 import numpy as np
 
@@ -77,6 +77,7 @@ class PBoS:
         eps=1e-2,
         take_root=False,
         normalize_semb=False,
+        subword_weight_normalize=False
     ):
         """
         Params:
@@ -105,6 +106,9 @@ class PBoS:
 
             take_root (default: False) - whether take `** ( 1 / len(sub))` when
                 getting subword prob.
+
+            subword_weight_normalize (default: False) - whether to normalize
+                all final subword weights (a_{s|w})
         """
         self.semb = subword_embedding or defaultdict(float)
         if embedding_dim is None:
@@ -123,6 +127,7 @@ class PBoS:
                 take_root=take_root,
             ) if subword_prob else None,
             weight_threshold=weight_threshold,
+            normalize=subword_weight_normalize
         ))
         self.config = dict(
             embedding_dim=embedding_dim,
@@ -132,6 +137,7 @@ class PBoS:
             subword_vocab=subword_vocab,
             subword_prob=subword_prob,
             normalize_semb=normalize_semb,
+            subword_weight_normalize=subword_weight_normalize,
         )
         self._zero_emb = np.zeros(self.config['embedding_dim'])
 
