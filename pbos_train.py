@@ -72,7 +72,7 @@ def add_model_args(parser):
     )
     parser.add_argument(
         '--subword_weight_normalize', '-swn', action='store_true',
-        help="normalze all final subword weights (a_{s|w})"
+        help="normalize all final subword weights (a_{s|w})"
     )
     return group
 

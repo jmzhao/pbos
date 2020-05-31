@@ -7,9 +7,9 @@ from collections import ChainMap
 
 import pbos_train
 import subwords
+from datasets import prepare_combined_query_path, prepare_en_target_vector_paths
 from datasets.unigram_freq import prepare_unigram_freq_paths
 from datasets.ws_bench import prepare_bench_paths, BENCHS
-from datasets import prepare_combined_query_path, prepare_en_target_vector_paths
 from utils import dotdict
 from utils.args import dump_args
 from ws_eval import eval_ws
@@ -98,6 +98,7 @@ def exp(model_type, target_vector_name):
         args.normalize_semb = True
     else:
         args.normalize_semb = False
+    args.subword_weight_normalize = True
 
     # prediction & evaluation
     args.pred_path = f"{args.results_dir}/vectors.txt"
@@ -117,8 +118,8 @@ def exp(model_type, target_vector_name):
 
 
 if __name__ == '__main__':
-    model_types = ('pbosn', 'pbos', 'bos', )
-    target_vector_names = ("polyglot", "google", )  # "glove")
+    model_types = ('pbos',)
+    target_vector_names = ("polyglot", "google",)  # "glove")
 
     for target_vector_name in target_vector_names:  # avoid race condition
         prepare_en_target_vector_paths(target_vector_name)

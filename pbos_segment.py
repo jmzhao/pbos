@@ -30,7 +30,7 @@ parser.add_argument('--n_largest', '-n', type=int, default=20,
 parser.add_argument('--subword_prob_eps', '-spe', type=float, default=1e-2,
                     help="the infinitesimal prob for unseen subwords")
 parser.add_argument('--subword_weight_normalize', '-swn', action='store_true',
-                    help="normalze all final subword weights (a_{s|w})")
+                    help="normalize all final subword weights (a_{s|w})")
 parser.add_argument('--subword_weight_threshold', '-swt', type=float,
                     help="the minimum weight of a subword to be considered")
 parser.add_argument('--interactive', '-i', action='store_true',
