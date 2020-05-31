@@ -6,7 +6,7 @@ import tarfile
 
 import numpy as np
 
-from datasets.utils import save_emb, save_words, is_normal
+from datasets.utils import save_emb, save_words, is_word
 from load import load_embedding
 from utils import dotdict
 
@@ -63,7 +63,7 @@ def prepare_polyglot_clear_en_paths(dir_path=dir_path):
     vocab, emb = [], []
 
     for w, e in zip(raw_vocab, raw_emb):
-        if is_normal(w):
+        if is_word(w):
             vocab.append(w)
             emb.append(e)
     emb = np.array(emb)
