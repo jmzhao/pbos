@@ -115,11 +115,11 @@ def eval_ws(modelPath, dataPath, lower, oov_handling="drop"):
     for _, g, m, (w1, w2) in sorted(zip(stats.zscore(mysim) - stats.zscore(gold), gold, mysim, words)):
         logger.info(f"{g:.2f} {m: .2f} {w1} {w2}")
 
-    return "{:20s}: {:2.0f}  (OOV: {:2.0f}%, {}, lower={})".format(
+    return "{:15s}: {:2.0f}  (OOV: {:2.0f}%, {}, l={})".format(
         dataset,
         corr[0] * 100,
         math.ceil(drop / nwords * 100.0),
-        oov_handling,
+        oov_handling[0],
         "T" if lower else "F"
     )
 
