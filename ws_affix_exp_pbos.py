@@ -83,7 +83,7 @@ def exp(model_type, target_vector_name):
         args.subword_prob = f"{args.results_dir}/subword_prob.jsonl"
 
     # training
-    args.target_vectors = target_vector_paths.txt_emb_path
+    args.target_vectors = target_vector_paths.pkl_emb_path
     args.model_path = f"{args.results_dir}/model.pkl"
     args.subword_weight_threshold = None
     args.normalize_semb = args.model_type in ('pbosn',)
