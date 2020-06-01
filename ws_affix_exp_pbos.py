@@ -118,7 +118,6 @@ def exp(model_type, target_vector_name, wb):
 
 
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.INFO)
     model_types = ('pbos', "bos")
     target_vector_names = ("polyglot_clean", "google")
 
