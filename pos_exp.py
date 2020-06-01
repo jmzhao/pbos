@@ -59,7 +59,7 @@ def evaluate_pbos(language_code, model_type):
                 --output {subword_vocab_path} \
                 --word_boundary \
         """
-        if model_type == 'bos_minmax':
+        if model_type == 'bos':
             cmd += f" --subword_min_len 3"
             cmd += f" --subword_max_len 6"
         sp.call(cmd.split())
@@ -130,9 +130,6 @@ def evaluate_pbos(language_code, model_type):
     logger.info(f"[evaluate_pbos({language_code}, model_type={model_type})]"
         f" done.")
 
-
-
-model_types = ("pbos", ) # "pbosn", ) # "bos_minmax")
 def main():
     import argparse
 
@@ -150,6 +147,9 @@ def main():
 
     language_codes = all_language_codes if "ALL" in args.languages else args.languages
     logger.debug(f"language_codes: {language_codes}")
+
+    model_types = ("pbos", "bos")
+
     def job(apply):
         for language_code in language_codes:
             # prepare raw data without multiprocessing,
@@ -172,6 +172,7 @@ def main():
             for r in results:
                 r.get()
     logger.debug("done.")
+
 
 if __name__ == "__main__":
     main()
