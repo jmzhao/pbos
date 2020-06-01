@@ -86,7 +86,7 @@ def exp(model_type, target_vector_name, wb):
     args.target_vectors = target_vector_paths.pkl_emb_path
     args.model_path = f"{args.results_dir}/model.pkl"
     args.epochs = 50
-    if model_types == "pbos" and target_vector_name == "polyglot_clean":
+    if model_types in ("pbos", ):
         args.lr = 0.1
     else:
         args.lr = 1
