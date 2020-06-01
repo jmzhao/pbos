@@ -57,12 +57,9 @@ def evaluate_pbos(language_code, model_type):
             python subwords.py build_vocab \
                 --word_freq {polyglot_embeddings_path.word_freq_path} \
                 --output {subword_vocab_path} \
+                --word_boundary \
         """
-        if model_type == 'pbosn':
-            cmd += f" --word_boundary"
-        elif model_type == 'bos_nominmax':
-            pass
-        elif model_type == 'bos_minmax':
+        if model_type == 'bos_minmax':
             cmd += f" --subword_min_len 3"
             cmd += f" --subword_max_len 6"
         sp.call(cmd.split())
@@ -75,9 +72,8 @@ def evaluate_pbos(language_code, model_type):
                 python subwords.py build_prob \
                     --word_freq {polyglot_frequency_path.word_freq_path} \
                     --output {subword_prob_path} \
+                    --word_boundary \
             """
-            if model_type == 'pbosn':
-                cmd += f" --word_boundary"
             sp.call(cmd.split())
         else:
             logger.info(f"[evaluate_pbos({language_code}, model_type={model_type})]"
@@ -91,11 +87,12 @@ def evaluate_pbos(language_code, model_type):
               --target_vectors {polyglot_embeddings_path.pkl_emb_path} \
               --model_path {subword_embedding_model_path} \
               --subword_vocab {subword_vocab_path} \
+              --word_boundary \
+              --lr 0.1 \
         """
         if model_type in ('pbos', 'pbosn'):
             cmd += f" --subword_prob {subword_prob_path}"
         if model_type == 'pbosn':
-            cmd += f" --word_boundary"
             cmd += f" --normalize_semb"
         cmd = cmd.split()
         with open(training_log_path, "w+") as log:
@@ -118,10 +115,9 @@ def evaluate_pbos(language_code, model_type):
             --queries {ud_vocab_path} \
             --save {ud_vocab_embedding_path} \
             --model {subword_embedding_model_path} \
+            --word_boundary \
         """
         # --pre_trained {polyglot_embeddings_path.pkl_emb_path} \
-        if model_type == 'pbosn':
-            cmd += f" --word_boundary"
         sp.call(cmd.split())
     else:
         logger.info(f"[evaluate_pbos({language_code}, model_type={model_type})]"
@@ -136,7 +132,7 @@ def evaluate_pbos(language_code, model_type):
 
 
 
-model_types = ("bos_nominmax", "pbos", "pbosn", ) # "bos_minmax")
+model_types = ("pbos", "pbosn", ) # "bos_minmax")
 def main():
     import argparse
 
