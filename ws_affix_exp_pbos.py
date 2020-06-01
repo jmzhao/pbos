@@ -53,14 +53,14 @@ def exp(model_type, target_vector_name, wb):
     args = dotdict()
 
     # misc
-    args.results_dir = f"results/ws_affix_trial/{target_vector_name}_{model_type}_wb{'T' if wb else 'F'}"
+    args.results_dir = f"results/ws_affix_trial_suf0.8/{target_vector_name}_{model_type}_wb{'T' if wb else 'F'}"
     args.model_type = model_type
     args.log_level = "INFO"
 
     # subword
-    args.word_boundary = wb or args.model_type in ('pbosn',)
+    args.word_boundary = wb
     args.subword_min_count = None
-    args.subword_uniq_factor = None  # TODO: investigate if we need to set this to 0.8
+    args.subword_uniq_factor = 0.8
     if model_type == 'bos':
         args.subword_min_len = 3
         args.subword_max_len = 6
@@ -86,7 +86,7 @@ def exp(model_type, target_vector_name, wb):
     args.target_vectors = target_vector_paths.pkl_emb_path
     args.model_path = f"{args.results_dir}/model.pkl"
     args.epochs = 50
-    if model_types in ("pbos", "pbosn"):
+    if model_type in ("pbos", "pbosn"):
         args.lr = 0.1
     else:
         args.lr = 1
@@ -95,7 +95,7 @@ def exp(model_type, target_vector_name, wb):
     args.subword_prob_eps = 0.01
     args.subword_weight_threshold = None
     args.normalize_semb = args.model_type in ('pbosn',)
-    if model_types in ("pbos", ):
+    if model_type in ("pbos", ):
         args.subword_weight_normalize = False
     else:
         args.subword_weight_normalize = True
@@ -118,7 +118,7 @@ def exp(model_type, target_vector_name, wb):
 
 
 if __name__ == '__main__':
-    model_types = ("pbosn", )
+    model_types = ("pbosn", "pbos")
     target_vector_names = ("polyglot_clean", "google")
 
     for target_vector_name in target_vector_names:  # avoid race condition
@@ -129,7 +129,7 @@ if __name__ == '__main__':
             pool.apply_async(exp, (model_type, target_vector_name, wb))
             for model_type in model_types
             for target_vector_name in target_vector_names
-            for wb in (True, False)
+            for wb in (False, True)
         ]
 
         for r in results:
