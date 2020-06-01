@@ -119,7 +119,7 @@ get_subword_prob=partial(
 )
 
 
-def test_word(w):
+def word_segs(w):
     if args.word_boundary:
         w = '<' + w + '>'
 
@@ -152,8 +152,8 @@ def test_word(w):
     return p_prefix, p_suffix, seg_score_dict, sub_weight_dict
 
 
-for w in test_words:
-    p_prefix, p_suffix, seg_score_dict, sub_weight_dict = test_word(w)
+def test_word(w):
+    p_prefix, p_suffix, seg_score_dict, sub_weight_dict = word_segs(w)
 
     if args.latex:
         top_seg_str = ", ".join(f"{seg} ({score:.3f})" for seg, score in seg_score_dict.items())
@@ -176,7 +176,8 @@ for w in test_words:
             print("{:.5e} : {}".format(weight, sub))
 
 
-
+for w in test_words:
+    test_word(w)
 
 if args.interactive:
     while True:
