@@ -118,7 +118,7 @@ def exp(model_type, target_vector_name, wb):
 
 
 if __name__ == '__main__':
-    model_types = ("pbosn")
+    model_types = ("pbosn", )
     target_vector_names = ("polyglot_clean", "google")
 
     for target_vector_name in target_vector_names:  # avoid race condition
