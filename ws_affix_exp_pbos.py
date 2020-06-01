@@ -2,7 +2,6 @@ import contextlib
 import logging
 import multiprocessing as mp
 import os
-import subprocess as sp
 from collections import ChainMap
 
 import pbos_train
@@ -10,6 +9,7 @@ import subwords
 from datasets import prepare_combined_query_path, prepare_en_target_vector_paths
 from datasets.unigram_freq import prepare_unigram_freq_paths
 from datasets.ws_bench import prepare_bench_paths, BENCHS
+from pbos_pred import predict
 from utils import dotdict
 from utils.args import dump_args
 from ws_eval import eval_ws
@@ -26,26 +26,6 @@ def train(args):
         )))
 
     pbos_train.main(args)
-
-
-def predict(args):
-    sp.call(f"""
-        python pbos_pred.py \
-          --queries {args.query_path} \
-          --save {args.pred_path} \
-          --model {args.model_path} \
-          {'--' if args.word_boundary else '--no_'}word_boundary \
-    """.split())
-
-
-def evaluate_ws_affix(args):
-    with open(args.eval_result_path, "w") as fout:
-        for bname in BENCHS:
-            bench_path = prepare_bench_paths(bname).txt_path
-            for lower in (True, False):
-                print(eval_ws(args.pred_path, bench_path, lower=lower, oov_handling='zero'), file=fout)
-
-        # sp.call(f"python affix_eval.py --embeddings {args.pred_path} --lower".split(), stdout=fout)
 
 
 def exp(model_type, target_vector_name, wb, suf):
@@ -110,8 +90,24 @@ def exp(model_type, target_vector_name, wb, suf):
 
     with contextlib.redirect_stdout(log_file), contextlib.redirect_stderr(log_file):
         train(args)
-        predict(args)
-        evaluate_ws_affix(args)
+
+        # prediction
+        time_used = predict(
+            model=args.model_path,
+            queries=args.query_path,
+            save=args.pred_path,
+            word_boundary=args.word_boundary,
+        )
+        print(f"time used: {time_used:.3f}")
+
+        # evaluate
+        with open(args.eval_result_path, "w") as fout:
+            for bname in BENCHS:
+                bench_path = prepare_bench_paths(bname).txt_path
+                for lower in (True, False):
+                    print(eval_ws(args.pred_path, bench_path, lower=lower, oov_handling='zero'), file=fout)
+
+            # sp.call(f"python affix_eval.py --embeddings {args.pred_path} --lower".split(), stdout=fout)
 
 
 if __name__ == '__main__':
