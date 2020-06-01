@@ -41,7 +41,7 @@ def exp(ref_vec_name):
 
 if __name__ == '__main__':
     with mp.Pool() as pool:
-        target_vector_names = ("polyglot_clean", "polyglot" ) # "google",)
+        target_vector_names = ("polyglot_clean", "google" ) # "google",)
 
         results = [
             pool.apply_async(exp, (ref_vec_name,))

@@ -59,10 +59,10 @@ def prepare_polyglot_clean_en_paths(dir_path=dir_path):
     language_dir_path = os.path.join(dir_path, "en")
     raw_en_emb_paths = prepare_polyglot_emb_paths("en", dir_path=dir_path)
 
-    pkl_emb_path = os.path.join(language_dir_path, "embeddings.clear.pkl")
-    w2v_emb_path = os.path.join(language_dir_path, "embeddings.clear.w2v")
-    txt_emb_path = os.path.join(language_dir_path, "embeddings.clear.txt")
-    word_freq_path = os.path.join(language_dir_path, "word_freq.clear.jsonl")
+    pkl_emb_path = os.path.join(language_dir_path, "embeddings.clean.pkl")
+    w2v_emb_path = os.path.join(language_dir_path, "embeddings.clean.w2v")
+    txt_emb_path = os.path.join(language_dir_path, "embeddings.clean.txt")
+    word_freq_path = os.path.join(language_dir_path, "word_freq.clean.jsonl")
 
     if not os.path.exists(pkl_emb_path):
         raw_vocab, raw_emb = load_embedding(raw_en_emb_paths.pkl_emb_path)

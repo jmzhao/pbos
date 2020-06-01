@@ -5,7 +5,8 @@ from datasets import prepare_en_target_vector_paths
 from datasets.ws_bench import BENCHS, prepare_bench_paths
 from ws_eval import eval_ws
 
-target_vector_names = ("EditSim", "polyglot", "google", "glove")
+# target_vector_names = ("EditSim", "polyglot_clean", "google", "glove")
+target_vector_names = ("polyglot_clean", "google")
 for target_vector_name in target_vector_names:
     if target_vector_name.lower() == "editsim":
         target_vector_path = "EditSim"
