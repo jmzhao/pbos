@@ -11,5 +11,5 @@ for language in languages:
     with open(ud_vocab_path) as f:
         ud_vocab = [w.strip() for w in f]
 
-    inv = sum(w in polyglot_vocab for w in ud_vocab) / len(ud_vocab)
-    print(language, inv)
+    oov = sum(w not in polyglot_vocab for w in ud_vocab) / len(ud_vocab)
+    print(language, oov)
