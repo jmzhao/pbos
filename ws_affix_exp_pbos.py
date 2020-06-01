@@ -30,14 +30,14 @@ def train(args):
 
 def evaluate_ws_affix(args):
     with open(args.eval_result_path, "w") as fout:
-            for bname in BENCHS:
-                bench_path = prepare_bench_paths(bname).txt_path
-                for lower in (True, False):
-                    print(eval_ws(args.pred_path, bench_path, lower=lower, oov_handling='zero'), file=fout)
+        for bname in BENCHS:
+            bench_path = prepare_bench_paths(bname).txt_path
+            for lower in (True, False):
+                print(eval_ws(args.pred_path, bench_path, lower=lower, oov_handling='zero'), file=fout)
         # sp.call(f"python affix_eval.py --embeddings {args.pred_path} --lower".split(), stdout=fout)
 
 
-def exp(model_type, target_vector_name, wb):
+def exp(model_type, target_vector_name):
     target_vector_paths = prepare_en_target_vector_paths(target_vector_name)
     args = dotdict()
 
