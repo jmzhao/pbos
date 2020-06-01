@@ -45,6 +45,8 @@ def calc_subword_weights(
         if normalize:
             subword_weights = normalize_prob(subword_weights)
         else:
+            if p_prefix[-1] == 0:
+                return {}
             for k in subword_weights:
                  subword_weights[k] /= p_prefix[-1]
         if weight_threshold:
