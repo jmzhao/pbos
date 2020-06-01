@@ -86,7 +86,7 @@ def exp(model_type, target_vector_name, wb):
     args.target_vectors = target_vector_paths.pkl_emb_path
     args.model_path = f"{args.results_dir}/model.pkl"
     args.epochs = 50
-    if model_types in ("pbos", ):
+    if model_types in ("pbos", "pbosn"):
         args.lr = 0.1
     else:
         args.lr = 1
@@ -118,7 +118,7 @@ def exp(model_type, target_vector_name, wb):
 
 
 if __name__ == '__main__':
-    model_types = ('pbos', "bos")
+    model_types = ("pbosn")
     target_vector_names = ("polyglot_clean", "google")
 
     for target_vector_name in target_vector_names:  # avoid race condition
