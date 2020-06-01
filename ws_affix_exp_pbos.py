@@ -27,6 +27,7 @@ def train(args):
 
     pbos_train.main(args)
 
+
 def evaluate_ws_affix(args):
     with open(args.eval_result_path, "w") as fout:
             for bname in BENCHS:
@@ -35,19 +36,20 @@ def evaluate_ws_affix(args):
                     print(eval_ws(args.pred_path, bench_path, lower=lower, oov_handling='zero'), file=fout)
         # sp.call(f"python affix_eval.py --embeddings {args.pred_path} --lower".split(), stdout=fout)
 
-def exp(model_type, target_vector_name, wb, suf):
+
+def exp(model_type, target_vector_name, wb):
     target_vector_paths = prepare_en_target_vector_paths(target_vector_name)
     args = dotdict()
 
     # misc
-    args.results_dir = f"results/ws_affix_trial_suf{suf}/{target_vector_name}_{model_type}_wb{'T' if wb else 'F'}"
+    args.results_dir = f"results/ws_affix/{target_vector_name}_{model_type}"
     args.model_type = model_type
     args.log_level = "INFO"
 
     # subword
-    args.word_boundary = wb
+    args.word_boundary = True
     args.subword_min_count = None
-    args.subword_uniq_factor = suf
+    args.subword_uniq_factor = None
     if model_type == 'bos':
         args.subword_min_len = 3
         args.subword_max_len = 6
@@ -112,19 +114,17 @@ def exp(model_type, target_vector_name, wb, suf):
 
 
 if __name__ == '__main__':
-    model_types = ("pbosn", "pbos")
-    target_vector_names = ("polyglot_clean", "google")
+    model_types = ("bos", "pbos")
+    target_vector_names = ("polyglot", "google")
 
     for target_vector_name in target_vector_names:  # avoid race condition
         prepare_en_target_vector_paths(target_vector_name)
 
     with mp.Pool() as pool:
         results = [
-            pool.apply_async(exp, (model_type, target_vector_name, wb, suf))
+            pool.apply_async(exp, (model_type, target_vector_name))
             for model_type in model_types
             for target_vector_name in target_vector_names
-            for wb in (False, True)
-            for suf in (None, 0.8)
         ]
 
         for r in results:
