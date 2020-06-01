@@ -48,19 +48,19 @@ def evaluate_ws_affix(args):
         # sp.call(f"python affix_eval.py --embeddings {args.pred_path} --lower".split(), stdout=fout)
 
 
-def exp(model_type, target_vector_name, wb):
+def exp(model_type, target_vector_name, wb, suf):
     target_vector_paths = prepare_en_target_vector_paths(target_vector_name)
     args = dotdict()
 
     # misc
-    args.results_dir = f"results/ws_affix_trial_suf0.8/{target_vector_name}_{model_type}_wb{'T' if wb else 'F'}"
+    args.results_dir = f"results/ws_affix_trial_suf{suf}/{target_vector_name}_{model_type}_wb{'T' if wb else 'F'}"
     args.model_type = model_type
     args.log_level = "INFO"
 
     # subword
     args.word_boundary = wb
     args.subword_min_count = None
-    args.subword_uniq_factor = 0.8
+    args.subword_uniq_factor = suf
     if model_type == 'bos':
         args.subword_min_len = 3
         args.subword_max_len = 6
@@ -95,11 +95,8 @@ def exp(model_type, target_vector_name, wb):
     args.subword_prob_eps = 0.01
     args.subword_weight_threshold = None
     args.normalize_semb = args.model_type in ('pbosn',)
-    if model_type in ("pbos", ):
-        args.subword_weight_normalize = False
-    else:
-        args.subword_weight_normalize = True
-   
+    args.subword_weight_normalize = False
+
     # prediction & evaluation
     args.pred_path = f"{args.results_dir}/vectors.txt"
     args.query_path = prepare_combined_query_path()
@@ -126,10 +123,11 @@ if __name__ == '__main__':
 
     with mp.Pool() as pool:
         results = [
-            pool.apply_async(exp, (model_type, target_vector_name, wb))
+            pool.apply_async(exp, (model_type, target_vector_name, wb, suf))
             for model_type in model_types
             for target_vector_name in target_vector_names
             for wb in (False, True)
+            for suf in (None, 0.8)
         ]
 
         for r in results:
