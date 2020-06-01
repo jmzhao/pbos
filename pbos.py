@@ -29,7 +29,7 @@ def calc_subword_weights(
     subword_vocab,
     get_subword_prob=None,
     weight_threshold=None,
-    normalize=True,
+    normalize=False,
 ):
     subword_weights = {}
     if get_subword_prob:
@@ -77,7 +77,7 @@ class PBoS:
         eps=1e-2,
         take_root=False,
         normalize_semb=False,
-        subword_weight_normalize=True
+        subword_weight_normalize=False
     ):
         """
         Params:
@@ -107,7 +107,7 @@ class PBoS:
             take_root (default: False) - whether take `** ( 1 / len(sub))` when
                 getting subword prob.
 
-            subword_weight_normalize (default: True) - whether to normalize
+            subword_weight_normalize (default: False) - whether to normalize
                 all final subword weights (a_{s|w})
         """
         self.semb = subword_embedding or defaultdict(float)
