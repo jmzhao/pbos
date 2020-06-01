@@ -132,7 +132,7 @@ def evaluate_pbos(language_code, model_type):
 
 
 
-model_types = ("pbos", "pbosn", ) # "bos_minmax")
+model_types = ("pbos", ) # "pbosn", ) # "bos_minmax")
 def main():
     import argparse
 
