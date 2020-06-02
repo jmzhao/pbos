@@ -77,7 +77,7 @@ def exp(model_type, target_vector_name):
     # training
     args.target_vectors = target_vector_paths.pkl_emb_path
     args.model_path = f"{args.results_dir}/model.pkl"
-    args.epochs = 20
+    args.epochs = 50
     args.lr = 1
     args.lr_decay = True
     args.random_seed = 42
