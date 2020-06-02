@@ -29,7 +29,7 @@ def calc_subword_weights(
     subword_vocab,
     get_subword_prob=None,
     weight_threshold=None,
-    normalize=True,
+    normalize=False,
 ):
     subword_weights = {}
     if get_subword_prob:
