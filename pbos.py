@@ -29,7 +29,6 @@ def calc_subword_weights(
     subword_vocab,
     get_subword_prob=None,
     weight_threshold=None,
-    normalize=False,
 ):
     subword_weights = {}
     if get_subword_prob:
@@ -42,13 +41,7 @@ def calc_subword_weights(
                     p_sub = get_subword_prob(sub) * p_prefix[i] * p_suffix[j]
                     subword_weights.setdefault(sub, 0)
                     subword_weights[sub] += p_sub
-        if normalize:
-            subword_weights = normalize_prob(subword_weights)
-        else:
-            if p_prefix[-1] == 0:
-                return {}
-            for k in subword_weights:
-                 subword_weights[k] /= p_prefix[-1]
+        subword_weights = normalize_prob(subword_weights)
         if weight_threshold:
             subword_weights = {k : v for k, v in subword_weights.items() if v > weight_threshold}
     else:
@@ -79,7 +72,6 @@ class PBoS:
         eps=1e-2,
         take_root=False,
         normalize_semb=False,
-        subword_weight_normalize=False
     ):
         """
         Params:
@@ -108,9 +100,6 @@ class PBoS:
 
             take_root (default: False) - whether take `** ( 1 / len(sub))` when
                 getting subword prob.
-
-            subword_weight_normalize (default: False) - whether to normalize
-                all final subword weights (a_{s|w})
         """
         self.semb = subword_embedding or defaultdict(float)
         if embedding_dim is None:
@@ -129,7 +118,6 @@ class PBoS:
                 take_root=take_root,
             ) if subword_prob else None,
             weight_threshold=weight_threshold,
-            normalize=subword_weight_normalize
         ))
         self.config = dict(
             embedding_dim=embedding_dim,
@@ -139,7 +127,6 @@ class PBoS:
             subword_vocab=subword_vocab,
             subword_prob=subword_prob,
             normalize_semb=normalize_semb,
-            subword_weight_normalize=subword_weight_normalize,
         )
         self._zero_emb = np.zeros(self.config['embedding_dim'])
 

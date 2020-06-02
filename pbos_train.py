@@ -70,10 +70,6 @@ def add_model_args(parser):
         action='store_true', default=False,
         help='if set, normalize subword embeddings during training'
     )
-    parser.add_argument(
-        '--subword_weight_normalize', '-swn', action='store_true',
-        help="normalize all final subword weights (a_{s|w})"
-    )
     return group
 
 
@@ -130,7 +126,6 @@ def main(args):
         eps=args.subword_prob_eps,
         take_root=args.subword_prob_take_root,
         normalize_semb=args.normalize_semb,
-        subword_weight_normalize=args.subword_weight_normalize
     )
     start_time = time()
     for i_epoch in range(args.epochs) :

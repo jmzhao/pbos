@@ -21,7 +21,7 @@ def get_acc(lang, model_type):
 
 
 if __name__ == "__main__":
-    model_types = ("sasaki", "bos", "pbos", "pbosn", )
+    model_types = ("sasaki", "bos", "pbos", )
 
     print("lang", *model_types, sep="\t")
     for lang in sorted(pos_result_dir.iterdir()):
