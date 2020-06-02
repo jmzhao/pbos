@@ -3,14 +3,12 @@ import datetime
 import json
 import logging
 import os
-import pickle
 from time import time
 
 import numpy as np
-from tqdm import tqdm
 
-from pbos import PBoS
 from load import load_embedding
+from pbos import PBoS
 from subwords import (
     add_subword_prob_args,
     add_word_args,
@@ -62,15 +60,19 @@ def add_model_args(parser):
         help="dict of subwords and their likelihood of presence. "
         "If not specified, assume uniform likelihood, aka fall back to BoS.")
     group.add_argument('--subword_weight_threshold', type=float,
-        help="minimum weight of a subword within a word for it to contribute "
-        "to the word embedding")
+                       help="minimum weight of a subword within a word for it to contribute "
+                            "to the word embedding")
     group.add_argument('--subword_prob_eps', type=float, default=1e-2,
-        help="default likelihood of a subword if it is not present in "
-        "the given `subword_prob`")
+                       help="default likelihood of a subword if it is not present in "
+                            "the given `subword_prob`")
     group.add_argument(
         '--normalize_semb',
         action='store_true', default=False,
         help='if set, normalize subword embeddings during training'
+    )
+    parser.add_argument(
+        '--subword_weight_normalize', '-swn', action='store_true',
+        help="normalize all final subword weights (a_{s|w})"
     )
     return group
 
@@ -128,6 +130,7 @@ def main(args):
         eps=args.subword_prob_eps,
         take_root=args.subword_prob_take_root,
         normalize_semb=args.normalize_semb,
+        subword_weight_normalize=args.subword_weight_normalize
     )
     start_time = time()
     for i_epoch in range(args.epochs) :

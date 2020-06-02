@@ -30,7 +30,7 @@ parser.add_argument('--n_largest', '-n', type=int, default=20,
 parser.add_argument('--subword_prob_eps', '-spe', type=float, default=1e-2,
                     help="the infinitesimal prob for unseen subwords")
 parser.add_argument('--subword_weight_normalize', '-swn', action='store_true',
-                    help="normalze all final subword weights (a_{s|w})")
+                    help="normalize all final subword weights (a_{s|w})")
 parser.add_argument('--subword_weight_threshold', '-swt', type=float,
                     help="the minimum weight of a subword to be considered")
 parser.add_argument('--interactive', '-i', action='store_true',
@@ -99,16 +99,11 @@ logger.info(f"subword vocab size: {len(subword_vocab)}")
 
 
 test_words = [
-    "neurology",
     "farmland",
-    "somnambulists", ## aka "sleep-walkers"
-    "penpineappleapplepie",
-    "lowest",
-    "boring",
-    "technical",
-    "electronic",
-    "synchronic",
-    "synchronized",
+    "higher",
+    "penpineapplepie",
+    "paradichlorobenzene",
+    "bisimulation",
 ]
 
 get_subword_prob=partial(
@@ -131,8 +126,11 @@ def word_segs(w):
         for j in range(i + 1, len(w) + 1):
             adjmat[i][j] = - math.log(max(1e-100, get_subword_prob(w[i:j])))
     segs = nshortest(adjmat, args.n_largest)
+
+    # logger.info(segs[:10])
+
     seg_score_dict = {
-        '/'.join(w[i:j] for i, j in zip(seg, seg[1:])) : score
+        '/'.join(w[i:j] for i, j in zip(seg, seg[1:])) : math.exp(-score) / p_prefix[-1]
         for score, seg in segs
     }
 
@@ -158,7 +156,13 @@ def test_word(w):
     if args.latex:
         top_seg_str = ", ".join(f"{seg} ({score:.3f})" for seg, score in seg_score_dict.items())
         sub_weight_str = ", ".join(f"{sub} ({weight:.3f})" for sub, weight in sub_weight_dict.items())
-        print(f"{w} & {top_seg_str} & {sub_weight_str} \\\\")
+        print(f"{w} \n& {top_seg_str} \n& {sub_weight_str} \n\\\\\n\n".translate(
+            str.maketrans({
+                "<": r"{\textless}",
+                ">": r"{\textgreater}",
+            })
+          )
+        )
 
     else:
 
@@ -169,7 +173,7 @@ def test_word(w):
 
         print("top segmentations:")
         for seg, score in seg_score_dict.items():
-            print("{:.5e} : {}".format(math.exp(-score), seg))
+            print("{:.5e} : {}".format(score, seg))
 
         print("top subword weights:")
         for sub, weight in sub_weight_dict.items():

@@ -13,6 +13,8 @@ def get_acc(lang, model_type):
         return -1
     with open(out_path, 'r') as f:
         lines = f.read().splitlines()
+        if len(lines) == 0:
+            return -1
         last_line = lines[-1]
         _, acc = last_line.split(":")
         return acc.strip()

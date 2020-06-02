@@ -3,12 +3,11 @@ import multiprocessing as mp
 import os
 import subprocess as sp
 
-from datasets.polyglot_emb import prepare_polyglot_emb_paths
 from datasets.polyglot_emb import languages as all_language_codes
+from datasets.polyglot_emb import prepare_polyglot_emb_paths
 from datasets.polyglot_freq import prepare_polyglot_freq_paths
 from datasets.ud import prepare_ud_paths
 from utils.args import add_logging_args, set_logging_config
-from load import load_embedding
 
 logger = logging.getLogger(__name__)
 
@@ -58,12 +57,9 @@ def evaluate_pbos(language_code, model_type):
             python subwords.py build_vocab \
                 --word_freq {polyglot_embeddings_path.word_freq_path} \
                 --output {subword_vocab_path} \
+                --word_boundary \
         """
-        if model_type == 'pbosn':
-            cmd += f" --word_boundary"
-        elif model_type == 'bos_nominmax':
-            pass
-        elif model_type == 'bos_minmax':
+        if model_type == 'bos':
             cmd += f" --subword_min_len 3"
             cmd += f" --subword_max_len 6"
         sp.call(cmd.split())
@@ -76,9 +72,8 @@ def evaluate_pbos(language_code, model_type):
                 python subwords.py build_prob \
                     --word_freq {polyglot_frequency_path.word_freq_path} \
                     --output {subword_prob_path} \
+                    --word_boundary \
             """
-            if model_type == 'pbosn':
-                cmd += f" --word_boundary"
             sp.call(cmd.split())
         else:
             logger.info(f"[evaluate_pbos({language_code}, model_type={model_type})]"
@@ -89,14 +84,15 @@ def evaluate_pbos(language_code, model_type):
             f" training subword model...")
         cmd = f"""
             python pbos_train.py \
-              --target_vectors {polyglot_embeddings_path.pkl_path} \
+              --target_vectors {polyglot_embeddings_path.pkl_emb_path} \
               --model_path {subword_embedding_model_path} \
               --subword_vocab {subword_vocab_path} \
+              --word_boundary \
+              --lr 0.1 \
         """
         if model_type in ('pbos', 'pbosn'):
             cmd += f" --subword_prob {subword_prob_path}"
         if model_type == 'pbosn':
-            cmd += f" --word_boundary"
             cmd += f" --normalize_semb"
         cmd = cmd.split()
         with open(training_log_path, "w+") as log:
@@ -119,10 +115,9 @@ def evaluate_pbos(language_code, model_type):
             --queries {ud_vocab_path} \
             --save {ud_vocab_embedding_path} \
             --model {subword_embedding_model_path} \
+            --word_boundary \
         """
-            # --pre_trained {polyglot_embeddings_path.pkl_path} \
-        if model_type == 'pbosn':
-            cmd += f" --word_boundary"
+        # --pre_trained {polyglot_embeddings_path.pkl_emb_path} \
         sp.call(cmd.split())
     else:
         logger.info(f"[evaluate_pbos({language_code}, model_type={model_type})]"
@@ -135,9 +130,6 @@ def evaluate_pbos(language_code, model_type):
     logger.info(f"[evaluate_pbos({language_code}, model_type={model_type})]"
         f" done.")
 
-
-
-model_types = ("bos_nominmax", "pbos", "pbosn", ) # "bos_minmax")
 def main():
     import argparse
 
@@ -155,6 +147,9 @@ def main():
 
     language_codes = all_language_codes if "ALL" in args.languages else args.languages
     logger.debug(f"language_codes: {language_codes}")
+
+    model_types = ("pbos", "bos")
+
     def job(apply):
         for language_code in language_codes:
             # prepare raw data without multiprocessing,
@@ -177,6 +172,7 @@ def main():
             for r in results:
                 r.get()
     logger.debug("done.")
+
 
 if __name__ == "__main__":
     main()
