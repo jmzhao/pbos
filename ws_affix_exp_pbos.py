@@ -47,11 +47,7 @@ def exp(model_type, target_vector_name):
     args.log_level = "INFO"
 
     # subword
-    if model_type == 'bos':
-        args.word_boundary = True
-    elif model_type in ('pbos', 'pbosn'):
-        args.word_boundary = False
-    args.word_boundary = True
+    args.word_boundary = False
     args.subword_min_count = None
     args.subword_uniq_factor = None
     if model_type == 'bos':
@@ -117,8 +113,8 @@ def exp(model_type, target_vector_name):
 
 
 if __name__ == '__main__':
-    model_types = ("bos", "pbos")
-    target_vector_names = ("polyglot", "google")
+    model_types = ("pbos",)
+    target_vector_names = ("google",)
 
     for target_vector_name in target_vector_names:  # avoid race condition
         prepare_en_target_vector_paths(target_vector_name)
