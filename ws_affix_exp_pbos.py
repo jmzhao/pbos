@@ -34,7 +34,6 @@ def evaluate_ws_affix(args):
             bench_path = prepare_bench_paths(bname).txt_path
             for lower in (True, False):
                 print(eval_ws(args.pred_path, bench_path, lower=lower, oov_handling='zero'), file=fout)
-        # sp.call(f"python affix_eval.py --embeddings {args.pred_path} --lower".split(), stdout=fout)
 
 
 def exp(model_type, target_vector_name):
