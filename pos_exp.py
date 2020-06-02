@@ -57,11 +57,11 @@ def evaluate_pbos(language_code, model_type):
             python subwords.py build_vocab \
                 --word_freq {polyglot_embeddings_path.word_freq_path} \
                 --output {subword_vocab_path} \
-                --word_boundary \
         """
         if model_type == 'bos':
             cmd += f" --subword_min_len 3"
             cmd += f" --subword_max_len 6"
+            cmd += f" --word_boundary"
         sp.call(cmd.split())
 
         if model_type in ('pbos', 'pbosn'):
@@ -72,7 +72,6 @@ def evaluate_pbos(language_code, model_type):
                 python subwords.py build_prob \
                     --word_freq {polyglot_frequency_path.word_freq_path} \
                     --output {subword_prob_path} \
-                    --word_boundary \
             """
             sp.call(cmd.split())
         else:
@@ -87,13 +86,14 @@ def evaluate_pbos(language_code, model_type):
               --target_vectors {polyglot_embeddings_path.pkl_emb_path} \
               --model_path {subword_embedding_model_path} \
               --subword_vocab {subword_vocab_path} \
-              --word_boundary \
-              --lr 0.1 \
         """
-        if model_type in ('pbos', 'pbosn'):
+        if model_type == "pbos":
             cmd += f" --subword_prob {subword_prob_path}"
-        if model_type == 'pbosn':
+        elif model_type == 'pbosn':
+            cmd += f" --subword_prob {subword_prob_path}"
             cmd += f" --normalize_semb"
+        elif model_type == "bos":
+            cmd += f" --word_boundary"
         cmd = cmd.split()
         with open(training_log_path, "w+") as log:
             sp.call(cmd, stdout=log, stderr=log)
@@ -109,14 +109,15 @@ def evaluate_pbos(language_code, model_type):
     # predict embeddings for ud vocabs
     if not os.path.exists(ud_vocab_embedding_path):
         logger.info(f"[evaluate_pbos({language_code}, model_type={model_type})]"
-            f" predicting word embeddings...")
+                    f" predicting word embeddings...")
         cmd = f"""
             python pbos_pred.py \
             --queries {ud_vocab_path} \
             --save {ud_vocab_embedding_path} \
             --model {subword_embedding_model_path} \
-            --word_boundary \
         """
+        if model_type == "bos":
+            cmd += f" --word_boundary"
         # --pre_trained {polyglot_embeddings_path.pkl_emb_path} \
         sp.call(cmd.split())
     else:

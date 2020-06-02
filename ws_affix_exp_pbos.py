@@ -47,6 +47,10 @@ def exp(model_type, target_vector_name):
     args.log_level = "INFO"
 
     # subword
+    if model_type == 'bos':
+        args.word_boundary = True
+    elif model_type in ('pbos', 'pbosn'):
+        args.word_boundary = False
     args.word_boundary = True
     args.subword_min_count = None
     args.subword_uniq_factor = None
@@ -54,7 +58,7 @@ def exp(model_type, target_vector_name):
         args.subword_min_len = 3
         args.subword_max_len = 6
     elif model_type in ('pbos', 'pbosn'):
-        args.subword_min_len = 1    # TODO: investigate if we need to set this to 3
+        args.subword_min_len = 1
         args.subword_max_len = None
 
     # subword vocab
@@ -75,15 +79,15 @@ def exp(model_type, target_vector_name):
     args.target_vectors = target_vector_paths.pkl_emb_path
     args.model_path = f"{args.results_dir}/model.pkl"
     args.epochs = 50
-    if model_type in ("pbos", "pbosn"):
-        args.lr = 0.1
-    else:
-        args.lr = 1
+    args.lr = 1
     args.lr_decay = True
     args.random_seed = 42
     args.subword_prob_eps = 0.01
     args.subword_weight_threshold = None
-    args.normalize_semb = args.model_type in ('pbosn',)
+    if args.model_type == 'pbosn':
+        args.normalize_semb = True
+    else:
+        args.normalize_semb = False
 
     # prediction & evaluation
     args.pred_path = f"{args.results_dir}/vectors.txt"
