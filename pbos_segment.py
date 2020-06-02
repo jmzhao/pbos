@@ -29,8 +29,6 @@ parser.add_argument('--n_largest', '-n', type=int, default=20,
                     help="the number of segmentations to show")
 parser.add_argument('--subword_prob_eps', '-spe', type=float, default=1e-2,
                     help="the infinitesimal prob for unseen subwords")
-parser.add_argument('--subword_weight_normalize', '-swn', action='store_true',
-                    help="normalize all final subword weights (a_{s|w})")
 parser.add_argument('--subword_weight_threshold', '-swt', type=float,
                     help="the minimum weight of a subword to be considered")
 parser.add_argument('--interactive', '-i', action='store_true',
@@ -139,7 +137,6 @@ def word_segs(w):
         subword_vocab=subword_vocab,
         get_subword_prob=get_subword_prob,
         weight_threshold=args.subword_weight_threshold,
-        normalize=args.subword_weight_normalize,
     )
 
     sub_weight_dict = {
