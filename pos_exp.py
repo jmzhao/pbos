@@ -61,7 +61,6 @@ def evaluate_pbos(language_code, model_type):
         if model_type == 'bos':
             cmd += f" --subword_min_len 3"
             cmd += f" --subword_max_len 6"
-            cmd += f" --word_boundary"
         sp.call(cmd.split())
 
         if model_type in ('pbos', 'pbosn'):
@@ -92,8 +91,6 @@ def evaluate_pbos(language_code, model_type):
         elif model_type == 'pbosn':
             cmd += f" --subword_prob {subword_prob_path}"
             cmd += f" --normalize_semb"
-        elif model_type == "bos":
-            cmd += f" --word_boundary"
         cmd = cmd.split()
         with open(training_log_path, "w+") as log:
             sp.call(cmd, stdout=log, stderr=log)
@@ -116,8 +113,6 @@ def evaluate_pbos(language_code, model_type):
             --save {ud_vocab_embedding_path} \
             --model {subword_embedding_model_path} \
         """
-        if model_type == "bos":
-            cmd += f" --word_boundary"
         # --pre_trained {polyglot_embeddings_path.pkl_emb_path} \
         sp.call(cmd.split())
     else:
