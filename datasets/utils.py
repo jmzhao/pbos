@@ -2,6 +2,7 @@ import json
 import logging
 import os
 import pickle
+import unicodedata
 
 import numpy as np
 
@@ -88,7 +89,8 @@ def save_target_dataset(
 
 
 def _is_word(w):
-    return w.isalpha() and w.isascii() and w.islower()
+    aw = unicodedata.normalize("NFKD", w).encode("ASCII", "ignore")
+    return 20 > len(aw) > 1 and not any(c in w for c in " _./") and aw.islower()
 
 
 def clean_target_emb(raw_vocab, raw_emb):
