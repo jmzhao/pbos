@@ -101,8 +101,6 @@ def main(args):
         logger.info(f"loading subword prob from `{args.subword_prob}`...")
         with open(args.subword_prob) as fin:
             subword_prob = dict(json.loads(line) for line in file_tqdm(fin))
-        # ## trial
-        # subword_prob = {k : v for k, v in subword_prob.items() if k in subword_vocab}
         subword_prob = subword_prob_post_process(
             subword_prob,
             min_prob=args.subword_prob_min_prob,

@@ -175,18 +175,9 @@ def build_subword_prob_cli(args):
     logger.info("processing...")
     if args.subword_prob_take_root:
         logger.warning("`args.subword_prob_take_root = True` ignored at this step.")
-    def revised_normalize(subword_counter):
-        with open(args.word_freq) as fin:
-            word_count_iter = (json.loads(line) for line in fin)
-            total_word_count = sum(count for word, count in word_count_iter)
-            return {k : v / total_word_count for k, v in subword_counter.items()}
     subword_prob = build_subword_prob(
         subword_counter,
         normalize_prob=normalize_prob,
-        # normalize_prob=revised_normalize, ## trial
-        ## [20200519] exp shows ws scores plump.
-        ## With subword_min_len=3, subword_uniq_factor=0.8,
-        ## the numebers are much better but still not winning our prev best.
         min_prob=args.subword_prob_min_prob,
         # take_root=args.subword_prob_take_root,
     )
