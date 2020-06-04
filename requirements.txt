@@ -1,5 +1,5 @@
 tqdm
-numpy
+numpy==1.18.1
 progressbar
 scipy~=1.4.1
 scikit-learn~=0.22.1
