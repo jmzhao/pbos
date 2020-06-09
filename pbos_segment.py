@@ -120,7 +120,7 @@ def word_segs(w):
     segs = nshortest(adjmat, args.n_largest)
 
     seg_score_dict = {
-        '/'.join(w[i:j] for i, j in zip(seg, seg[1:])): score
+        '/'.join(w[i:j] for i, j in zip(seg, seg[1:])): math.exp(-score) / p_prefix[-1]
         for score, seg in segs
     }
 
@@ -162,7 +162,7 @@ def test_word(w):
 
         print("top segmentations:")
         for seg, score in seg_score_dict.items():
-            print("{:.5e} : {}".format(math.exp(-score), seg))
+            print("{:.5e} : {}".format(score, seg))
 
         print("top subword weights:")
         for sub, weight in sub_weight_dict.items():
