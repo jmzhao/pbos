@@ -9,17 +9,17 @@ from pbos_pred import predict
 from ws_eval import eval_ws
 
 
-def exp(model_type, lang, bname):
+def exp(model_type, lang, bname, target_vec):
     query_path = prepare_bench_paths(bname).query_path
 
     if model_type == "sasaki":
         from sasaki_utils import inference, get_info_from_result_path
-        model_info = get_info_from_result_path(Path(f"results/ws_affix/google_sasaki/sep_kvq"))
+        model_info = get_info_from_result_path(Path(f"results/ws_affix/{target_vec}_sasaki/sep_kvq"))
         result_emb_path = inference(model_info, query_path)
     else:
         result_emb_path = f"results/ws_multi/{bname}/{model_type}/emb.txt"
         predict(
-            model=f"results/ws_affix/polyglot_{model_type}/model.pkl",
+            model=f"results/ws_affix/{target_vec}_{model_type}/model.pkl",
             queries=query_path,
             save=result_emb_path,
             word_boundary=(model_type == "bos"),
@@ -33,11 +33,12 @@ def exp(model_type, lang, bname):
 
 def main():
     model_types = ("bos", "pbos", "sasaki")
+    target_vec = "polyglot"
 
     for lang in ("en", ):
         for bname in get_all_bnames_for_lang(lang):
             for model_type in model_types:
-                exp(model_type, lang, bname)
+                exp(model_type, lang, bname, target_vec)
 
 
 if __name__ == '__main__':
