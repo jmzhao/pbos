@@ -4,7 +4,7 @@ import math
 from importlib import import_module
 from itertools import islice
 
-from datasets import prepare_en_target_vector_paths, target_vector_names
+from datasets import prepare_target_vector_paths, target_vector_names
 from nshortest import nshortest
 from pbos import *
 from subwords import (
@@ -72,7 +72,7 @@ logger.info(f"building subword vocab from `{args.vocab_word_freq}`...")
 if args.vocab_word_freq is None:
     subword_vocab = set(subword_prob)
 else:
-    word_freq_path = prepare_en_target_vector_paths(args.vocab_word_freq).word_freq_path
+    word_freq_path = prepare_target_vector_paths(args.vocab_word_freq).word_freq_path
     with open(word_freq_path) as fin:
         word_count_iter = (json.loads(line) for line in file_tqdm(fin))
         subword_counter = build_subword_counter(

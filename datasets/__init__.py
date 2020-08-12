@@ -42,7 +42,7 @@ def prepare_combined_query_path(
 target_vector_names = ("google", "polyglot", "glove")
 
 
-def prepare_en_target_vector_paths(target_vector_name):
+def prepare_target_vector_paths(target_vector_name):
     from .polyglot_emb import languages as polyglot_emb_langs
 
     target_vector_name = target_vector_name.lower()
