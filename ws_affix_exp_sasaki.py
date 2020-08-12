@@ -35,13 +35,14 @@ def exp(ref_vec_name):
     logger.info("Evaluating...")
     evaluate_ws_affix(dotdict(
         eval_result_path=result_path / "result.txt",
-        pred_path=result_emb_path
+        pred_path=result_emb_path,
+        target_vector_name=ref_vec_name
     ))
 
 
 if __name__ == '__main__':
     with mp.Pool() as pool:
-        target_vector_names = ("polyglot", "google")
+        target_vector_names = ("de", "it", "ru")
 
         results = [
             pool.apply_async(exp, (ref_vec_name,))
