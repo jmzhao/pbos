@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 from datasets import prepare_target_vector_paths
@@ -7,7 +8,7 @@ from ws_eval import eval_ws
 
 
 def evaluate(target_vector_name, pred_path, eval_result_path):
-    with open(eval_result_path, "w+") as fout:
+    with open(eval_result_path, "w") as fout:
         bname = f"simlex999-{target_vector_name}"
         bench_path = prepare_bench_paths(bname).txt_path
         for lower in (True, False):
@@ -41,6 +42,7 @@ def main():
     for target_vector_name in target_vector_names:
         prepare_target_vector_paths(target_vector_name)
         for model_type in model_types:
+            os.makedirs(f"results/ws_multi/{target_vector_name}/{model_type}", exist_ok=True)
             eval_result_path = f"results/ws_multi/{target_vector_name}/{model_type}/result.txt"
             query_path = f"datasets/ws_bench/simlex999-{target_vector_name}/queries.txt"
 
