@@ -4,6 +4,12 @@ import subprocess as sp
 from utils import dotdict
 
 BENCHS = {
+    "simlex999-en": {
+        "url": "https://raw.githubusercontent.com/nmrksic/eval-multilingual-simlex/master/evaluation/simlex-english.txt",
+        "raw_txt_rel_path": "simlex-english.txt",
+        "no_zip": True,
+        "skip_lines": 1,
+    },
     "simlex999-de": {
         "url": "https://raw.githubusercontent.com/nmrksic/eval-multilingual-simlex/master/evaluation/simlex-german.txt",
         "raw_txt_rel_path": "simlex-german.txt",

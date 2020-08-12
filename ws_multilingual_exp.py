@@ -37,7 +37,7 @@ def exp_sasaki(target_vector_name, query_path, eval_result_path):
 def main():
     # model_types = ("pbos", "bos", "sasaki")
     model_types = ("sasaki",)
-    target_vector_names = ("it", "ru")
+    target_vector_names = ("en",)
 
     for target_vector_name in target_vector_names:
         prepare_target_vector_paths(target_vector_name)
