@@ -20,7 +20,7 @@ def exp(model_type, lang, bname):
         model_info = get_info_from_result_path(Path(f"results/pos/{lang}/sasaki/sep_kvq"))
         result_emb_path = inference(model_info, query_path)
     else:
-        result_emb_path = f"results/ws_multi/{lang}/{model_type}/emb.txt"
+        result_emb_path = result_path / "emb.txt"
         predict(
             model=f"results/pos/{lang}/{model_type}/model.pbos",
             queries=query_path,
