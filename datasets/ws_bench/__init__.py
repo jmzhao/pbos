@@ -4,56 +4,6 @@ import subprocess as sp
 from utils import dotdict
 
 BENCHS = {
-    "ws353-en": {
-        "url": "https://raw.githubusercontent.com/iraleviant/eval-multilingual-simlex/master/evaluation/ws-353/wordsim353-english.txt",
-        "raw_txt_rel_path": "wordsim353-english.txt",
-        "no_zip": True,
-        "skip_lines": 1,
-    },
-    "ws353-de": {
-        "url": "https://raw.githubusercontent.com/nmrksic/eval-multilingual-simlex/master/evaluation/ws-353/wordsim353-german.txt",
-        "raw_txt_rel_path": "wordsim353-german.txt",
-        "no_zip": True,
-        "skip_lines": 1,
-    },
-    "ws353-it": {
-        "url": "https://raw.githubusercontent.com/nmrksic/eval-multilingual-simlex/master/evaluation/ws-353/wordsim353-italian.txt",
-        "raw_txt_rel_path": "wordsim353-italian.txt",
-        "no_zip": True,
-        "skip_lines": 1,
-    },
-    "ws353-ru": {
-        "url": "https://raw.githubusercontent.com/nmrksic/eval-multilingual-simlex/master/evaluation/ws-353/wordsim353-russian.txt",
-        "raw_txt_rel_path": "wordsim353-russian.txt",
-        "no_zip": True,
-        "skip_lines": 1,
-    },
-
-    "simlex999-en": {
-        "url": "https://raw.githubusercontent.com/nmrksic/eval-multilingual-simlex/master/evaluation/simlex-english.txt",
-        "raw_txt_rel_path": "simlex-english.txt",
-        "no_zip": True,
-        "skip_lines": 1,
-    },
-    "simlex999-de": {
-        "url": "https://raw.githubusercontent.com/nmrksic/eval-multilingual-simlex/master/evaluation/simlex-german.txt",
-        "raw_txt_rel_path": "simlex-german.txt",
-        "no_zip": True,
-        "skip_lines": 1,
-    },
-    "simlex999-it": {
-        "url": "https://raw.githubusercontent.com/nmrksic/eval-multilingual-simlex/master/evaluation/simlex-italian.txt",
-        "raw_txt_rel_path": "simlex-italian.txt",
-        "no_zip": True,
-        "skip_lines": 1,
-    },
-    "simlex999-ru": {
-        "url": "https://raw.githubusercontent.com/nmrksic/eval-multilingual-simlex/master/evaluation/simlex-russian.txt",
-        "raw_txt_rel_path": "simlex-russian.txt",
-        "no_zip": True,
-        "skip_lines": 1,
-    },
-
     "wordsim353": {
         "url": "https://leviants.com/wp-content/uploads/2020/01/wordsim353.zip",
         "raw_txt_rel_path": "combined.tab",
@@ -69,6 +19,29 @@ BENCHS = {
         "raw_txt_rel_path": "dataset.tsv",
     },
 }
+
+bench_languages = {
+    "en": "english",
+    "it": "italian",
+    "ru": "russian",
+    "de": "german"
+}
+
+for code, lang in bench_languages.items():
+    for ws_suffix in ("-rel", "-sim", ""):
+        BENCHS[f"ws353-{code}{ws_suffix}"] = {
+            "url": f"https://raw.githubusercontent.com/iraleviant/eval-multilingual-simlex/master/evaluation/ws-353/wordsim353-{lang}{ws_suffix}.txt",
+            "raw_txt_rel_path": f"wordsim353-{lang}{ws_suffix}.txt",
+            "no_zip": True,
+            "skip_lines": 1,
+        }
+
+    BENCHS[f"simlex999-{code}"] = {
+        "url": f"https://raw.githubusercontent.com/nmrksic/eval-multilingual-simlex/master/evaluation/simlex-{lang}.txt",
+        "raw_txt_rel_path": f"simlex-{lang}.txt",
+        "no_zip": True,
+        "skip_lines": 1,
+    }
 
 datasets_dir = os.path.dirname(os.path.realpath(__file__))
 
