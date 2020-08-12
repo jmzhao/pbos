@@ -4,19 +4,19 @@ import subprocess as sp
 from utils import dotdict
 
 BENCHS = {
-    "simlex999-german": {
+    "simlex999-de": {
         "url": "https://raw.githubusercontent.com/nmrksic/eval-multilingual-simlex/master/evaluation/simlex-german.txt",
         "raw_txt_rel_path": "simlex-german.txt",
         "no_zip": True,
         "skip_lines": 1,
     },
-    "simlex999-italian": {
+    "simlex999-it": {
         "url": "https://raw.githubusercontent.com/nmrksic/eval-multilingual-simlex/master/evaluation/simlex-italian.txt",
         "raw_txt_rel_path": "simlex-italian.txt",
         "no_zip": True,
         "skip_lines": 1,
     },
-    "simlex999-russian": {
+    "simlex999-ru": {
         "url": "https://raw.githubusercontent.com/nmrksic/eval-multilingual-simlex/master/evaluation/simlex-russian.txt",
         "raw_txt_rel_path": "simlex-russian.txt",
         "no_zip": True,

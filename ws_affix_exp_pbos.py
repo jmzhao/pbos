@@ -6,9 +6,9 @@ from collections import ChainMap
 
 import pbos_train
 import subwords
-from datasets import prepare_combined_query_path, prepare_en_target_vector_paths
+from datasets import prepare_combined_query_path, prepare_target_vector_paths
 from datasets.unigram_freq import prepare_unigram_freq_paths
-from datasets.ws_bench import prepare_bench_paths, BENCHS
+from datasets.ws_bench import prepare_bench_paths
 from pbos_pred import predict
 from utils import dotdict
 from utils.args import dump_args
@@ -30,20 +30,21 @@ def train(args):
 
 def evaluate_ws_affix(args):
     with open(args.eval_result_path, "w") as fout:
-        for bname in BENCHS:
-            bench_path = prepare_bench_paths(bname).txt_path
-            for lower in (True, False):
-                print(eval_ws(args.pred_path, bench_path, lower=lower, oov_handling='zero'), file=fout)
+        bname = f"simlex999-{args.starget_vector_name}"
+        bench_path = prepare_bench_paths(bname).txt_path
+        for lower in (True, False):
+            print(eval_ws(args.pred_path, bench_path, lower=lower, oov_handling='zero'), file=fout)
 
 
 def exp(model_type, target_vector_name):
-    target_vector_paths = prepare_en_target_vector_paths(target_vector_name)
+    target_vector_paths = prepare_target_vector_paths(target_vector_name)
     args = dotdict()
 
     # misc
     args.results_dir = f"results/ws_affix/{target_vector_name}_{model_type}"
     args.model_type = model_type
     args.log_level = "INFO"
+    args.target_vector_name = target_vector_name
 
     # subword
     if model_type == "bos":
@@ -116,10 +117,10 @@ def exp(model_type, target_vector_name):
 
 if __name__ == '__main__':
     model_types = ("pbos", "bos")
-    target_vector_names = ("google", "polyglot")
+    target_vector_names = ("de", "it", "ru")
 
     for target_vector_name in target_vector_names:  # avoid race condition
-        prepare_en_target_vector_paths(target_vector_name)
+        prepare_target_vector_paths(target_vector_name)
 
     with mp.Pool() as pool:
         results = [

@@ -55,7 +55,7 @@ def prepare_polyglot_emb_paths(language_code, *, dir_path=dir_path):
 
 
 languages = [
-    'ar', 'bg', 'cs', 'da', 'el', 'en', 'es', 'eu', 'fa', 'he', 'hi', 'hu',
+    'ar', 'bg', 'cs', 'da', 'de', 'el', 'en', 'es', 'eu', 'fa', 'he', 'hi', 'hu',
     'id', 'it', 'kk', 'lv', 'ro', 'ru', 'sv', 'ta', 'tr', 'vi', 'zh',
 ]
 
