@@ -7,7 +7,7 @@ from ws_eval import eval_ws
 
 
 def evaluate(target_vector_name, pred_path, eval_result_path):
-    with open(eval_result_path, "w") as fout:
+    with open(eval_result_path, "w+") as fout:
         bname = f"simlex999-{target_vector_name}"
         bench_path = prepare_bench_paths(bname).txt_path
         for lower in (True, False):
