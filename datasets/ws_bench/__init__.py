@@ -4,6 +4,24 @@ import subprocess as sp
 from utils import dotdict
 
 BENCHS = {
+    "simlex999-german": {
+        "url": "https://raw.githubusercontent.com/nmrksic/eval-multilingual-simlex/master/evaluation/simlex-german.txt",
+        "raw_txt_rel_path": "simlex-german.txt",
+        "no_zip": True,
+        "skip_lines": 1,
+    },
+    "simlex999-italian": {
+        "url": "https://raw.githubusercontent.com/nmrksic/eval-multilingual-simlex/master/evaluation/simlex-italian.txt",
+        "raw_txt_rel_path": "simlex-italian.txt",
+        "no_zip": True,
+        "skip_lines": 1,
+    },
+    "simlex999-russian": {
+        "url": "https://raw.githubusercontent.com/nmrksic/eval-multilingual-simlex/master/evaluation/simlex-russian.txt",
+        "raw_txt_rel_path": "simlex-russian.txt",
+        "no_zip": True,
+        "skip_lines": 1,
+    },
     "wordsim353": {
         "url": "https://leviants.com/wp-content/uploads/2020/01/wordsim353.zip",
         "raw_txt_rel_path": "combined.tab",
