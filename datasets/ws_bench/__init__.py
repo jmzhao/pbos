@@ -64,8 +64,12 @@ def prepare_bench_paths(name):
             for w in words:
                 print(w, file=fout)
 
-
     return dotdict(
         txt_path=txt_path,
         query_path=query_path,
     )
+
+
+if __name__ == '__main__':
+    for bname in BENCHS:
+        prepare_bench_paths(bname)
