@@ -1,6 +1,9 @@
+"""
+Evaluate multilingual word sim on POS model
+"""
+
 from pathlib import Path
 
-from datasets import prepare_target_vector_paths
 from datasets.ws_bench import prepare_bench_paths, multi_bench_languages, get_all_bnames_for_lang
 from pbos_pred import predict
 from ws_eval import eval_ws
@@ -35,7 +38,6 @@ def main():
     model_types = ("pbos", "bos", "sasaki")
 
     for lang in multi_bench_languages:
-        prepare_target_vector_paths(f"polyglot-{lang}")
         for model_type in model_types:
             for bname in get_all_bnames_for_lang(lang):
                 exp(model_type, lang, bname)
