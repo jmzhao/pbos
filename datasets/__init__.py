@@ -43,16 +43,14 @@ target_vector_names = ("google", "polyglot", "glove")
 
 
 def prepare_target_vector_paths(target_vector_name):
-    from .polyglot_emb import languages as polyglot_emb_langs
-
     target_vector_name = target_vector_name.lower()
 
+    if target_vector_name.startswith("polyglot-"):
+        return prepare_polyglot_emb_paths(target_vector_name.lstrip("polyglot-"))
     if target_vector_name == "google":
         return prepare_google_paths()
     if target_vector_name == "polyglot":
         return prepare_polyglot_emb_paths("en")
     if target_vector_name == "glove":
         return prepare_glove_paths()
-    if target_vector_name in polyglot_emb_langs:
-        return prepare_polyglot_emb_paths(target_vector_name)
     raise NotImplementedError

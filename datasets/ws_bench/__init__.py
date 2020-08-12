@@ -20,30 +20,38 @@ BENCHS = {
     },
 }
 
-bench_languages = {
+multi_bench_languages = {
     "en": "english",
     "it": "italian",
     "ru": "russian",
     "de": "german"
 }
 
-for code, lang in bench_languages.items():
+MULTI_BENCHS = {}
+
+for lang, full_name in multi_bench_languages.items():
     for ws_suffix in ("-rel", "-sim", ""):
-        BENCHS[f"ws353-{code}{ws_suffix}"] = {
-            "url": f"https://raw.githubusercontent.com/iraleviant/eval-multilingual-simlex/master/evaluation/ws-353/wordsim353-{lang}{ws_suffix}.txt",
-            "raw_txt_rel_path": f"wordsim353-{lang}{ws_suffix}.txt",
+        MULTI_BENCHS[f"ws353-{lang}{ws_suffix}"] = {
+            "url": f"https://raw.githubusercontent.com/iraleviant/eval-multilingual-simlex/master/evaluation/ws-353/wordsim353-{full_name}{ws_suffix}.txt",
+            "raw_txt_rel_path": f"wordsim353-{full_name}{ws_suffix}.txt",
             "no_zip": True,
             "skip_lines": 1,
         }
 
-    BENCHS[f"simlex999-{code}"] = {
-        "url": f"https://raw.githubusercontent.com/nmrksic/eval-multilingual-simlex/master/evaluation/simlex-{lang}.txt",
-        "raw_txt_rel_path": f"simlex-{lang}.txt",
+    MULTI_BENCHS[f"simlex999-{lang}"] = {
+        "url": f"https://raw.githubusercontent.com/nmrksic/eval-multilingual-simlex/master/evaluation/simlex-{full_name}.txt",
+        "raw_txt_rel_path": f"simlex-{full_name}.txt",
         "no_zip": True,
         "skip_lines": 1,
     }
 
+BENCHS.update(MULTI_BENCHS)
+
 datasets_dir = os.path.dirname(os.path.realpath(__file__))
+
+
+def get_all_bnames_for_lang(lang):
+    return [f"ws353-{lang}", f"ws353-{lang}-rel", f"ws353-{lang}-sim", f"simlex999-{lang}"]
 
 
 def prepare_bench_paths(name):
