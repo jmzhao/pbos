@@ -117,7 +117,7 @@ def exp(model_type, target_vector_name):
 
 if __name__ == '__main__':
     model_types = ("pbos", "bos")
-    target_vector_names = ("de", "it", "ru")
+    target_vector_names = ("wiki2vec-de", "wiki2vec-it", "wiki2vec-ru")
 
     for target_vector_name in target_vector_names:  # avoid race condition
         prepare_target_vector_paths(target_vector_name)

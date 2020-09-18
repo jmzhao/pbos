@@ -47,6 +47,8 @@ def prepare_target_vector_paths(target_vector_name):
 
     if target_vector_name.startswith("polyglot-"):
         return prepare_polyglot_emb_paths(target_vector_name.lstrip("polyglot-"))
+    if target_vector_name.startswith("wiki2vec-"):
+        return prepare_polyglot_emb_paths(target_vector_name.lstrip("wiki2vec-"))
     if target_vector_name == "google":
         return prepare_google_paths()
     if target_vector_name == "polyglot":
