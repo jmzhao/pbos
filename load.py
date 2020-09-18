@@ -24,7 +24,10 @@ def load_embedding(filename: str, show_progress=False) -> (List[str], np.ndarray
             for line in file_tqdm(fin):
                 ss = line.split()
                 vocab.append(ss[0])
-                emb.append([float(x) for x in ss[1:]])
+                try:
+                    emb.append([float(x) for x in ss[1:]])
+                except ValueError:
+                    print(f"Error loading the line: {line[:30]} ...")
         emb = np.array(emb)
     elif ext in (".pickle", ".pkl"):
         import pickle

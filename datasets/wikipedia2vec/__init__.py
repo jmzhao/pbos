@@ -12,7 +12,7 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 
 def prepare_wiki2vec_emb_paths(language_code, *, dir_path=dir_path):
     language_dir_path = os.path.join(dir_path, language_code)
-    tar_path = os.path.join(language_dir_path, "embeddings.tar.bz2")
+    download_path = os.path.join(language_dir_path, "raw_embeddings.w2v.bz2")
     pkl_emb_path = os.path.join(language_dir_path, "embeddings.pkl")
     w2v_emb_path = os.path.join(language_dir_path, "embeddings.w2v")
     word_freq_path = os.path.join(language_dir_path, "word_freq.jsonl")
@@ -20,19 +20,22 @@ def prepare_wiki2vec_emb_paths(language_code, *, dir_path=dir_path):
 
     os.makedirs(language_dir_path, exist_ok=True)
 
-    if not os.path.exists(tar_path):
-        logger.info(f"Downloading {tar_path}")
-        url = f"http://wikipedia2vec.s3.amazonaws.com/models/{language_code}/2018-04-20/{language_code}wiki_20180420_300d.pkl.bz2"
-        sp.run(f"wget -O {tar_path} {url}".split())
+    if not os.path.exists(download_path):
+        url = f"http://wikipedia2vec.s3.amazonaws.com/models/{language_code}/2018-04-20/{language_code}wiki_20180420_300d.txt.bz2"
+        logger.info(f"Downloading {url} to {download_path}")
+        sp.run(f"wget -O {download_path} {url}".split())
 
-    # if not os.path.exists(pkl_emb_path):
-    #     logger.info(f"Unzipping {tar_path}")
-    #     with tarfile.open(tar_path) as tar, open(pkl_emb_path, 'wb+') as dst_file:
-    #         src_file = tar.extractfile("./words_embeddings_32.pkl")
-    #         shutil.copyfileobj(src_file, dst_file)
+    if not os.path.exists(w2v_emb_path):
+        logger.info(f"Unzipping {download_path}")
+        sp.run(f"bzip2 -dk {download_path}".split())
+        os.system(f"head -n 100001 {download_path[:-4]} > {w2v_emb_path}")  # keep 100k tokens and one line of header
+
 
     convert_target_dataset(
-        input_emb_path=pkl_emb_path,
+        input_emb_path=w2v_emb_path,
+
+        txt_emb_path=txt_emb_path,
+        pkl_emb_path=pkl_emb_path,
 
         word_freq_path=word_freq_path,
     )
@@ -40,7 +43,7 @@ def prepare_wiki2vec_emb_paths(language_code, *, dir_path=dir_path):
     return dotdict(
         dir_path=dir_path,
         language_dir_path=language_dir_path,
-        tar_path=tar_path,
+        download_path=download_path,
 
         pkl_emb_path=pkl_emb_path,
         w2v_emb_path=w2v_emb_path,
