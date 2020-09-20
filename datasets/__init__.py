@@ -5,6 +5,7 @@ from datasets.glove import prepare_glove_paths
 from datasets.google import prepare_google_paths
 from datasets.polyglot_emb import prepare_polyglot_emb_paths
 from datasets.ws_bench import BENCHS, prepare_bench_paths
+from datasets.wikipedia2vec import prepare_wiki2vec_emb_paths
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
@@ -48,7 +49,7 @@ def prepare_target_vector_paths(target_vector_name):
     if target_vector_name.startswith("polyglot-"):
         return prepare_polyglot_emb_paths(target_vector_name.lstrip("polyglot-"))
     if target_vector_name.startswith("wiki2vec-"):
-        return prepare_polyglot_emb_paths(target_vector_name.lstrip("wiki2vec-"))
+        return prepare_wiki2vec_emb_paths(target_vector_name[-2:])
     if target_vector_name == "google":
         return prepare_google_paths()
     if target_vector_name == "polyglot":
