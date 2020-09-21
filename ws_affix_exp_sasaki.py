@@ -3,6 +3,7 @@ import multiprocessing as mp
 from pathlib import Path
 
 from datasets import prepare_combined_query_path, prepare_target_vector_paths
+from datasets.ws_bench import prepare_combined_query_path_for_lang
 from sasaki_utils import inference, prepare_codecs_path, train
 from utils import dotdict
 from ws_affix_exp_pbos import evaluate_ws_affix
@@ -12,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 def exp(ref_vec_name):
     result_path = Path("results") / "ws_multi" / f"{ref_vec_name}_sasaki"
-    ref_vec_path = prepare_target_vector_paths(ref_vec_name).w2v_emb_path
+    ref_vec_path = prepare_target_vector_paths(f"wiki2vec-{ref_vec_name}").w2v_emb_path
     codecs_path = prepare_codecs_path(ref_vec_path, result_path)
 
     log_file = open(result_path / "log.txt", "w+")
@@ -29,7 +30,7 @@ def exp(ref_vec_name):
     )
 
     logger.info("Inferencing...")
-    combined_query_path = prepare_combined_query_path()
+    combined_query_path = prepare_combined_query_path_for_lang(ref_vec_name)
     result_emb_path = inference(model_info, combined_query_path)
 
     logger.info("Evaluating...")
@@ -42,7 +43,7 @@ def exp(ref_vec_name):
 
 if __name__ == '__main__':
     with mp.Pool() as pool:
-        target_vector_names = ("de", "it", "ru")
+        target_vector_names = ("en", "de", "it", "ru")
 
         results = [
             pool.apply_async(exp, (ref_vec_name,))
