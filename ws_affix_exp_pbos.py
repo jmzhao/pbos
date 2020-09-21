@@ -41,8 +41,9 @@ def evaluate(args):
         )
 
         for bname in get_all_bnames_for_lang(args.target_vector_name):
+            bench_path = prepare_bench_paths(bname).txt_path
             for lower in (True, False):
-                print(model_type.ljust(10), eval_ws(pred_path, bench_path, lower=lower, oov_handling='zero'), file=fout)
+                print(args.model_type.ljust(10), eval_ws(pred_path, bench_path, lower=lower, oov_handling='zero'), file=fout)
 
 
 def exp(model_type, target_vector_name):
@@ -119,11 +120,11 @@ if __name__ == '__main__':
         prepare_target_vector_paths(f"wiki2vec-{target_vector_name}")
         prepare_polyglot_freq_paths(target_vector_name)
 
-    with mp.Pool(1) as pool:
+    with mp.Pool(4) as pool:
         results = [
             pool.apply_async(exp, (model_type, target_vector_name))
-            for model_type in model_types
             for target_vector_name in target_vector_names
+            for model_type in model_types
         ]
 
         for r in results:
