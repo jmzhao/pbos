@@ -8,7 +8,7 @@ import pbos_train
 import subwords
 from datasets import prepare_combined_query_path, prepare_target_vector_paths
 from datasets.polyglot_freq import prepare_polyglot_freq_paths
-from datasets.ws_bench import prepare_bench_paths
+from datasets.ws_bench import prepare_bench_paths, get_all_bnames_for_lang, prepare_combined_query_path_for_lang
 from pbos_pred import predict
 from utils import dotdict
 from utils.args import dump_args
@@ -28,12 +28,21 @@ def train(args):
     pbos_train.main(args)
 
 
-def evaluate_ws_affix(args):
+def evaluate(args):
     with open(args.eval_result_path, "w") as fout:
-        bname = f"simlex999-{args.target_vector_name}"
-        bench_path = prepare_bench_paths(bname).txt_path
-        for lower in (True, False):
-            print(eval_ws(args.pred_path, bench_path, lower=lower, oov_handling='zero'), file=fout)
+        combined_query_path = prepare_combined_query_path_for_lang(args.target_vector_name)
+        pred_path = f"{args.results_dir}/vectors.txt"
+
+        predict(
+            model=args.model_path,
+            queries=combined_query_path,
+            save=pred_path,
+            word_boundary=args.word_boundary,
+        )
+
+        for bname in get_all_bnames_for_lang(args.target_vector_name):
+            for lower in (True, False):
+                print(model_type.ljust(10), eval_ws(pred_path, bench_path, lower=lower, oov_handling='zero'), file=fout)
 
 
 def exp(model_type, target_vector_name):
@@ -71,7 +80,7 @@ def exp(model_type, target_vector_name):
         args.subword_prob = None
     elif model_type in ('pbos', 'pbosn'):
         args.subword_prob_min_prob = 0
-        args.subword_prob_word_freq = prepare_polyglot_freq_paths(target_vector_name)
+        args.subword_prob_word_freq = prepare_polyglot_freq_paths(target_vector_name).word_freq_path
         args.subword_prob = f"{args.results_dir}/subword_prob.jsonl"
 
     # training
@@ -89,8 +98,6 @@ def exp(model_type, target_vector_name):
         args.normalize_semb = False
 
     # prediction & evaluation
-    args.pred_path = f"{args.results_dir}/vectors.txt"
-    args.query_path = prepare_combined_query_path()
     args.eval_result_path = f"{args.results_dir}/result.txt"
     os.makedirs(args.results_dir, exist_ok=True)
 
@@ -101,29 +108,18 @@ def exp(model_type, target_vector_name):
 
     with contextlib.redirect_stdout(log_file), contextlib.redirect_stderr(log_file):
         train(args)
-
-        # prediction
-        time_used = predict(
-            model=args.model_path,
-            queries=args.query_path,
-            save=args.pred_path,
-            word_boundary=args.word_boundary,
-        )
-        print(f"time used: {time_used:.3f}")
-
-        # evaluate
-        evaluate_ws_affix(args)
+        evaluate(args)
 
 
 if __name__ == '__main__':
-    model_types = ("pbos", "bos")
-    target_vector_names = ("en", "de", "it", "ru",)
+    model_types = ("bos", "pbos")
+    target_vector_names = ("en", "de", "it", "ru", )
 
     for target_vector_name in target_vector_names:  # avoid race condition
         prepare_target_vector_paths(f"wiki2vec-{target_vector_name}")
         prepare_polyglot_freq_paths(target_vector_name)
 
-    with mp.Pool() as pool:
+    with mp.Pool(1) as pool:
         results = [
             pool.apply_async(exp, (model_type, target_vector_name))
             for model_type in model_types

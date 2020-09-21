@@ -53,6 +53,23 @@ datasets_dir = os.path.dirname(os.path.realpath(__file__))
 def get_all_bnames_for_lang(lang):
     return [f"ws353-{lang}", f"ws353-{lang}-rel", f"ws353-{lang}-sim", f"simlex999-{lang}"]
 
+def prepare_combined_query_path_for_lang(lang):
+    combined_query_path = f"{datasets_dir}/combined_query_{lang}.txt"
+
+    if not os.path.exists(combined_query_path):
+        all_words = set()
+        for bname in get_all_bnames_for_lang(lang):
+            bench_paths = prepare_bench_paths(bname)
+            with open(bench_paths.query_path) as fin:
+                for line in fin:
+                    all_words.add(line.strip())
+                    all_words.add(line.strip().lower())
+        with open(combined_query_path, 'w') as fout:
+            for w in all_words:
+                print(w, file=fout)
+
+    return combined_query_path
+
 
 def prepare_bench_paths(name):
     binfo = BENCHS[name]
@@ -104,3 +121,5 @@ def prepare_bench_paths(name):
 if __name__ == '__main__':
     for bname in BENCHS:
         prepare_bench_paths(bname)
+    for lang in multi_bench_languages:
+        prepare_combined_query_path_for_lang(lang)
