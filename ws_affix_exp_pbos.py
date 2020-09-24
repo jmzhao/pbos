@@ -30,20 +30,10 @@ def train(args):
 
 def evaluate(args):
     with open(args.eval_result_path, "w") as fout:
-        combined_query_path = prepare_combined_query_path_for_lang(args.target_vector_name)
-        pred_path = f"{args.results_dir}/vectors.txt"
-
-        predict(
-            model=args.model_path,
-            queries=combined_query_path,
-            save=pred_path,
-            word_boundary=args.word_boundary,
-        )
-
         for bname in get_all_bnames_for_lang(args.target_vector_name):
             bench_path = prepare_bench_paths(bname).txt_path
             for lower in (True, False):
-                print(args.model_type.ljust(10), eval_ws(pred_path, bench_path, lower=lower, oov_handling='zero'), file=fout)
+                print(args.model_type.ljust(10), eval_ws(args.pred_path, bench_path, lower=lower, oov_handling='zero'), file=fout)
 
 
 def exp(model_type, target_vector_name):
@@ -100,6 +90,7 @@ def exp(model_type, target_vector_name):
 
     # prediction & evaluation
     args.eval_result_path = f"{args.results_dir}/result.txt"
+    args.pred_path = f"{args.results_dir}/vectors.txt"
     os.makedirs(args.results_dir, exist_ok=True)
 
     # redirect log output
@@ -109,18 +100,29 @@ def exp(model_type, target_vector_name):
 
     with contextlib.redirect_stdout(log_file), contextlib.redirect_stderr(log_file):
         train(args)
+
+        combined_query_path = prepare_combined_query_path_for_lang(args.target_vector_name)
+        
+        predict(
+            model=args.model_path,
+            queries=combined_query_path,
+            save=args.pred_path,
+            word_boundary=args.word_boundary,
+        )
+
         evaluate(args)
 
 
 if __name__ == '__main__':
     model_types = ("bos", "pbos")
     target_vector_names = ("en", "de", "it", "ru", )
+    target_vector_names = ("ru", )
 
     for target_vector_name in target_vector_names:  # avoid race condition
         prepare_target_vector_paths(f"wiki2vec-{target_vector_name}")
         prepare_polyglot_freq_paths(target_vector_name)
 
-    with mp.Pool(4) as pool:
+    with mp.Pool() as pool:
         results = [
             pool.apply_async(exp, (model_type, target_vector_name))
             for target_vector_name in target_vector_names

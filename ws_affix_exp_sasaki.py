@@ -4,9 +4,9 @@ from pathlib import Path
 
 from datasets import prepare_combined_query_path, prepare_target_vector_paths
 from datasets.ws_bench import prepare_combined_query_path_for_lang
-from sasaki_utils import inference, prepare_codecs_path, train
+from sasaki_utils import inference, prepare_codecs_path, train, get_info_from_result_path
 from utils import dotdict
-from ws_affix_exp_pbos import evaluate_ws_affix
+from ws_affix_exp_pbos import evaluate
 
 logger = logging.getLogger(__name__)
 
@@ -20,30 +20,35 @@ def exp(ref_vec_name):
     logging.basicConfig(level=logging.DEBUG, stream=log_file)
 
     logger.info("Training...")
-    model_info = train(
-        ref_vec_path,
-        result_path,
-        codecs_path=codecs_path,
-        H=40_000,
-        F=500_000,
-        epoch=300,
-    )
+    # model_info = train(
+    #     ref_vec_path,
+    #     result_path,
+    #     codecs_path=codecs_path,
+    #     H=40_000,
+    #     F=500_000,
+    #     epoch=300,
+    # )
+
+    model_info = get_info_from_result_path(result_path / "sep_kvq")
 
     logger.info("Inferencing...")
     combined_query_path = prepare_combined_query_path_for_lang(ref_vec_name)
     result_emb_path = inference(model_info, combined_query_path)
 
     logger.info("Evaluating...")
-    evaluate_ws_affix(dotdict(
+    evaluate(dotdict(
+        model_type="sasaki",
         eval_result_path=result_path / "result.txt",
         pred_path=result_emb_path,
-        target_vector_name=ref_vec_name
+        target_vector_name=ref_vec_name,
+        results_dir=result_path,
     ))
 
 
 if __name__ == '__main__':
-    with mp.Pool() as pool:
+    with mp.Pool(1) as pool:
         target_vector_names = ("en", "de", "it", "ru")
+        # target_vector_names = ("en", )
 
         results = [
             pool.apply_async(exp, (ref_vec_name,))
