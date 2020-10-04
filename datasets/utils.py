@@ -20,12 +20,16 @@ def convert_target_dataset(
     word_list_path=None,
     word_freq_path=None,
     raw_count_path=None,
+    vocab_size_limit=None,
 ):
     if all(path is None or os.path.exists(path) for path in
            (w2v_emb_path, txt_emb_path, pkl_emb_path, word_list_path, word_freq_path, raw_count_path)):
         return
 
     vocab, emb = load_embedding(input_emb_path)
+
+    vocab = vocab[:vocab_size_limit]
+    emb = emb[:vocab_size_limit]
 
     return save_target_dataset(
         vocab,
