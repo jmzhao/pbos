@@ -16,13 +16,18 @@ def load_embedding(filename: str, show_progress=False) -> (List[str], np.ndarray
         from utils import dummy_tqdm as file_tqdm
 
     _, ext = os.path.splitext(filename)
-    if ext in (".txt",):
+    if ext in (".txt", ".w2v"):
         vocab, emb = [], []
         with open(filename, "r") as fin:
+            if ext == ".w2v":
+                next(fin)
             for line in file_tqdm(fin):
                 ss = line.split()
-                vocab.append(ss[0])
-                emb.append([float(x) for x in ss[1:]])
+                try:
+                    emb.append([float(x) for x in ss[1:]])
+                    vocab.append(ss[0])
+                except ValueError:
+                    print(f"Error loading the line: {line[:30]} ...")
         emb = np.array(emb)
     elif ext in (".pickle", ".pkl"):
         import pickle

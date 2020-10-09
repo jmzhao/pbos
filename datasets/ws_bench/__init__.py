@@ -20,7 +20,56 @@ BENCHS = {
     },
 }
 
+multi_bench_languages = {
+    "en": "english",
+    "it": "italian",
+    "ru": "russian",
+    "de": "german"
+}
+
+MULTI_BENCHS = {}
+
+for lang, full_name in multi_bench_languages.items():
+    for ws_suffix in ("-rel", "-sim", ""):
+        MULTI_BENCHS[f"ws353-{lang}{ws_suffix}"] = {
+            "url": f"https://raw.githubusercontent.com/iraleviant/eval-multilingual-simlex/master/evaluation/ws-353/wordsim353-{full_name}{ws_suffix}.txt",
+            "raw_txt_rel_path": f"wordsim353-{full_name}{ws_suffix}.txt",
+            "no_zip": True,
+            "skip_lines": 1,
+        }
+
+    MULTI_BENCHS[f"simlex999-{lang}"] = {
+        "url": f"https://raw.githubusercontent.com/nmrksic/eval-multilingual-simlex/master/evaluation/simlex-{full_name}.txt",
+        "raw_txt_rel_path": f"simlex-{full_name}.txt",
+        "no_zip": True,
+        "skip_lines": 1,
+    }
+
+BENCHS.update(MULTI_BENCHS)
+
 datasets_dir = os.path.dirname(os.path.realpath(__file__))
+
+
+def get_all_bnames_for_lang(lang):
+    return [f"ws353-{lang}", f"ws353-{lang}-rel", f"ws353-{lang}-sim", f"simlex999-{lang}"]
+
+
+def prepare_combined_query_path_for_lang(lang):
+    combined_query_path = f"{datasets_dir}/combined_query_{lang}.txt"
+
+    if not os.path.exists(combined_query_path):
+        all_words = set()
+        for bname in get_all_bnames_for_lang(lang):
+            bench_paths = prepare_bench_paths(bname)
+            with open(bench_paths.query_path) as fin:
+                for line in fin:
+                    all_words.add(line.strip())
+                    all_words.add(line.strip().lower())
+        with open(combined_query_path, 'w') as fout:
+            for w in all_words:
+                print(w, file=fout)
+
+    return combined_query_path
 
 
 def prepare_bench_paths(name):
@@ -64,8 +113,14 @@ def prepare_bench_paths(name):
             for w in words:
                 print(w, file=fout)
 
-
     return dotdict(
         txt_path=txt_path,
         query_path=query_path,
     )
+
+
+if __name__ == '__main__':
+    for bname in BENCHS:
+        prepare_bench_paths(bname)
+    for lang in multi_bench_languages:
+        prepare_combined_query_path_for_lang(lang)
