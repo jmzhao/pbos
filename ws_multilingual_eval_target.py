@@ -2,7 +2,7 @@
 Used to generate target vector statistics
 """
 from datasets import prepare_target_vector_paths
-from datasets.ws_bench import BENCHS, prepare_bench_paths, get_all_bnames_for_lang
+from datasets.ws_bench import prepare_bench_paths, get_all_bnames_for_lang
 from ws_eval import eval_ws
 
 for lang in ("de", "en", "it", "ru",):

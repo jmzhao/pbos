@@ -45,8 +45,6 @@ for lang, full_name in multi_bench_languages.items():
         "skip_lines": 1,
     }
 
-BENCHS.update(MULTI_BENCHS)
-
 datasets_dir = os.path.dirname(os.path.realpath(__file__))
 
 
@@ -73,7 +71,7 @@ def prepare_combined_query_path_for_lang(lang):
 
 
 def prepare_bench_paths(name):
-    binfo = BENCHS[name]
+    binfo = BENCHS[name] if name in BENCHS else MULTI_BENCHS[name]
 
     raw_txt_path = f"{datasets_dir}/{name}/{binfo['raw_txt_rel_path']}"
     txt_path = f"{datasets_dir}/{name}/{name}.txt"
