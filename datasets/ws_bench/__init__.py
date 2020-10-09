@@ -53,6 +53,7 @@ datasets_dir = os.path.dirname(os.path.realpath(__file__))
 def get_all_bnames_for_lang(lang):
     return [f"ws353-{lang}", f"ws353-{lang}-rel", f"ws353-{lang}-sim", f"simlex999-{lang}"]
 
+
 def prepare_combined_query_path_for_lang(lang):
     combined_query_path = f"{datasets_dir}/combined_query_{lang}.txt"
 
