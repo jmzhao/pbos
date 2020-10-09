@@ -5,7 +5,7 @@ from pathlib import Path
 from datasets import prepare_combined_query_path, prepare_target_vector_paths
 from sasaki_utils import inference, prepare_codecs_path, train
 from utils import dotdict
-from ws_affix_exp_pbos import evaluate
+from ws_exp_pbos import evaluate
 
 logger = logging.getLogger(__name__)
 

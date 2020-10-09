@@ -36,7 +36,7 @@ def plot_loss(result_paths):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--results_dir', help="path to the results directory", default="results/ws_affix")
+    parser.add_argument('--results_dir', help="path to the results directory", default="results/ws")
     args = parser.parse_args()
 
     plot_loss(args.results_dir)
