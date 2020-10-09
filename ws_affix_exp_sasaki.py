@@ -20,14 +20,14 @@ def exp(ref_vec_name):
     logging.basicConfig(level=logging.DEBUG, stream=log_file)
 
     logger.info("Training...")
-    # model_info = train(
-    #     ref_vec_path,
-    #     result_path,
-    #     codecs_path=codecs_path,
-    #     H=40_000,
-    #     F=500_000,
-    #     epoch=300,
-    # )
+    train(
+        ref_vec_path,
+        result_path,
+        codecs_path=codecs_path,
+        H=40_000,
+        F=500_000,
+        epoch=300,
+    )
 
     model_info = get_info_from_result_path(result_path / "sep_kvq")
 
@@ -46,9 +46,8 @@ def exp(ref_vec_name):
 
 
 if __name__ == '__main__':
-    with mp.Pool(1) as pool:
+    with mp.Pool() as pool:
         target_vector_names = ("en", "de", "it", "ru")
-        # target_vector_names = ("en", )
 
         results = [
             pool.apply_async(exp, (ref_vec_name,))
