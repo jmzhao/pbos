@@ -2,17 +2,17 @@ import logging
 import multiprocessing as mp
 from pathlib import Path
 
-from datasets import prepare_combined_query_path, prepare_en_target_vector_paths
+from datasets import prepare_combined_query_path, prepare_target_vector_paths
 from sasaki_utils import inference, prepare_codecs_path, train
 from utils import dotdict
-from ws_affix_exp_pbos import evaluate_ws_affix
+from ws_affix_exp_pbos import evaluate
 
 logger = logging.getLogger(__name__)
 
 
 def exp(ref_vec_name):
-    result_path = Path("results") / "ws_affix" / f"{ref_vec_name}_sasaki"
-    ref_vec_path = prepare_en_target_vector_paths(ref_vec_name).w2v_emb_path
+    result_path = Path("results") / "ws" / f"{ref_vec_name}_sasaki"
+    ref_vec_path = prepare_target_vector_paths(ref_vec_name).w2v_emb_path
     codecs_path = prepare_codecs_path(ref_vec_path, result_path)
 
     log_file = open(result_path / "log.txt", "w+")
@@ -33,7 +33,7 @@ def exp(ref_vec_name):
     result_emb_path = inference(model_info, combined_query_path)
 
     logger.info("Evaluating...")
-    evaluate_ws_affix(dotdict(
+    evaluate(dotdict(
         eval_result_path=result_path / "result.txt",
         pred_path=result_emb_path
     ))

@@ -6,7 +6,7 @@ from collections import ChainMap
 
 import pbos_train
 import subwords
-from datasets import prepare_combined_query_path, prepare_en_target_vector_paths
+from datasets import prepare_combined_query_path, prepare_target_vector_paths
 from datasets.unigram_freq import prepare_unigram_freq_paths
 from datasets.ws_bench import prepare_bench_paths, BENCHS
 from pbos_pred import predict
@@ -28,7 +28,7 @@ def train(args):
     pbos_train.main(args)
 
 
-def evaluate_ws_affix(args):
+def evaluate(args):
     with open(args.eval_result_path, "w") as fout:
         for bname in BENCHS:
             bench_path = prepare_bench_paths(bname).txt_path
@@ -37,11 +37,11 @@ def evaluate_ws_affix(args):
 
 
 def exp(model_type, target_vector_name):
-    target_vector_paths = prepare_en_target_vector_paths(target_vector_name)
+    target_vector_paths = prepare_target_vector_paths(target_vector_name)
     args = dotdict()
 
     # misc
-    args.results_dir = f"results/ws_affix/{target_vector_name}_{model_type}"
+    args.results_dir = f"results/ws/{target_vector_name}_{model_type}"
     args.model_type = model_type
     args.log_level = "INFO"
 
@@ -111,7 +111,7 @@ def exp(model_type, target_vector_name):
         print(f"time used: {time_used:.3f}")
 
         # evaluate
-        evaluate_ws_affix(args)
+        evaluate(args)
 
 
 if __name__ == '__main__':
@@ -119,7 +119,7 @@ if __name__ == '__main__':
     target_vector_names = ("google", "polyglot")
 
     for target_vector_name in target_vector_names:  # avoid race condition
-        prepare_en_target_vector_paths(target_vector_name)
+        prepare_target_vector_paths(target_vector_name)
 
     with mp.Pool() as pool:
         results = [
