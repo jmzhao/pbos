@@ -49,7 +49,7 @@ def main(results_dir):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        '--results_dir',
+        '--results_dir', '-d', 
         help="path to the results directory",
         default="results/ws_affix"
     )
