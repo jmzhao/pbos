@@ -6,9 +6,8 @@ from collections import ChainMap
 
 import pbos_train
 import subwords
-from datasets import prepare_combined_query_path, prepare_target_vector_paths
-from datasets.polyglot_freq import prepare_polyglot_freq_paths
-from datasets.ws_bench import prepare_bench_paths, get_all_bnames_for_lang, prepare_combined_query_path_for_lang
+from datasets import (prepare_target_vector_paths, prepare_polyglot_freq_paths, prepare_bench_paths,
+                      get_all_bnames_for_lang, prepare_combined_query_path_for_lang)
 from pbos_pred import predict
 from utils import dotdict
 from utils.args import dump_args
@@ -102,7 +101,7 @@ def exp(model_type, target_vector_name):
         train(args)
 
         combined_query_path = prepare_combined_query_path_for_lang(args.target_vector_name)
-        
+
         predict(
             model=args.model_path,
             queries=combined_query_path,

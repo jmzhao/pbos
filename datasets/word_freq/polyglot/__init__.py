@@ -7,7 +7,6 @@ import tarfile
 
 from utils import dotdict
 
-
 logger = logging.getLogger(__name__)
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -54,12 +53,9 @@ def prepare_polyglot_freq_paths(
         word_freq_path = word_freq_path,
     )
 
-languages = [
-    'kk', 'ta', 'lv', 'vi', 'hu', 'tr', 'el', 'bg', 'sv', 'eu', 'ru', 'da',
-    'id', 'zh', 'fa', 'he', 'ro', 'en', 'ar', 'hi', 'it', 'es', 'cs'
-]
-
 
 if __name__ == '__main__':
-    for language_code in languages:
+    from datasets import polyglot_languages
+
+    for language_code in polyglot_languages:
         prepare_polyglot_freq_paths(language_code)

@@ -2,8 +2,7 @@ import logging
 import multiprocessing as mp
 from pathlib import Path
 
-from datasets import prepare_target_vector_paths
-from datasets.ws_bench import prepare_combined_query_path_for_lang
+from datasets import prepare_target_vector_paths, prepare_combined_query_path_for_lang
 from sasaki_utils import inference, prepare_codecs_path, train, get_info_from_result_path
 from utils import dotdict
 from ws_multilingual_exp_pbos import evaluate

@@ -1,9 +1,8 @@
-from datasets.polyglot_emb import prepare_polyglot_emb_paths, languages
-from datasets.ud import prepare_ud_paths
+from datasets import prepare_target_vector_paths, polyglot_languages, prepare_ud_paths
 from load import load_embedding
 
-for language in languages:
-    polyglot_path = prepare_polyglot_emb_paths(language).pkl_emb_path
+for language in polyglot_languages:
+    polyglot_path = prepare_target_vector_paths(language).pkl_emb_path
     polyglot_vocab, _ = load_embedding(polyglot_path)
     polyglot_vocab = set(polyglot_vocab)
 

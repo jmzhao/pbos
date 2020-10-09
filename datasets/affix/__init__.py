@@ -1,14 +1,12 @@
 import gzip
-from itertools import islice
-import json
 import logging
 import os
-from pathlib import Path
 import shutil
 import subprocess as sp
+from itertools import islice
+from pathlib import Path
 
 from utils import dotdict
-
 
 logger = logging.getLogger(__name__)
 

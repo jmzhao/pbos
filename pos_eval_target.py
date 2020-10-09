@@ -8,11 +8,10 @@ python pos_exp_polyglot.py 2>train.log 1>eval.log
 
 import subprocess as sp
 
-from datasets.polyglot_emb import prepare_polyglot_emb_paths, languages
-from datasets.ud import prepare_ud_paths
+from datasets import prepare_target_vector_paths, polyglot_languages, prepare_ud_paths
 
-for language_code in languages:
-    ud_vocab_embedding_path = prepare_polyglot_emb_paths(language_code).pkl_emb_path
+for language_code in polyglot_languages:
+    ud_vocab_embedding_path = prepare_target_vector_paths(language_code).pkl_emb_path
     ud_data_path, ud_vocab_path = prepare_ud_paths(language_code)
 
     cmd = f"""

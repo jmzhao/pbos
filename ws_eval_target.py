@@ -1,7 +1,6 @@
 import argparse
 
-from datasets import prepare_target_vector_paths
-from datasets.ws_bench import BENCHS, prepare_bench_paths
+from datasets import prepare_target_vector_paths, BENCHS, prepare_bench_paths
 from ws_eval import eval_ws
 
 
@@ -27,5 +26,5 @@ if __name__ == '__main__':
     )
 
     args = parser.parse_args()
-    
+
     main(args.targets)

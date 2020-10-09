@@ -4,7 +4,7 @@ import shutil
 import subprocess as sp
 import tarfile
 
-from datasets.utils import convert_target_dataset
+from datasets.target_vectors.utils import convert_target_dataset
 from utils import dotdict
 
 logger = logging.getLogger(__name__)
@@ -57,12 +57,9 @@ def prepare_polyglot_emb_paths(language_code, *, dir_path=dir_path):
     )
 
 
-languages = [
-    'ar', 'bg', 'cs', 'da', 'de', 'el', 'en', 'es', 'eu', 'fa', 'he', 'hi', 'hu',
-    'id', 'it', 'kk', 'lv', 'ro', 'ru', 'sv', 'ta', 'tr', 'vi', 'zh',
-]
-
 if __name__ == '__main__':
+    from datasets import polyglot_languages
+    
     logging.basicConfig(level=logging.INFO)
-    for language_code in languages:
+    for language_code in polyglot_languages:
         prepare_polyglot_emb_paths(language_code)

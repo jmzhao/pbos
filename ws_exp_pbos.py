@@ -6,9 +6,8 @@ from collections import ChainMap
 
 import pbos_train
 import subwords
-from datasets import prepare_combined_query_path, prepare_target_vector_paths
-from datasets.unigram_freq import prepare_unigram_freq_paths
-from datasets.ws_bench import prepare_bench_paths, BENCHS
+from datasets import prepare_combined_query_path, prepare_target_vector_paths, prepare_unigram_freq_paths, \
+    prepare_bench_paths, BENCHS
 from pbos_pred import predict
 from utils import dotdict
 from utils.args import dump_args

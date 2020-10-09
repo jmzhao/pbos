@@ -70,6 +70,28 @@ def prepare_combined_query_path_for_lang(lang):
     return combined_query_path
 
 
+def prepare_combined_query_path():
+    """
+    Prepare the combined query path for word similarity datasets dataset
+    """
+
+    combined_query_path = f"{datasets_dir}/combined_query.txt"
+
+    if not os.path.exists(combined_query_path):
+        all_words = set()
+        for bname in BENCHS:
+            bench_paths = prepare_bench_paths(bname)
+            with open(bench_paths.query_path) as fin:
+                for line in fin:
+                    all_words.add(line.strip())
+                    all_words.add(line.strip().lower())
+        with open(combined_query_path, 'w') as fout:
+            for w in all_words:
+                print(w, file=fout)
+
+    return combined_query_path
+
+
 def prepare_bench_paths(name):
     binfo = BENCHS[name] if name in BENCHS else MULTI_BENCHS[name]
 

@@ -3,10 +3,7 @@ import multiprocessing as mp
 import os
 import subprocess as sp
 
-from datasets.polyglot_emb import languages as all_language_codes
-from datasets.polyglot_emb import prepare_polyglot_emb_paths
-from datasets.polyglot_freq import prepare_polyglot_freq_paths
-from datasets.ud import prepare_ud_paths
+from datasets import prepare_target_vector_paths, polyglot_languages, prepare_ud_paths, prepare_polyglot_freq_paths
 from utils.args import add_logging_args, set_logging_config
 
 logger = logging.getLogger(__name__)
@@ -35,7 +32,7 @@ def evaluate_pbos(language_code, model_type):
     logger.info(f"[evaluate_pbos({language_code}, model_type={model_type})] start...")
 
     # Input files
-    polyglot_embeddings_path = prepare_polyglot_emb_paths(language_code)
+    polyglot_embeddings_path = prepare_target_vector_paths(language_code)
     polyglot_frequency_path = prepare_polyglot_freq_paths(language_code)
 
     # Output/result files
@@ -132,8 +129,8 @@ def main():
     parser = argparse.ArgumentParser("Run POS tagging experiments on PolyGlot and UD",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--languages', '-langs', nargs='+', metavar="LANG_CODE",
-        choices=all_language_codes + ["ALL"],
-        help="languages to evaluate over")
+                        choices=polyglot_languages + ["ALL"],
+                        help="languages to evaluate over")
     parser.add_argument('--num_processes', '-nproc', type=int,
         help="number of processers to use")
     add_logging_args(parser)
@@ -141,7 +138,7 @@ def main():
 
     set_logging_config(args)
 
-    language_codes = all_language_codes if "ALL" in args.languages else args.languages
+    language_codes = polyglot_languages if "ALL" in args.languages else args.languages
     logger.debug(f"language_codes: {language_codes}")
 
     model_types = ("pbos", "bos")
@@ -150,7 +147,7 @@ def main():
         for language_code in language_codes:
             # prepare raw data without multiprocessing,
             # otherwise trouble comes with race conditions of file write
-            prepare_polyglot_emb_paths(language_code)
+            prepare_target_vector_paths(language_code)
             prepare_polyglot_freq_paths(language_code)
             prepare_ud_paths(language_code)
             for model_type in model_types:

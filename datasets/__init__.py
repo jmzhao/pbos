@@ -1,59 +1,29 @@
-import os
+from .target_vectors import prepare_target_vector_paths
+from .ud import prepare_ud_paths
+from .word_freq.polyglot import prepare_polyglot_freq_paths
+from .word_freq.unigram import prepare_unigram_freq_paths
+from .ws_bench import prepare_combined_query_path, BENCHS, prepare_bench_paths, prepare_combined_query_path_for_lang, \
+    get_all_bnames_for_lang
 
-from datasets.affix import prepare_affix_paths
-from datasets.glove import prepare_glove_paths
-from datasets.google import prepare_google_paths
-from datasets.polyglot_emb import prepare_polyglot_emb_paths
-from datasets.wikipedia2vec import prepare_wiki2vec_emb_paths
-from datasets.ws_bench import BENCHS, prepare_bench_paths
+polyglot_languages = [
+    'ar', 'bg', 'cs', 'da', 'el', 'en', 'es', 'eu', 'fa', 'he', 'hi', 'hu',
+    'id', 'it', 'kk', 'lv', 'ro', 'ru', 'sv', 'ta', 'tr', 'vi', 'zh',
+]
 
-dir_path = os.path.dirname(os.path.realpath(__file__))
+__all__ = [
+    "polyglot_languages",
 
+    "prepare_target_vector_paths",
 
-def prepare_combined_query_path(
-    *,
-    dir_path=dir_path,
-):
-    """
-    Prepare the combined query path for word similarity datasets & affix dataset
-    """
+    "prepare_combined_query_path",
+    "prepare_bench_paths",
+    "BENCHS",
+    "prepare_combined_query_path_for_lang",
+    "get_all_bnames_for_lang",
 
-    combined_query_path = f"{dir_path}/combined_query.txt"
+    "prepare_ud_paths",
 
-    if not os.path.exists(combined_query_path):
-        all_words = set()
-        for bname in BENCHS:
-            bench_paths = prepare_bench_paths(bname)
-            with open(bench_paths.query_path) as fin:
-                for line in fin:
-                    all_words.add(line.strip())
-                    all_words.add(line.strip().lower())
-        affix_paths = prepare_affix_paths()
-        with open(affix_paths.queries_path) as fin:
-            for line in fin:
-                all_words.add(line.strip())
-                all_words.add(line.strip().lower())
-        with open(combined_query_path, 'w') as fout:
-            for w in all_words:
-                print(w, file=fout)
+    "prepare_polyglot_freq_paths",
+    "prepare_unigram_freq_paths"
 
-    return combined_query_path
-
-
-target_vector_names = ("google", "polyglot", "glove")
-
-
-def prepare_target_vector_paths(target_vector_name):
-    target_vector_name = target_vector_name.lower()
-
-    if target_vector_name.startswith("polyglot-"):
-        return prepare_polyglot_emb_paths(target_vector_name[-2:])
-    if target_vector_name.startswith("wiki2vec-"):
-        return prepare_wiki2vec_emb_paths(target_vector_name[-2:])
-    if target_vector_name == "google":
-        return prepare_google_paths()
-    if target_vector_name == "polyglot":
-        return prepare_polyglot_emb_paths("en")
-    if target_vector_name == "glove":
-        return prepare_glove_paths()
-    raise NotImplementedError
+]

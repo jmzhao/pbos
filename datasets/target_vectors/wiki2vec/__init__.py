@@ -2,7 +2,7 @@ import logging
 import os
 import subprocess as sp
 
-from datasets.utils import convert_target_dataset
+from datasets.target_vectors.utils import convert_target_dataset
 from utils import dotdict
 
 logger = logging.getLogger(__name__)
