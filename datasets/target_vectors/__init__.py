@@ -1,6 +1,6 @@
 from .glove import prepare_glove_paths
 from .google import prepare_google_paths
-from .polyglot import prepare_polyglot_emb_paths
+from .polyglot import prepare_polyglot_emb_paths, polyglot_languages
 from .wiki2vec import prepare_wiki2vec_emb_paths
 
 
@@ -17,4 +17,6 @@ def prepare_target_vector_paths(target_vector_name):
         return prepare_polyglot_emb_paths("en")
     if target_vector_name == "glove":
         return prepare_glove_paths()
-    return prepare_polyglot_emb_paths(target_vector_name)
+    if target_vector_name in polyglot_languages:
+        return prepare_polyglot_emb_paths(target_vector_name)
+    raise NotImplementedError
