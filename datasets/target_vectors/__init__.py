@@ -17,4 +17,4 @@ def prepare_target_vector_paths(target_vector_name):
         return prepare_polyglot_emb_paths("en")
     if target_vector_name == "glove":
         return prepare_glove_paths()
-    raise NotImplementedError
+    return prepare_polyglot_emb_paths(target_vector_name)

@@ -130,6 +130,7 @@ def main():
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--languages', '-langs', nargs='+', metavar="LANG_CODE",
                         choices=polyglot_languages + ["ALL"],
+                        default="ALL",
                         help="languages to evaluate over")
     parser.add_argument('--num_processes', '-nproc', type=int,
         help="number of processers to use")
@@ -147,6 +148,7 @@ def main():
         for language_code in language_codes:
             # prepare raw data without multiprocessing,
             # otherwise trouble comes with race conditions of file write
+            print(language_code)
             prepare_target_vector_paths(language_code)
             prepare_polyglot_freq_paths(language_code)
             prepare_ud_paths(language_code)
