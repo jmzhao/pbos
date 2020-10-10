@@ -24,8 +24,7 @@
   python ws_exp_sasaki.py
   ```
 
-  The results will be available at `results/ws/{target_vector_name}_{model_type}/result.txt`, where
-  `target_vector_name` is in [`google`, `polyglot`], and `model_type` is in [`bos`, `pbos`, `sasaki`]
+  The results will be available at `results/ws/{target_vector_name}_{model_type}/result.txt`
 
 
 - To reproduce the multilingual word similarity results:
@@ -35,8 +34,7 @@
   python ws_multilingual_exp_sasaki.py
   ```
 
-  The results will be available at `results/ws_multi/{lang}_{model_type}/result.txt`, where
-  `target_vector_name` is in [`de`, `en`, `it`, `ru`], and `model_type` is in [`bos`, `pbos`, `sasaki`]
+  The results will be available at `results/ws_multi/{lang}_{model_type}/result.txt`
 
 
 - To reproduce the POS tagging results:
