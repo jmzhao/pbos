@@ -89,9 +89,7 @@ def prepare_ud_paths(language):
 
 
 if __name__ == "__main__":
-    languages = [
-        'ar', 'bg', 'cs', 'da', 'el', 'en', 'es', 'eu', 'fa', 'he', 'hi', 'hu',
-        'id', 'it', 'kk', 'lv', 'ro', 'ru', 'sv', 'ta', 'tr', 'vi', 'zh',
-    ]
-    for language in languages:
+    from datasets import polyglot_languages
+
+    for language in polyglot_languages:
         prepare_ud_paths(language)

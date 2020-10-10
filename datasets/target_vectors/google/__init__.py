@@ -6,7 +6,7 @@ import subprocess as sp
 
 import gensim
 
-from datasets.utils import save_target_dataset, clean_target_emb, convert_target_dataset
+from datasets.target_vectors.utils import save_target_dataset, clean_target_emb, convert_target_dataset
 from utils import dotdict
 
 logger = logging.getLogger(__name__)

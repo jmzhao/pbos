@@ -4,7 +4,7 @@ import shutil
 import subprocess as sp
 import tarfile
 
-from datasets.utils import convert_target_dataset
+from datasets.target_vectors.utils import convert_target_dataset
 from utils import dotdict
 
 logger = logging.getLogger(__name__)
@@ -12,8 +12,11 @@ logger = logging.getLogger(__name__)
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 
-def prepare_polyglot_emb_paths(language_code, *, dir_path=dir_path):
-    language_dir_path = os.path.join(dir_path, language_code)
+def prepare_polyglot_emb_paths(lang, *, dir_path=dir_path):
+    if lang not in polyglot_languages:
+        raise NotImplementedError
+
+    language_dir_path = os.path.join(dir_path, lang)
     tar_path = os.path.join(language_dir_path, "embeddings.tar.bz2")
     raw_pkl_emb_path = os.path.join(language_dir_path, "raw_embeddings.pkl")
     pkl_emb_path = os.path.join(language_dir_path, "embeddings.pkl")
@@ -25,7 +28,7 @@ def prepare_polyglot_emb_paths(language_code, *, dir_path=dir_path):
 
     if not os.path.exists(tar_path):
         logger.info(f"Downloading {tar_path}")
-        url = f"http://polyglot.cs.stonybrook.edu/~polyglot/embeddings2/{language_code}/embeddings_pkl.tar.bz2"
+        url = f"http://polyglot.cs.stonybrook.edu/~polyglot/embeddings2/{lang}/embeddings_pkl.tar.bz2"
         sp.run(f"wget -O {tar_path} {url}".split())
 
     if not os.path.exists(raw_pkl_emb_path):
@@ -57,12 +60,12 @@ def prepare_polyglot_emb_paths(language_code, *, dir_path=dir_path):
     )
 
 
-languages = [
-    'ar', 'bg', 'cs', 'da', 'de', 'el', 'en', 'es', 'eu', 'fa', 'he', 'hi', 'hu',
+polyglot_languages = [
+    'ar', 'bg', 'cs', 'da', 'el', 'en', 'es', 'eu', 'fa', 'he', 'hi', 'hu',
     'id', 'it', 'kk', 'lv', 'ro', 'ru', 'sv', 'ta', 'tr', 'vi', 'zh',
 ]
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
-    for language_code in languages:
+    for language_code in polyglot_languages:
         prepare_polyglot_emb_paths(language_code)

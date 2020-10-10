@@ -6,9 +6,8 @@ from collections import ChainMap
 
 import pbos_train
 import subwords
-from datasets import prepare_combined_query_path, prepare_target_vector_paths
-from datasets.polyglot_freq import prepare_polyglot_freq_paths
-from datasets.ws_bench import prepare_bench_paths, get_all_bnames_for_lang, prepare_combined_query_path_for_lang
+from datasets import (prepare_target_vector_paths, prepare_polyglot_freq_paths, prepare_ws_dataset_paths,
+                      get_ws_dataset_names, prepare_ws_combined_query_path)
 from pbos_pred import predict
 from utils import dotdict
 from utils.args import dump_args
@@ -30,10 +29,11 @@ def train(args):
 
 def evaluate(args):
     with open(args.eval_result_path, "w") as fout:
-        for bname in get_all_bnames_for_lang(args.target_vector_name):
-            bench_path = prepare_bench_paths(bname).txt_path
+        for bname in get_ws_dataset_names(args.target_vector_name):
+            bench_path = prepare_ws_dataset_paths(bname).txt_path
             for lower in (True, False):
-                print(args.model_type.ljust(10), eval_ws(args.pred_path, bench_path, lower=lower, oov_handling='zero'), file=fout)
+                print(args.model_type.ljust(10), eval_ws(args.pred_path, bench_path, lower=lower, oov_handling='zero'),
+                      file=fout)
 
 
 def exp(model_type, target_vector_name):
@@ -101,8 +101,8 @@ def exp(model_type, target_vector_name):
     with contextlib.redirect_stdout(log_file), contextlib.redirect_stderr(log_file):
         train(args)
 
-        combined_query_path = prepare_combined_query_path_for_lang(args.target_vector_name)
-        
+        combined_query_path = prepare_ws_combined_query_path(args.target_vector_name)
+
         predict(
             model=args.model_path,
             queries=combined_query_path,
