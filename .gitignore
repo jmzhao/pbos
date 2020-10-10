@@ -1,0 +1,10 @@
+/.idea
+/datasets/*.*
+/datasets/**/*.*
+!/datasets/**/*.py
+
+/results/
+.DS_Store
+__pycache__
+.vscode
+/venv

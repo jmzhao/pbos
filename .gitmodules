@@ -1,0 +1,3 @@
+[submodule "compact_reconstruction"]
+	path = compact_reconstruction
+	url = git@github.com:losyer/compact_reconstruction.git
