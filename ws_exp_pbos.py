@@ -6,8 +6,8 @@ from collections import ChainMap
 
 import pbos_train
 import subwords
-from datasets import prepare_combined_query_path, prepare_target_vector_paths, prepare_unigram_freq_paths, \
-    prepare_bench_paths, BENCHS
+from datasets import prepare_ws_combined_query_path, prepare_target_vector_paths, prepare_unigram_freq_paths, \
+    prepare_ws_dataset_paths, get_ws_dataset_names
 from pbos_pred import predict
 from utils import dotdict
 from utils.args import dump_args
@@ -29,8 +29,8 @@ def train(args):
 
 def evaluate(args):
     with open(args.eval_result_path, "w") as fout:
-        for bname in BENCHS:
-            bench_path = prepare_bench_paths(bname).txt_path
+        for bname in get_ws_dataset_names():
+            bench_path = prepare_ws_dataset_paths(bname).txt_path
             for lower in (True, False):
                 print(eval_ws(args.pred_path, bench_path, lower=lower, oov_handling='zero'), file=fout)
 
@@ -88,7 +88,7 @@ def exp(model_type, target_vector_name):
 
     # prediction & evaluation
     args.pred_path = f"{args.results_dir}/vectors.txt"
-    args.query_path = prepare_combined_query_path()
+    args.query_path = prepare_ws_combined_query_path()
     args.eval_result_path = f"{args.results_dir}/result.txt"
     os.makedirs(args.results_dir, exist_ok=True)
 

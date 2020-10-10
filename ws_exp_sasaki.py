@@ -2,7 +2,7 @@ import logging
 import multiprocessing as mp
 from pathlib import Path
 
-from datasets import prepare_combined_query_path, prepare_target_vector_paths
+from datasets import prepare_ws_combined_query_path, prepare_target_vector_paths
 from sasaki_utils import inference, prepare_codecs_path, train
 from utils import dotdict
 from ws_exp_pbos import evaluate
@@ -29,7 +29,7 @@ def exp(ref_vec_name):
     )
 
     logger.info("Inferencing...")
-    combined_query_path = prepare_combined_query_path()
+    combined_query_path = prepare_ws_combined_query_path()
     result_emb_path = inference(model_info, combined_query_path)
 
     logger.info("Evaluating...")

@@ -2,8 +2,7 @@ from .target_vectors import prepare_target_vector_paths
 from .ud import prepare_ud_paths
 from .word_freq.polyglot import prepare_polyglot_freq_paths
 from .word_freq.unigram import prepare_unigram_freq_paths
-from .ws_bench import prepare_combined_query_path, BENCHS, prepare_bench_paths, prepare_combined_query_path_for_lang, \
-    get_all_bnames_for_lang
+from .word_similarity import prepare_ws_combined_query_path, prepare_ws_dataset_paths, get_ws_dataset_names
 
 polyglot_languages = [
     'ar', 'bg', 'cs', 'da', 'el', 'en', 'es', 'eu', 'fa', 'he', 'hi', 'hu',
@@ -15,11 +14,9 @@ __all__ = [
 
     "prepare_target_vector_paths",
 
-    "prepare_combined_query_path",
-    "prepare_bench_paths",
-    "BENCHS",
-    "prepare_combined_query_path_for_lang",
-    "get_all_bnames_for_lang",
+    "prepare_ws_combined_query_path",
+    "prepare_ws_dataset_paths",
+    "get_ws_dataset_names",
 
     "prepare_ud_paths",
 
