@@ -5,7 +5,7 @@ from datasets import prepare_target_vector_paths, prepare_ws_dataset_paths, get_
 from ws_eval import eval_ws
 
 for lang in ("de", "en", "it", "ru",):
-    target_vector_path = prepare_target_vector_paths(f"polyglot-{lang}").txt_emb_path
+    target_vector_path = prepare_target_vector_paths(f"wiki2vec-{lang}").txt_emb_path
     for dataset in get_ws_dataset_names(lang):
         data_path = prepare_ws_dataset_paths(dataset).txt_path
         for oov_handling in ("drop", "zero"):
